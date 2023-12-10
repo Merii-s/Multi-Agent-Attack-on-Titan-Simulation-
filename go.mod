@@ -1,3 +1,3 @@
-module gitlab.com/slakramt/aot
+module aot
 
 go 1.21.1
