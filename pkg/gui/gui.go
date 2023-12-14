@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	Height = 700
-	Width  = 1400
+	Height = 500
+	Width  = 1000
 )
 
 type Game struct{}
@@ -37,8 +37,11 @@ func init() {
 	//Reglages de la taille de l'image
 	spriteX := (Width / 2)
 	spriteY := (Height / 2)
+	// imageBounds := wallImg.Bounds()
+	// width := imageBounds.Dx()
+	// height := imageBounds.Dy()
+	//opWall.GeoM.Scale(0.005*float64(width), 0.005*float64(height))
 	opWall.GeoM.Translate(float64(spriteX), float64(spriteY))
-	opWall.GeoM.Scale(0.005, 0.005)
 
 	fieldImg, _, err2 = ebitenutil.NewImageFromFile(utils.GetPath("wheat_sprite"))
 	//Reglages de la taille de l'image
@@ -49,7 +52,7 @@ func init() {
 	//Reglages de la taille de l'image
 	//spriteX = (Width - Width*0.005) / 2
 	//spriteY = (Height - Height*0.005) / 2
-	//opGrass.GeoM.Translate(float64(spriteX), float64(spriteY))
+	//opGrass.GeoM.Translate(float64(0), float64(0))
 	//opGrass.GeoM.Scale(0.005, 0.005)
 
 	if err1 != nil {
@@ -61,8 +64,45 @@ func init() {
 	}
 }
 
-func drawWall() {
+// dir : horizontal et sprite bien dimensionné
+func drawWall(Xs int, Ys int, Xe int, Ye int, dir bool, sprite *ebiten.Image, screen *ebiten.Image) {
+	imageBounds := sprite.Bounds()
+	w := imageBounds.Dx()
+	h := imageBounds.Dy()
+	if dir {
+		nbSprite := (Xe - Xs) / w
+		for i := 0; i < nbSprite; i++ {
+			opWall.GeoM.Reset()
+			opWall.GeoM.Translate(float64(Xs+i*w), float64(Ys))
+			screen.DrawImage(sprite, &opWall)
+		}
+	} else {
+		nbSprite := (Ye - Ys) / h
+		for i := 0; i < nbSprite; i++ {
+			opWall.GeoM.Reset()
+			opWall.GeoM.Translate(float64(Xs), float64(Ys+i*h))
+			screen.DrawImage(sprite, &opWall)
+		}
+	}
+}
 
+func drawCityBorders(sprite *ebiten.Image, screen *ebiten.Image) {
+	imageBounds := sprite.Bounds()
+	cSprite := imageBounds.Dx()
+	xTL := 0.2 * Width
+	yTL := 0.2 * Height
+	xBR := 0.8 * Width
+	yBR := 0.8 * Height
+	// mur haut horizontal G --> D
+	drawWall(int(xTL), int(yTL), int(xBR)+cSprite, int(yTL), true, sprite, screen)
+	// mur gauche vertical H --> B
+	drawWall(int(xTL), int(yTL+float64(cSprite)), int(xTL), int(yBR), false, sprite, screen)
+	// mur bas horizontal G --> D
+	drawWall(int(xTL), int(yBR), int(xBR)+cSprite, int(yBR), true, sprite, screen)
+	// mur droit vertical H --> B
+	drawWall(int(xBR), int(yTL+float64(cSprite)), int(xBR), int(yBR), false, sprite, screen)
+
+	// screen.DrawImage(wallImg /*&opField*/, &opWall)
 }
 
 func drawGrass() {
@@ -78,11 +118,12 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(fieldImg /*&opField*/, nil)
+	screen.DrawImage(grassImg /*&opField*/, &opGrass)
+	drawCityBorders(wallImg, screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return Height, Width
+	return Width, Height
 }
 
 func RunDisplay() {
