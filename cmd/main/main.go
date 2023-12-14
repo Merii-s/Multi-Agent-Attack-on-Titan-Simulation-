@@ -1,13 +1,9 @@
 package main
 
-import(
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/widget"
+import (
+	g "AOT/pkg/gui"
 )
 
-func main(){
-	a := app.New()
-	w := a.NewWindow("AOT Simulation")
-	w.SetContent(widget.NewLabel("Hello World !"))
-	w.ShowAndRun()
+func main() {
+	g.RunDisplay()
 }
