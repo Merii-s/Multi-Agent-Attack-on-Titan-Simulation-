@@ -21,3 +21,8 @@ func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 
 	return randomX, randomY
 }
+
+func isValidMove(pos Position, e *Environment) bool {
+	// TODO : verifier que la position est bien dans l'environnement
+	return true
+}
