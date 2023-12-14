@@ -2,6 +2,9 @@ package gui
 
 import (
 	"log"
+	"path/filepath"
+
+	os "os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -30,21 +33,23 @@ func init() {
 	var (
 		err1, err2, err3 error
 	)
+	currentDir, _ := os.Getwd()
+	path := filepath.Join(currentDir, "../..")
 
 	//Recuperation du fichier png cotenant l'image du mur
-	wallImg, _, err1 = ebitenutil.NewImageFromFile("C:/Users/Saad Lakramti/Documents/UTC/AI30/AOT_local/AOT/assets/wall_sprite.png")
+	wallImg, _, err1 = ebitenutil.NewImageFromFile(filepath.Join(path, "assets/wall_sprite.png"))
 	//Reglages de la taille de l'image
 	spriteX := (Width / 2)
 	spriteY := (Height / 2)
 	opWall.GeoM.Translate(float64(spriteX), float64(spriteY))
 	opWall.GeoM.Scale(0.005, 0.005)
 
-	fieldImg, _, err2 = ebitenutil.NewImageFromFile("C:/Users/Saad Lakramti/Documents/UTC/AI30/AOT_local/AOT/assets/wheat_sprite.png")
+	fieldImg, _, err2 = ebitenutil.NewImageFromFile(filepath.Join(path, "assets/wheat_sprite.png"))
 	//Reglages de la taille de l'image
 	//opField.GeoM.Scale(0.005, 0.005)
 	//opField.GeoM.Translate(Width/2, Height/2)
 
-	grassImg, _, err3 = ebitenutil.NewImageFromFile("C:/Users/Saad Lakramti/Documents/UTC/AI30/AOT_local/AOT/assets/grass_sprite.png")
+	grassImg, _, err3 = ebitenutil.NewImageFromFile(filepath.Join(path, "assets/grass_sprite.png"))
 	//Reglages de la taille de l'image
 	//spriteX = (Width - Width*0.005) / 2
 	//spriteY = (Height - Height*0.005) / 2

@@ -33,3 +33,15 @@ type Position struct {
 	X int
 	Y int
 }
+
+type Type string
+
+const (
+	Civilian     = "Civilian"
+	Soldier      = "Soldier"
+	Titan        = "Titan"
+	SpecialTitan = "SpecialTitan"
+	ErenTitan    = "ErenTitan"
+)
+
+// Behavior ?
