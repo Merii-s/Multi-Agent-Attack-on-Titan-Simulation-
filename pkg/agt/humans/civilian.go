@@ -1,7 +1,7 @@
 package agt
 
 import (
-	pkg "aot/pkg"
+	pkg "AOT/pkg"
 )
 
 type CivilianI interface {
@@ -52,3 +52,9 @@ func (*Civilian) eat() {
 func (*Civilian) sleep() {
 
 }
+
+func (*Civilian) build() {
+
+}
+
+func (*Civilian) getFood()

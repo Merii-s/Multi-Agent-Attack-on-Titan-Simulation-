@@ -1,7 +1,7 @@
 package agt
 
 import (
-	pkg "aot/pkg"
+	pkg "AOT/pkg"
 )
 
 type BasicTitanI interface {
