@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -20,4 +21,10 @@ func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 	randomY := random.Intn(topLeft.Y-bottomRight.Y) + bottomRight.Y
 
 	return randomX, randomY
+}
+
+func GetPath(imgName string) string {
+	currentDir, _ := os.Getwd()
+	path := currentDir + "/assets/" + imgName + ".png"
+	return path
 }
