@@ -32,28 +32,10 @@ func init() {
 		err1, err2, err3 error
 	)
 
-	//Recuperation du fichier png cotenant l'image du mur
+	//Lecture des fichiers png dans des variables
 	wallImg, _, err1 = ebitenutil.NewImageFromFile(utils.GetPath("wall_sprite"))
-	//Reglages de la taille de l'image
-	spriteX := (Width / 2)
-	spriteY := (Height / 2)
-	// imageBounds := wallImg.Bounds()
-	// width := imageBounds.Dx()
-	// height := imageBounds.Dy()
-	//opWall.GeoM.Scale(0.005*float64(width), 0.005*float64(height))
-	opWall.GeoM.Translate(float64(spriteX), float64(spriteY))
-
 	fieldImg, _, err2 = ebitenutil.NewImageFromFile(utils.GetPath("wheat_sprite"))
-	//Reglages de la taille de l'image
-	//opField.GeoM.Scale(0.005, 0.005)
-	//opField.GeoM.Translate(Width/2, Height/2)
-
 	grassImg, _, err3 = ebitenutil.NewImageFromFile(utils.GetPath("grass_sprite"))
-	//Reglages de la taille de l'image
-	//spriteX = (Width - Width*0.005) / 2
-	//spriteY = (Height - Height*0.005) / 2
-	//opGrass.GeoM.Translate(float64(0), float64(0))
-	//opGrass.GeoM.Scale(0.005, 0.005)
 
 	if err1 != nil {
 		log.Fatal(err1)
@@ -86,28 +68,6 @@ func drawWall(Xs int, Ys int, Xe int, Ye int, dir bool, sprite *ebiten.Image, sc
 	}
 }
 
-/*
-
-func drawCityBorders(sprite *ebiten.Image, screen *ebiten.Image) {
-	imageBounds := sprite.Bounds()
-	cSpriteWallWall := imageBounds.Dx()
-	xTL := 0.2 * Width
-	yTL := 0.2 * Height
-	xBR := 0.8 * Width
-	yBR := 0.8 * Height
-	// mur haut horizontal G --> D
-	drawWall(int(xTL), int(yTL), int(xBR)+cSpriteWall, int(yTL), true, sprite, screen)
-	// mur gauche vertical H --> B
-	drawWall(int(xTL), int(yTL+float64(cSpriteWall)), int(xTL), int(yBR), false, sprite, screen)
-	// mur bas horizontal G --> D
-	drawWall(int(xTL), int(yBR), int(xBR)+cSpriteWall, int(yBR), true, sprite, screen)
-	// mur droit vertical H --> B
-	drawWall(int(xBR), int(yTL+float64(cSpriteWall)), int(xBR), int(yBR), false, sprite, screen)
-
-	// screen.DrawImage(wallImg , &opWall)
-}
-*/
-
 func drawCity(screen *ebiten.Image, wallSprite *ebiten.Image, fieldSprite *ebiten.Image) {
 	// dimensions des sprites
 	wallBounds := wallSprite.Bounds()
@@ -132,9 +92,8 @@ func drawCity(screen *ebiten.Image, wallSprite *ebiten.Image, fieldSprite *ebite
 
 	// ------- Draw fields -------
 	// field haut horizontal 1
-	//func drawWall(Xs int, Ys int, Xe int, Ye int, dir bool, sprite *ebiten.Image, screen *ebiten.Image) {
-	drawWall(int(xTL)+cSpriteWall+0.25*1000, int(yTL)+cSpriteWall+0.25*Height, int(xBR)-cSpriteWall-0.25*Height, int(yTL)+cSpriteWall+0.25*Height, true, fieldSprite, screen)
-	drawWall(int(xTL)+cSpriteWall+0.25*1000, int(yTL)+cSpriteWall+0.25*Height+cSpriteField, int(xBR)-cSpriteWall-0.25*Height, int(yTL)+cSpriteWall+0.25*Height+cSpriteField, true, fieldSprite, screen)
+	drawWall(int(xTL)+cSpriteWall+0.2*1000, int(yTL)+cSpriteWall+0.18*Height, int(xBR)-cSpriteWall-0.2*Width, int(yTL)+cSpriteWall+0.18*Height, true, fieldSprite, screen)
+	drawWall(int(xTL)+cSpriteWall+0.2*1000, int(yTL)+cSpriteWall+0.18*Height+cSpriteField, int(xBR)-cSpriteWall-0.2*Width, int(yTL)-cSpriteWall+0.18*Height+cSpriteField, true, fieldSprite, screen)
 
 }
 
