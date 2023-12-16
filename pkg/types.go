@@ -46,4 +46,8 @@ const (
 	ErenTitan    = "ErenTitan"
 )
 
-// Behavior ?
+type BehaviorI interface {
+	Percept(*Environment)
+	Deliberate()
+	Act(*Environment)
+}

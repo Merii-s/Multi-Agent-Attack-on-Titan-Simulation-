@@ -17,23 +17,59 @@ type BasicTitan struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
+	pkg.BehaviorI
 }
 
 func NewBasicTitan(id pkg.Id, pos pkg.Position, hp int, reach int, speed int, strength int, height int, regen int) *BasicTitan {
 	atts := NewTitan(id, pkg.Titan, pos, hp, reach, strength, speed, height, regen)
-	return &BasicTitan{attributes: *atts, syncChan: make(chan string), mu: sync.Mutex{}, stopCh: make(chan struct{})}
+	return &BasicTitan{
+		attributes: *atts,
+		stopCh:     make(chan struct{}),
+		syncChan:   make(chan string),
+		mu:         sync.Mutex{},
+		BehaviorI:  &BasicTitanBehavior{},
+	}
 }
 
-func (*BasicTitan) Percept(e *pkg.Environment) {
+// Setter and getter methods for BasicTitan
+func (bt *BasicTitan) SyncChan() chan string {
+	return bt.syncChan
+}
+
+func (bt *BasicTitan) StopCh() chan struct{} {
+	return bt.stopCh
+}
+
+func (bt *BasicTitan) Mu() sync.Mutex {
+	return bt.mu
+}
+
+func (bt *BasicTitan) Behavior() pkg.BehaviorI {
+	return bt.BehaviorI
+}
+
+func (bt *BasicTitan) SetBehavior(b pkg.BehaviorI) {
+	bt.BehaviorI = b
+}
+
+// Methods for BasicTitan
+func (bt *BasicTitan) Percept(e *pkg.Environment) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
+	bt.BehaviorI.Percept(e)
+}
+
+func (bt *BasicTitan) Deliberate() {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
+	bt.BehaviorI.Deliberate()
 
 }
 
-func (*BasicTitan) Deliberate() {
-
-}
-
-func (*BasicTitan) Act(e *pkg.Environment) {
-
+func (bt *BasicTitan) Act(e *pkg.Environment) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
+	bt.BehaviorI.Act(e)
 }
 
 func (bt *BasicTitan) Start() {
@@ -56,7 +92,7 @@ func (bt *BasicTitan) Id() pkg.Id {
 }
 
 func (bt *BasicTitan) move() {
-	// TODO : Move randomly or towards a target --> not only in a straight line
+	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
 	new_X_pos := bt.attributes.agentAttributes.Pos().X + bt.attributes.agentAttributes.Speed()
 	new_Y_pos := bt.attributes.agentAttributes.Pos().Y + bt.attributes.agentAttributes.Speed()
 	new_pos := pkg.Position{X: new_X_pos, Y: new_Y_pos}
@@ -136,4 +172,20 @@ func (bt *BasicTitan) Regenerate() {
 // StopRegeneration stops the regeneration process
 func (bt *BasicTitan) StopRegeneration() {
 	close(bt.stopCh)
+}
+
+// Define the behavior struct of the BasicTitan :
+type BasicTitanBehavior struct {
+}
+
+func (btb *BasicTitanBehavior) Percept(e *pkg.Environment) {
+
+}
+
+func (btb *BasicTitanBehavior) Deliberate() {
+
+}
+
+func (btb *BasicTitanBehavior) Act(e *pkg.Environment) {
+
 }
