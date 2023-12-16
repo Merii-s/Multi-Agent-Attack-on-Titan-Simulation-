@@ -8,6 +8,7 @@ type Environment struct {
 	sync.RWMutex
 	agents     []AgentI
 	agentCount int
+	// Day/Night cycle
 
 	//A modifier
 	in        uint64
@@ -25,6 +26,7 @@ type AgentI interface {
 	move()
 	eat()
 	sleep()
+	attack_success(spd_atk int, reach_atk int, spd_def int) float64
 }
 
 type Id string
