@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -22,7 +23,8 @@ func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 	return randomX, randomY
 }
 
-func isValidMove(pos Position, e *Environment) bool {
-	// TODO : verifier que la position est bien dans l'environnement
-	return true
+func GetPath(imgName string) string {
+	currentDir, _ := os.Getwd()
+	path := currentDir + "/assets/" + imgName + ".png"
+	return path
 }
