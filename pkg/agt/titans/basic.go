@@ -36,7 +36,18 @@ func (*BasicTitan) Act(e *pkg.Environment) {
 
 }
 
-func (*BasicTitan) Start() {
+func (bt *BasicTitan) Start() {
+	// launch the agent goroutine Percept-Act cycle
+	go func() {
+		for {
+			// Percept
+			// TODO : Percept
+			// Deliberate
+			// TODO : Deliberate
+			// Act
+			// TODO : Act
+		}
+	}()
 
 }
 
@@ -45,6 +56,7 @@ func (bt *BasicTitan) Id() pkg.Id {
 }
 
 func (bt *BasicTitan) move() {
+	// TODO : Move randomly or towards a target --> not only in a straight line
 	new_X_pos := bt.attributes.agentAttributes.Pos().X + bt.attributes.agentAttributes.Speed()
 	new_Y_pos := bt.attributes.agentAttributes.Pos().Y + bt.attributes.agentAttributes.Speed()
 	new_pos := pkg.Position{X: new_X_pos, Y: new_Y_pos}
