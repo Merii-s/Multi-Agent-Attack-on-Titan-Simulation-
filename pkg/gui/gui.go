@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	Height = 500
+	Height = 700
 	Width  = 1000
 )
 
@@ -93,6 +93,19 @@ func drawWall(Xs int, Ys int, Xe int, Ye int, dir bool, sprite *ebiten.Image, sc
 func drawDungeons(screen *ebiten.Image, dungeonImg *ebiten.Image, cWall int) {
 	imageBounds := dungeonImg.Bounds()
 	w := imageBounds.Dx()
+	opDungeon.GeoM.Reset()
+	opDungeon.GeoM.Translate(float64(0.2*Width+cWall), float64(0.2*Height+cWall))
+	screen.DrawImage(dungeonImg, &opDungeon)
+	opDungeon.GeoM.Reset()
+	opDungeon.GeoM.Translate(float64(0.8*Width-cWall-w/2), float64(0.2*Height+cWall))
+	screen.DrawImage(dungeonImg, &opDungeon)
+}
+
+func drawCannons(screen *ebiten.Image, cannonImg *ebiten.Image, cWall int) {
+	imageBounds := cannonImg.Bounds()
+	w := imageBounds.Dx()
+	//h := imageBounds.Dy()
+
 	opDungeon.GeoM.Reset()
 	opDungeon.GeoM.Translate(float64(0.2*Width+cWall), float64(0.2*Height+cWall))
 	screen.DrawImage(dungeonImg, &opDungeon)
