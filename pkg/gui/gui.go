@@ -101,15 +101,17 @@ func drawSmallHouses(screen *ebiten.Image, sHouseImg *ebiten.Image) {
 }
 
 func drawBigHouses(screen *ebiten.Image, bHouseImg *ebiten.Image) {
-	for i := 0; i < 3; i++ {
+	coefsCoords := [][]float32{{0.29, 0.65}, {0.5, 0.55}}
+	for _, coords := range coefsCoords {
 		opHouse.GeoM.Reset()
-		opHouse.GeoM.Translate(float64(0.35*Width), float64(0.4*Height))
+		opHouse.GeoM.Translate(float64(coords[0]*Width), float64(coords[1]*Height))
 		screen.DrawImage(bHouseImg, &opHouse)
 	}
 }
 
 func drawHouses(screen *ebiten.Image, sHouseImg *ebiten.Image, bHouseImg *ebiten.Image) {
 	drawSmallHouses(screen, sHouseImg)
+	drawBigHouses(screen, bHouseImg)
 }
 
 // Visuel dans lequel la ville est un rectangle au centre de la screen
