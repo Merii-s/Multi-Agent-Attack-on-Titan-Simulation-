@@ -22,8 +22,10 @@ var (
 	fieldImg   *ebiten.Image
 	grassImg   *ebiten.Image
 	sHouseImg  *ebiten.Image
-	bHouseImg  *ebiten.Image
+	bHouse1Img *ebiten.Image
+	bHouse2Img *ebiten.Image
 	dungeonImg *ebiten.Image
+	cannonImg  *ebiten.Image
 
 	opWall    ebiten.DrawImageOptions
 	opGrass   ebiten.DrawImageOptions
@@ -34,7 +36,7 @@ var (
 
 func init() {
 	var (
-		err1, err2, err3, err4, err5 error
+		err1, err2, err3, err4, err5, err6, err7, err8 error
 	)
 
 	//Lecture des fichiers png dans des variables
@@ -42,8 +44,10 @@ func init() {
 	fieldImg, _, err2 = ebitenutil.NewImageFromFile(utils.GetPath("wheat_V2"))
 	grassImg, _, err3 = ebitenutil.NewImageFromFile(utils.GetPath("grass_spriteV4"))
 	sHouseImg, _, err4 = ebitenutil.NewImageFromFile(utils.GetPath("small_house_sprite"))
-	bHouseImg, _, err5 = ebitenutil.NewImageFromFile(utils.GetPath("big_house_sprite"))
-	dungeonImg, _, err5 = ebitenutil.NewImageFromFile(utils.GetPath("dungeon_sprite"))
+	bHouse1Img, _, err5 = ebitenutil.NewImageFromFile(utils.GetPath("big_house_sprite"))
+	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(utils.GetPath("big_house_spriteV2"))
+	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(utils.GetPath("dungeon_sprite"))
+	cannonImg, _, err8 = ebitenutil.NewImageFromFile(utils.GetPath("dungeon_sprite"))
 
 	if err1 != nil {
 		log.Fatal(err1)
@@ -55,6 +59,12 @@ func init() {
 		log.Fatal(err4)
 	} else if err5 != nil {
 		log.Fatal(err5)
+	} else if err6 != nil {
+		log.Fatal(err6)
+	} else if err7 != nil {
+		log.Fatal(err7)
+	} else if err8 != nil {
+		log.Fatal(err8)
 	}
 }
 
@@ -100,18 +110,22 @@ func drawSmallHouses(screen *ebiten.Image, sHouseImg *ebiten.Image) {
 	}
 }
 
-func drawBigHouses(screen *ebiten.Image, bHouseImg *ebiten.Image) {
-	coefsCoords := [][]float32{{0.29, 0.65}, {0.5, 0.55}}
-	for _, coords := range coefsCoords {
+func drawBigHouses(screen *ebiten.Image, bHouse1Img *ebiten.Image, bHouse2Img *ebiten.Image) {
+	coefsCoords := [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.4, 0.55}, {0.62, 0.7}}
+	for i, coords := range coefsCoords {
 		opHouse.GeoM.Reset()
 		opHouse.GeoM.Translate(float64(coords[0]*Width), float64(coords[1]*Height))
-		screen.DrawImage(bHouseImg, &opHouse)
+		if i < 2 {
+			screen.DrawImage(bHouse1Img, &opHouse)
+		} else {
+			screen.DrawImage(bHouse2Img, &opHouse)
+		}
 	}
 }
 
-func drawHouses(screen *ebiten.Image, sHouseImg *ebiten.Image, bHouseImg *ebiten.Image) {
+func drawHouses(screen *ebiten.Image, sHouseImg *ebiten.Image, bHouse1Img *ebiten.Image, bHouse2Img *ebiten.Image) {
 	drawSmallHouses(screen, sHouseImg)
-	drawBigHouses(screen, bHouseImg)
+	drawBigHouses(screen, bHouse1Img, bHouse2Img)
 }
 
 // Visuel dans lequel la ville est un rectangle au centre de la screen
@@ -169,7 +183,7 @@ func drawCityBorderWalls(screen *ebiten.Image, wallSprite *ebiten.Image, fieldSp
 	drawWall(int(xTL)+cSpriteWall+0.2*1000, int(yTL)+cSpriteWall+0.18*Height, int(xBR)-cSpriteWall-0.2*Width, int(yTL)+cSpriteWall+0.18*Height, true, fieldSprite, screen)
 	drawWall(int(xTL)+cSpriteWall+0.2*1000, int(yTL)+cSpriteWall+0.18*Height+4*cSpriteField, int(xBR)-cSpriteWall-0.2*Width, int(yTL)-cSpriteWall+0.18*Height+4*cSpriteField, true, fieldSprite, screen)
 
-	drawHouses(screen, sHouseImg, bHouseImg)
+	drawHouses(screen, sHouseImg, bHouse1Img, bHouse2Img)
 	drawDungeons(screen, dungeonImg, cSpriteWall)
 
 }
