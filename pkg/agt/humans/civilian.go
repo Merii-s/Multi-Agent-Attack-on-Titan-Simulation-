@@ -14,10 +14,8 @@ type Civilian struct {
 	attributes Human
 }
 
-func NewCivilian(id pkg.Id, topLeft pkg.Position, bottomRight pkg.Position, hp int, reach int, speed int, strength int) *Civilian {
-	x, y := pkg.GetRandomCoords(topLeft, bottomRight)
-	pos := pkg.Position{X: x, Y: y}
-	atts := NewHuman(id, pos, hp, reach, strength, speed)
+func NewCivilian(id pkg.Id, t pkg.Type, topLeft pkg.Position, hp int, reach int, strength int, speed int) *Civilian {
+	atts := NewHuman(id, t, topLeft, hp, reach, strength, speed)
 	return &Civilian{attributes: *atts}
 }
 

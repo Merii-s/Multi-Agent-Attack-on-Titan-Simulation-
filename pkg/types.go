@@ -23,10 +23,11 @@ type AgentI interface {
 	Start()
 	Id()
 
-	move()
+	move(Position)
 	eat()
 	sleep()
 	attack_success(spd_atk int, reach_atk int, spd_def int) float64
+	Pos()
 }
 
 type Id string
