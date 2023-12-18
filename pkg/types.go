@@ -47,6 +47,17 @@ const (
 	ErenTitan    = "ErenTitan"
 )
 
+type ObjectName string
+
+const (
+	Grass      ObjectName = "Grass"
+	Field      ObjectName = "Field"
+	Wall       ObjectName = "Wall"
+	BigHouse   ObjectName = "BigHouse"
+	SmallHouse ObjectName = "SmallHouse"
+	Dungeon    ObjectName = "Dungeon"
+)
+
 type BehaviorI interface {
 	Percept(*Environment)
 	Deliberate()
