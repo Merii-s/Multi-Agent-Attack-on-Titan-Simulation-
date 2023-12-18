@@ -31,5 +31,5 @@ type Sprite struct {
 }
 
 func (f *Sprite) hitbox() (br *types.Position) {
-	return types.NewPosition(f.Tl.X()+WField, f.Tl.Y()+HField)
+	return &types.Position{X: f.Tl.X + WField, Y: f.Tl.Y + HField}
 }
