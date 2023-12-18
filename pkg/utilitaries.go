@@ -8,7 +8,7 @@ import (
 
 func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 	// Verification des parametres d'entree
-	if topLeft.X >= bottomRight.X || topLeft.Y <= bottomRight.Y {
+	if topLeft.X() >= bottomRight.X() || topLeft.Y() <= bottomRight.Y() {
 		return 0, 0
 	}
 
@@ -17,8 +17,8 @@ func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 	random := rand.New(source)
 
 	// Generation des coordonnees aleatoires
-	randomX := random.Intn(bottomRight.X-topLeft.X) + topLeft.X
-	randomY := random.Intn(topLeft.Y-bottomRight.Y) + bottomRight.Y
+	randomX := random.Intn(bottomRight.X()-topLeft.X()) + topLeft.X()
+	randomY := random.Intn(topLeft.Y()-bottomRight.Y()) + bottomRight.Y()
 
 	return randomX, randomY
 }
