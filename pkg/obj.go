@@ -1,8 +1,4 @@
-package obj
-
-import (
-	types "AOT/pkg"
-)
+package pkg
 
 const (
 	//Screen Dimensions
@@ -33,12 +29,12 @@ const (
 )
 
 type Object struct {
-	name types.ObjectName
-	tl   types.Position
+	name ObjectName
+	tl   Position
 	life int
 }
 
-func NewObject(name types.ObjectName, tl types.Position, life int) *Object {
+func NewObject(name ObjectName, tl Position, life int) *Object {
 	return &Object{
 		name: name,
 		tl:   tl,
@@ -50,20 +46,19 @@ func (o *Object) SetLife(l int) {
 	o.life = l
 }
 
-func (o *Object) SetPosition(p types.Position) {
+func (o *Object) SetPosition(p Position) {
 	o.tl = p
 }
 
-type Field struct {
+type FieldObject struct {
 	attr    Object
 	reserve int
 }
 
-func NewField(tl types.Position, life int, reserve int) *Field {
-
-	return &Field{
+func NewField(tl Position, life int, reserve int) *FieldObject {
+	return &FieldObject{
 		attr: Object{
-			name: types.Field,
+			name: Field,
 			tl:   tl,
 			life: life,
 		},

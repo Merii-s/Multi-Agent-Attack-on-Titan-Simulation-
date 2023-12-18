@@ -7,6 +7,7 @@ import (
 type Environment struct {
 	sync.RWMutex
 	agents     []AgentI
+	abjects    []Object
 	agentCount int
 	// Day/Night cycle
 
@@ -40,11 +41,11 @@ type Position struct {
 type Type string
 
 const (
-	Civilian     = "Civilian"
-	Soldier      = "Soldier"
-	Titan        = "Titan"
-	SpecialTitan = "SpecialTitan"
-	ErenTitan    = "ErenTitan"
+	Civilian     Type = "Civilian"
+	Soldier      Type = "Soldier"
+	Titan        Type = "Titan"
+	SpecialTitan Type = "SpecialTitan"
+	ErenTitan    Type = "ErenTitan"
 )
 
 type ObjectName string
