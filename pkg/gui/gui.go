@@ -1,7 +1,7 @@
 package gui
 
 import (
-	utils "AOT/pkg"
+	pkg "AOT/pkg"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	Height = 500
+	Height = 700
 	Width  = 1000
 )
 
-type Game struct{}
+type Game struct {
+}
 
 var (
 	//var qui vont acceuillir les sprites
@@ -32,6 +33,9 @@ var (
 	opField   ebiten.DrawImageOptions
 	opHouse   ebiten.DrawImageOptions
 	opDungeon ebiten.DrawImageOptions
+	op        ebiten.DrawImageOptions
+
+	e *pkg.Environment
 )
 
 func init() {
@@ -40,14 +44,14 @@ func init() {
 	)
 
 	//Lecture des fichiers png dans des variables
-	wallImg, _, err1 = ebitenutil.NewImageFromFile(utils.GetPath("wall_sprite"))
-	fieldImg, _, err2 = ebitenutil.NewImageFromFile(utils.GetPath("wheat_V2"))
-	grassImg, _, err3 = ebitenutil.NewImageFromFile(utils.GetPath("grass_spriteV4"))
-	sHouseImg, _, err4 = ebitenutil.NewImageFromFile(utils.GetPath("small_house_sprite"))
-	bHouse1Img, _, err5 = ebitenutil.NewImageFromFile(utils.GetPath("big_house_sprite"))
-	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(utils.GetPath("big_house_spriteV2"))
-	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(utils.GetPath("dungeon_sprite"))
-	cannonImg, _, err8 = ebitenutil.NewImageFromFile(utils.GetPath("dungeon_sprite"))
+	wallImg, _, err1 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wall_sprite"))
+	fieldImg, _, err2 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wheat_V2"))
+	grassImg, _, err3 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("grass_spriteV4"))
+	sHouseImg, _, err4 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("small_house_sprite"))
+	bHouse1Img, _, err5 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_sprite"))
+	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_spriteV2"))
+	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
+	cannonImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
 
 	if err1 != nil {
 		log.Fatal(err1)
@@ -65,6 +69,46 @@ func init() {
 		log.Fatal(err7)
 	} else if err8 != nil {
 		log.Fatal(err8)
+	}
+	e = pkg.NewEnvironement(700, 1000)
+}
+
+func drawSprite(screen *ebiten.Image, o pkg.Object) {
+	var (
+		img *ebiten.Image
+		err error
+	)
+
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(o.TL().X), float64(o.TL().Y))
+
+	switch o.Name() {
+	case pkg.Field:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wheat_V2"))
+	case pkg.BigHouse1:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_sprite"))
+	case pkg.BigHouse2:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_spriteV2"))
+	case pkg.Dungeon:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
+	case pkg.Grass:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("grass_spriteV4"))
+	case pkg.Wall:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wall_sprite"))
+	default:
+		img, _, err = ebitenutil.NewImageFromFile(pkg.GetPath_Win("small_house_sprite"))
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		screen.DrawImage(img, &op)
+	}
+}
+
+func drawEnvironment(screen *ebiten.Image, env *pkg.Environment) {
+	for _, o := range env.Objects() {
+		drawSprite(screen, o)
 	}
 }
 
@@ -93,6 +137,19 @@ func drawWall(Xs int, Ys int, Xe int, Ye int, dir bool, sprite *ebiten.Image, sc
 func drawDungeons(screen *ebiten.Image, dungeonImg *ebiten.Image, cWall int) {
 	imageBounds := dungeonImg.Bounds()
 	w := imageBounds.Dx()
+	opDungeon.GeoM.Reset()
+	opDungeon.GeoM.Translate(float64(0.2*Width+cWall), float64(0.2*Height+cWall))
+	screen.DrawImage(dungeonImg, &opDungeon)
+	opDungeon.GeoM.Reset()
+	opDungeon.GeoM.Translate(float64(0.8*Width-cWall-w/2), float64(0.2*Height+cWall))
+	screen.DrawImage(dungeonImg, &opDungeon)
+}
+
+func drawCannons(screen *ebiten.Image, cannonImg *ebiten.Image, cWall int) {
+	imageBounds := cannonImg.Bounds()
+	w := imageBounds.Dx()
+	//h := imageBounds.Dy()
+
 	opDungeon.GeoM.Reset()
 	opDungeon.GeoM.Translate(float64(0.2*Width+cWall), float64(0.2*Height+cWall))
 	screen.DrawImage(dungeonImg, &opDungeon)
@@ -204,17 +261,15 @@ func drawGrass(screen *ebiten.Image, grassImg *ebiten.Image) {
 	}
 }
 
-func drawEnvironment() {
-
-}
-
 func (g *Game) Update() error {
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	drawGrass(screen, grassImg)
-	drawCityBorderWalls(screen, wallImg, fieldImg)
+	//drawGrass(screen, grassImg)
+	//drawCityBorderWalls(screen, wallImg, fieldImg)
+
+	drawEnvironment(screen, e)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

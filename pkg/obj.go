@@ -50,6 +50,14 @@ func (o *Object) SetPosition(p Position) {
 	o.tl = p
 }
 
+func (o *Object) Name() ObjectName {
+	return o.name
+}
+
+func (o *Object) TL() Position {
+	return o.tl
+}
+
 type FieldObject struct {
 	attr    Object
 	reserve int
@@ -68,6 +76,7 @@ func NewField(tl Position, life int, reserve int) *FieldObject {
 
 func (f *Object) hitbox() (br *Position) {
 	var w, h int
+
 	switch f.name {
 	case Wall:
 		h = CWall
@@ -75,9 +84,12 @@ func (f *Object) hitbox() (br *Position) {
 	case Grass:
 		h = CGrass
 		w = CGrass
-	case BigHouse:
+	case BigHouse1:
 		h = HBHouse1
 		w = WBHouse1
+	case BigHouse2:
+		h = HBHouse2
+		w = WBHouse2
 	case SmallHouse:
 		h = HSHouse
 		w = WSHouse

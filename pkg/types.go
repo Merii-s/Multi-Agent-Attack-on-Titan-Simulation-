@@ -6,15 +6,16 @@ import (
 
 type Environment struct {
 	sync.RWMutex
-	agents     []AgentI
-	abjects    []Object
-	agentCount int
-	// Day/Night cycle
+	agents  []AgentI
+	objects []Object
 
-	//A modifier
-	in        uint64
-	out       uint64
-	noopCount uint64
+	screenH int
+	screenW int
+
+	agentCount int
+
+	// Day/Night cycle
+	day bool
 }
 
 type AgentI interface {
@@ -54,7 +55,8 @@ const (
 	Grass      ObjectName = "Grass"
 	Field      ObjectName = "Field"
 	Wall       ObjectName = "Wall"
-	BigHouse   ObjectName = "BigHouse"
+	BigHouse1  ObjectName = "BigHouse1"
+	BigHouse2  ObjectName = "BigHouse2"
 	SmallHouse ObjectName = "SmallHouse"
 	Dungeon    ObjectName = "Dungeon"
 )
