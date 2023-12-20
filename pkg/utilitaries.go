@@ -23,7 +23,7 @@ func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 	return randomX, randomY
 }
 
-func GetPath(imgName string) string {
+func GetPath_Win(imgName string) string {
 	currentDir, _ := os.Getwd()
 	path := currentDir + "/assets/" + imgName + ".png"
 	return path
