@@ -76,7 +76,6 @@ func NewField(tl Position, life int, reserve int) *FieldObject {
 
 func (f *Object) hitbox() (br *Position) {
 	var w, h int
-
 	switch f.name {
 	case Wall:
 		h = CWall
@@ -87,9 +86,6 @@ func (f *Object) hitbox() (br *Position) {
 	case BigHouse1:
 		h = HBHouse1
 		w = WBHouse1
-	case BigHouse2:
-		h = HBHouse2
-		w = WBHouse2
 	case SmallHouse:
 		h = HSHouse
 		w = WSHouse
