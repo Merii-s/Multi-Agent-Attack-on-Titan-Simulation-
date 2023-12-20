@@ -66,27 +66,27 @@ func NewField(tl Position, life int, reserve int) *FieldObject {
 	}
 }
 
-func (f *Object) hitbox() (br *types.Position) {
+func (f *Object) hitbox() (br *Position) {
 	var w, h int
 	switch f.name {
-	case types.Wall:
+	case Wall:
 		h = CWall
 		w = CWall
-	case types.Grass:
+	case Grass:
 		h = CGrass
 		w = CGrass
-	case types.BigHouse:
+	case BigHouse:
 		h = HBHouse1
 		w = WBHouse1
-	case types.SmallHouse:
+	case SmallHouse:
 		h = HSHouse
 		w = WSHouse
-	case types.Dungeon:
+	case Dungeon:
 		h = HDungeon
 		w = WDungeon
 	default:
 		h = HField
 		w = WField
 	}
-	return &types.Position{X: f.tl.X + w, Y: f.tl.Y + h}
+	return &Position{X: f.tl.X + w, Y: f.tl.Y + h}
 }
