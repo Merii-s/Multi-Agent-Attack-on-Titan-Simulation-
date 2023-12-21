@@ -96,9 +96,44 @@ func drawSprite(screen *ebiten.Image, o pkg.Object) {
 	}
 }
 
+func eraseSprite(screen *ebiten.Image, o pkg.Object) {
+	var (
+		img *ebiten.Image
+		err error
+	)
+
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(o.TL().X), float64(o.TL().Y))
+
+	switch o.Name() {
+	case pkg.Field:
+		img = fieldImg
+	case pkg.BigHouse1:
+		img = bHouse1Img
+	case pkg.BigHouse2:
+		img = bHouse2Img
+	case pkg.Dungeon:
+		img = dungeonImg
+	case pkg.Grass:
+		img = grassImg
+	case pkg.Wall:
+		img = wallImg
+	default:
+		img = sHouseImg
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		screen.DrawImage(img, &op)
+	}
+}
+
 func drawEnvironment(screen *ebiten.Image, env *pkg.Environment) {
 	for _, o := range env.Objects() {
-		drawSprite(screen, o)
+		if o.Life() > 0 {
+			drawSprite(screen, o)
+		}
 	}
 }
 

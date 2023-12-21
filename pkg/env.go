@@ -52,6 +52,7 @@ func createStaticObjects(H int, W int) []Object {
 	//Petites maisons
 	coefsCoords := [][]float32{{0.29, 0.4}, {1 - 0.29, 0.4}, {0.29, 0.85}, {1 - 0.29, 0.85}, {0.29, 0.55}, {1 - 0.29, 0.65}, {0.5, 0.85}}
 	for _, coords := range coefsCoords {
+
 		obj = NewObject(SmallHouse, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
 		objects = append(objects, *obj)
 	}

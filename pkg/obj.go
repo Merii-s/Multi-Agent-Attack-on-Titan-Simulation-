@@ -46,6 +46,10 @@ func (o *Object) SetLife(l int) {
 	o.life = l
 }
 
+func (o *Object) Life() int {
+	return o.life
+}
+
 func (o *Object) SetPosition(p Position) {
 	o.tl = p
 }
