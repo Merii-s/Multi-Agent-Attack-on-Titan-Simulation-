@@ -13,6 +13,8 @@ type SoldierI interface {
 
 type Soldier struct {
 	attributes Human
+	stopCh     chan struct{}
+	syncChan   chan string
 	mu         sync.Mutex
 	pkg.BehaviorI
 }
@@ -21,29 +23,68 @@ func NewSoldier(id pkg.Id, t pkg.Type, topLeft pkg.Position, hp int, reach int, 
 	atts := NewHuman(id, t, topLeft, hp, reach, strength, speed)
 	return &Soldier{
 		attributes: *atts,
+		stopCh:     make(chan struct{}),
+		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
 		BehaviorI:  &SoldierBehavior{},
 	}
 }
 
-func (bt *Soldier) Id() pkg.Id {
-	return bt.attributes.agentAttributes.Id()
+// Setter and getter methods for Soldier
+func (s *Soldier) SyncChan() chan string {
+	return s.syncChan
+}
+
+func (s *Soldier) StopCh() chan struct{} {
+	return s.stopCh
+}
+
+// func (s *Soldier) Mu() sync.Mutex {
+// 	return s.mu
+// }
+
+// Methods for Soldier
+func (s *Soldier) Percept(e *pkg.Environment) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.BehaviorI.Percept(e)
+}
+
+func (s *Soldier) Deliberate() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.BehaviorI.Deliberate()
+
+}
+
+func (s *Soldier) Act(e *pkg.Environment) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.BehaviorI.Act(e)
+}
+
+func (s *Soldier) Id() pkg.Id {
+	return s.attributes.agentAttributes.Id()
 }
 
 func (*Soldier) Start() {
 
 }
 
-func (*Soldier) move() {
+func (s *Soldier) move() {
+	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
+	new_X_pos := s.attributes.agentAttributes.Pos().X + s.attributes.agentAttributes.Speed()
+	new_Y_pos := s.attributes.agentAttributes.Pos().Y + s.attributes.agentAttributes.Speed()
+	new_pos := pkg.Position{X: new_X_pos, Y: new_Y_pos}
+	s.attributes.agentAttributes.SetPos(new_pos)
+}
+
+func (s *Soldier) eat() {
 
 }
 
-func (*Soldier) eat() {
-
-}
-
-func (*Soldier) sleep() {
-
+func (s *Soldier) sleep() {
+	//time.Sleep(?)
 }
 
 func (*Soldier) Gard() {
@@ -76,18 +117,18 @@ func (s *Soldier) attack(agt pkg.Agent) {
 	}
 }
 
-// Define the behavior struct of the BasicTitan :
+// Define the behavior struct of the Soldier :
 type SoldierBehavior struct {
 }
 
-func (btb *SoldierBehavior) Percept(e *pkg.Environment) {
+func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
 
 }
 
-func (btb *SoldierBehavior) Deliberate() {
+func (sb *SoldierBehavior) Deliberate() {
 
 }
 
-func (btb *SoldierBehavior) Act(e *pkg.Environment) {
+func (sb *SoldierBehavior) Act(e *pkg.Environment) {
 
 }
