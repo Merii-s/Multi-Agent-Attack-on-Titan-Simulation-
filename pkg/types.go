@@ -63,6 +63,9 @@ const (
 	Mikasa         ObjectName = "Mikasa"
 	MaleVillager   ObjectName = "MaleVillager"
 	FemaleVillager ObjectName = "FemaleVillager"
+	BasicTitan1    ObjectName = "BasicTitan1"
+	BasicTitan2    ObjectName = "BasicTitan2"
+	BeastTitan     ObjectName = "BeastTitan"
 )
 
 type BehaviorI interface {

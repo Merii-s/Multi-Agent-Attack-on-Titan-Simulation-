@@ -79,6 +79,12 @@ func createStaticObjects(H int, W int) []Object {
 	objects = append(objects, *obj)
 	obj = NewObject(FemaleVillager, Position{X: 530, Y: 350}, 1000000000)
 	objects = append(objects, *obj)
+	obj = NewObject(BasicTitan1, Position{X: 560, Y: 400}, 1000000000)
+	objects = append(objects, *obj)
+	obj = NewObject(BasicTitan2, Position{X: 590, Y: 400}, 1000000000)
+	objects = append(objects, *obj)
+	obj = NewObject(BeastTitan, Position{X: 610, Y: 350}, 1000000000)
+	objects = append(objects, *obj)
 
 	return objects
 }

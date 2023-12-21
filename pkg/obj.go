@@ -25,6 +25,18 @@ const (
 	WDungeon = 29
 	HDungeon = 52
 
+	WEren = 10
+	HEren = 19
+
+	WMikasa = 9
+	HMikasa = 19
+
+	WMaleVillager = 10
+	HMaleVillager = 18
+
+	WFemaleVillager = 10
+	HFemaleVillager = 17
+
 	//Il faut  ajouter les durrees de vie des objets
 )
 
@@ -96,6 +108,21 @@ func (f *Object) hitbox() (br *Position) {
 	case Dungeon:
 		h = HDungeon
 		w = WDungeon
+	case BigHouse2:
+		h = HBHouse2
+		w = WBHouse2
+	case Eren:
+		h = HEren
+		w = WEren
+	case Mikasa:
+		h = HMikasa
+		w = WMikasa
+	case MaleVillager:
+		h = HMaleVillager
+		w = WMaleVillager
+	case FemaleVillager:
+		h = HFemaleVillager
+		w = WFemaleVillager
 	default:
 		h = HField
 		w = WField
