@@ -21,6 +21,7 @@ var (
 	bHouse2Img *ebiten.Image
 	dungeonImg *ebiten.Image
 	cannonImg  *ebiten.Image
+	erenImg    *ebiten.Image
 
 	op ebiten.DrawImageOptions
 
@@ -41,6 +42,7 @@ func init() {
 	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(pkg.GetImagePath("big_house_spriteV2"))
 	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(pkg.GetImagePath("dungeon_sprite"))
 	cannonImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetImagePath("dungeon_sprite"))
+	erenImg, _, _ = ebitenutil.NewImageFromFile(pkg.GetImagePath("eren_sprite"))
 
 	// //Lecture des fichiers png dans des variables
 	// wallImg, _, err1 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wall_sprite"))
