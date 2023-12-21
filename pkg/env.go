@@ -58,13 +58,9 @@ func createStaticObjects(H int, W int) []Object {
 	}
 
 	//Grandes maisons 1 et 2
-	coefsCoords = [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.4, 0.55}, {0.62, 0.7}}
-	for i, coords := range coefsCoords {
-		if i < 2 {
-			obj = NewObject(BigHouse1, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
-		} else {
-			obj = NewObject(BigHouse2, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
-		}
+	coefsCoords = [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.60, 0.7}}
+	for _, coords := range coefsCoords {
+		obj = NewObject(BigHouse1, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
 		objects = append(objects, *obj)
 	}
 
@@ -72,6 +68,16 @@ func createStaticObjects(H int, W int) []Object {
 	obj = NewObject(Dungeon, Position{X: int(0.2*float32(W) + CWall), Y: int(0.2*float32(H) + CWall)}, 1000000000)
 	objects = append(objects, *obj)
 	obj = NewObject(Dungeon, Position{X: int(0.8*float32(W) - CWall - WDungeon/2), Y: int(0.2*float32(H) + CWall)}, 1000000000)
+	objects = append(objects, *obj)
+
+	//Adding characters
+	obj = NewObject(Eren, Position{X: 500, Y: 350}, 1000000000)
+	objects = append(objects, *obj)
+	obj = NewObject(Mikasa, Position{X: 510, Y: 350}, 1000000000)
+	objects = append(objects, *obj)
+	obj = NewObject(MaleVillager, Position{X: 520, Y: 350}, 1000000000)
+	objects = append(objects, *obj)
+	obj = NewObject(FemaleVillager, Position{X: 530, Y: 350}, 1000000000)
 	objects = append(objects, *obj)
 
 	return objects

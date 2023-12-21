@@ -52,13 +52,17 @@ const (
 type ObjectName string
 
 const (
-	Grass      ObjectName = "Grass"
-	Field      ObjectName = "Field"
-	Wall       ObjectName = "Wall"
-	BigHouse1  ObjectName = "BigHouse1"
-	BigHouse2  ObjectName = "BigHouse2"
-	SmallHouse ObjectName = "SmallHouse"
-	Dungeon    ObjectName = "Dungeon"
+	Grass          ObjectName = "Grass"
+	Field          ObjectName = "Field"
+	Wall           ObjectName = "Wall"
+	BigHouse1      ObjectName = "BigHouse1"
+	BigHouse2      ObjectName = "BigHouse2"
+	SmallHouse     ObjectName = "SmallHouse"
+	Dungeon        ObjectName = "Dungeon"
+	Eren           ObjectName = "Eren"
+	Mikasa         ObjectName = "Mikasa"
+	MaleVillager   ObjectName = "MaleVillager"
+	FemaleVillager ObjectName = "FemaleVillager"
 )
 
 type BehaviorI interface {

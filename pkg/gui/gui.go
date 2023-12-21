@@ -13,15 +13,18 @@ type Game struct {
 
 var (
 	//var qui vont acceuillir les sprites
-	wallImg    *ebiten.Image
-	fieldImg   *ebiten.Image
-	grassImg   *ebiten.Image
-	sHouseImg  *ebiten.Image
-	bHouse1Img *ebiten.Image
-	bHouse2Img *ebiten.Image
-	dungeonImg *ebiten.Image
-	cannonImg  *ebiten.Image
-	erenImg    *ebiten.Image
+	wallImg           *ebiten.Image
+	fieldImg          *ebiten.Image
+	grassImg          *ebiten.Image
+	sHouseImg         *ebiten.Image
+	bHouse1Img        *ebiten.Image
+	bHouse2Img        *ebiten.Image
+	dungeonImg        *ebiten.Image
+	cannonImg         *ebiten.Image
+	erenImg           *ebiten.Image
+	mikasaImg         *ebiten.Image
+	maleVillagerImg   *ebiten.Image
+	femaleVillagerImg *ebiten.Image
 
 	op ebiten.DrawImageOptions
 
@@ -42,7 +45,10 @@ func init() {
 	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(pkg.GetImagePath("big_house_spriteV2"))
 	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(pkg.GetImagePath("dungeon_sprite"))
 	cannonImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetImagePath("dungeon_sprite"))
-	erenImg, _, _ = ebitenutil.NewImageFromFile(pkg.GetImagePath("eren_sprite"))
+	erenImg, _, _ = ebitenutil.NewImageFromFile(pkg.GetImagePath("eren_small_sprite"))
+	mikasaImg, _, _ = ebitenutil.NewImageFromFile(pkg.GetImagePath("mikasa_sprite"))
+	maleVillagerImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetImagePath("male_villager_sprite"))
+	femaleVillagerImg, _, _ = ebitenutil.NewImageFromFile(pkg.GetImagePath("female_villager_sprite"))
 
 	// //Lecture des fichiers png dans des variables
 	// wallImg, _, err1 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wall_sprite"))
@@ -97,6 +103,14 @@ func drawSprite(screen *ebiten.Image, o pkg.Object) {
 		img = grassImg
 	case pkg.Wall:
 		img = wallImg
+	case pkg.Eren:
+		img = erenImg
+	case pkg.Mikasa:
+		img = mikasaImg
+	case pkg.MaleVillager:
+		img = maleVillagerImg
+	case pkg.FemaleVillager:
+		img = femaleVillagerImg
 	default:
 		img = sHouseImg
 	}
