@@ -33,14 +33,24 @@ func init() {
 	)
 
 	//Lecture des fichiers png dans des variables
-	wallImg, _, err1 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wall_sprite"))
-	fieldImg, _, err2 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wheat_V2"))
-	grassImg, _, err3 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("grass_spriteV4"))
-	sHouseImg, _, err4 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("small_house_sprite"))
-	bHouse1Img, _, err5 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_sprite"))
-	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_spriteV2"))
-	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
-	cannonImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
+	wallImg, _, err1 = ebitenutil.NewImageFromFile(pkg.GetImagePath("wall_sprite"))
+	fieldImg, _, err2 = ebitenutil.NewImageFromFile(pkg.GetImagePath("wheat_V2"))
+	grassImg, _, err3 = ebitenutil.NewImageFromFile(pkg.GetImagePath("grass_spriteV4"))
+	sHouseImg, _, err4 = ebitenutil.NewImageFromFile(pkg.GetImagePath("small_house_sprite"))
+	bHouse1Img, _, err5 = ebitenutil.NewImageFromFile(pkg.GetImagePath("big_house_sprite"))
+	bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(pkg.GetImagePath("big_house_spriteV2"))
+	dungeonImg, _, err7 = ebitenutil.NewImageFromFile(pkg.GetImagePath("dungeon_sprite"))
+	cannonImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetImagePath("dungeon_sprite"))
+
+	// //Lecture des fichiers png dans des variables
+	// wallImg, _, err1 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wall_sprite"))
+	// fieldImg, _, err2 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("wheat_V2"))
+	// grassImg, _, err3 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("grass_spriteV4"))
+	// sHouseImg, _, err4 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("small_house_sprite"))
+	// bHouse1Img, _, err5 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_sprite"))
+	// bHouse2Img, _, err6 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("big_house_spriteV2"))
+	// dungeonImg, _, err7 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
+	// cannonImg, _, err8 = ebitenutil.NewImageFromFile(pkg.GetPath_Win("dungeon_sprite"))
 
 	if err1 != nil {
 		log.Fatal(err1)

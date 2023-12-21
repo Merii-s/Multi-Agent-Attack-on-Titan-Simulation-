@@ -1,8 +1,10 @@
 package pkg
 
 import (
+	"log"
 	"math/rand"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -23,8 +25,23 @@ func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
 	return randomX, randomY
 }
 
-func GetPath_Win(imgName string) string {
+// func GetPath_Win(imgName string) string {
+// 	currentDir, _ := os.Getwd()
+// 	path := currentDir + "/assets/" + imgName + ".png"
+// 	return path
+// }
+
+func GetImagePath(imgName string) string {
 	currentDir, _ := os.Getwd()
-	path := currentDir + "/assets/" + imgName + ".png"
+	var path string
+
+	if runtime.GOOS == "windows" {
+		path = currentDir + "/assets/" + imgName + ".png"
+	} else if runtime.GOOS == "darwin" {
+		path = currentDir + "/../../assets/" + imgName + ".png"
+	} else {
+		log.Fatal("OS not supported")
+	}
+
 	return path
 }
