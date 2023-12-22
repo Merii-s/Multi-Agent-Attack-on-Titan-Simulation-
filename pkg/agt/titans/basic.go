@@ -40,10 +40,6 @@ func (bt *BasicTitan) StopCh() chan struct{} {
 	return bt.stopCh
 }
 
-func (bt *BasicTitan) Mu() sync.Mutex {
-	return bt.mu
-}
-
 func (bt *BasicTitan) Behavior() pkg.BehaviorI {
 	return bt.BehaviorI
 }
@@ -91,7 +87,7 @@ func (bt *BasicTitan) Id() pkg.Id {
 	return bt.attributes.agentAttributes.Id()
 }
 
-func (bt *BasicTitan) move() {
+func (bt *BasicTitan) move(pos pkg.Position) {
 	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
 	new_X_pos := bt.attributes.agentAttributes.Pos().X + bt.attributes.agentAttributes.Speed()
 	new_Y_pos := bt.attributes.agentAttributes.Pos().Y + bt.attributes.agentAttributes.Speed()
