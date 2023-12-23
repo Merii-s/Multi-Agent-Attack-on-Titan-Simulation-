@@ -70,6 +70,7 @@ const (
 	ArmoredTitan   ObjectName = "ArmoredTitan"
 	ErenTitanS     ObjectName = "ErenTitan"
 	FemaleTitan    ObjectName = "FemaleTitan"
+	JawTitan       ObjectName = "JawTitan"
 )
 
 type BehaviorI interface {

@@ -72,8 +72,8 @@ func createStaticObjects(H int, W int) []Object {
 
 	//Adding characters
 	k := 0.6 * float32(H)
-	names := []ObjectName{Eren, Mikasa, MaleVillager, FemaleVillager, BasicTitan1, BasicTitan2, BeastTitan, ColossalTitan, ArmoredTitan, FemaleTitan, ErenTitanS}
-	coords := [][]int{{500, 350}, {510, 350}, {520, 350}, {530, 350}, {560, 400}, {590, 400}, {610, 350}, {610 + 30, 350}, {wall_Tl_X + CWall + int(wWall/4) + 25, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 50, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 75, int(k)}}
+	names := []ObjectName{Eren, Mikasa, MaleVillager, FemaleVillager, BasicTitan1, BasicTitan2, BeastTitan, ColossalTitan, ArmoredTitan, FemaleTitan, ErenTitanS, JawTitan}
+	coords := [][]int{{500, 350}, {510, 350}, {520, 350}, {530, 350}, {560, 400}, {590, 400}, {610, 350}, {610 + 30, 350}, {wall_Tl_X + CWall + int(wWall/4) + 25, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 50, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 75, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 100, int(k)}}
 	for i := 0; i < len(names); i++ {
 		obj = NewObject(names[i], Position{X: coords[i][0], Y: coords[i][1]}, 1000000000)
 		objects = append(objects, *obj)

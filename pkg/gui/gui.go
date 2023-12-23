@@ -32,6 +32,7 @@ var (
 	colossalTitanImg  *ebiten.Image
 	femaleTitanImg    *ebiten.Image
 	erenTitanImg      *ebiten.Image
+	jawTitanImg       *ebiten.Image
 
 	op ebiten.DrawImageOptions
 
@@ -40,7 +41,7 @@ var (
 
 func init() {
 	var (
-		err1, err2, err3, err4, err5, err6, err7, err8, err9, err10, err11, err12, err13, err14, err15, err16, err17, err18, err19 error
+		err1, err2, err3, err4, err5, err6, err7, err8, err9, err10, err11, err12, err13, err14, err15, err16, err17, err18, err19, err20 error
 	)
 
 	//Lecture des fichiers png dans des variables
@@ -63,6 +64,7 @@ func init() {
 	colossalTitanImg, _, err17 = ebitenutil.NewImageFromFile(pkg.GetImagePath("colossal_titan_sprite"))
 	femaleTitanImg, _, err18 = ebitenutil.NewImageFromFile(pkg.GetImagePath("female_titan_sprite"))
 	erenTitanImg, _, err19 = ebitenutil.NewImageFromFile(pkg.GetImagePath("eren_titan_sprite"))
+	jawTitanImg, _, err20 = ebitenutil.NewImageFromFile(pkg.GetImagePath("jaw_titan_sprite"))
 
 	if err1 != nil {
 		log.Fatal(err1)
@@ -102,6 +104,8 @@ func init() {
 		log.Fatal(err18)
 	} else if err19 != nil {
 		log.Fatal(err19)
+	} else if err20 != nil {
+		log.Fatal(err20)
 	}
 
 	e = pkg.NewEnvironement(700, 1000)
@@ -151,6 +155,8 @@ func drawSprite(screen *ebiten.Image, o pkg.Object) {
 		img = colossalTitanImg
 	case pkg.ErenTitanS:
 		img = erenTitanImg
+	case pkg.JawTitan:
+		img = jawTitanImg
 	default:
 		img = sHouseImg
 	}
