@@ -28,6 +28,10 @@ var (
 	basicTitan1Img    *ebiten.Image
 	basicTitan2Img    *ebiten.Image
 	beastTitanImg     *ebiten.Image
+	armoredTitanImg   *ebiten.Image
+	colossalTitanImg  *ebiten.Image
+	femaleTitanImg    *ebiten.Image
+	erenTitanImg      *ebiten.Image
 
 	op ebiten.DrawImageOptions
 
@@ -36,7 +40,7 @@ var (
 
 func init() {
 	var (
-		err1, err2, err3, err4, err5, err6, err7, err8, err9, err10, err11, err12, err13, err14, err15 error
+		err1, err2, err3, err4, err5, err6, err7, err8, err9, err10, err11, err12, err13, err14, err15, err16, err17, err18, err19 error
 	)
 
 	//Lecture des fichiers png dans des variables
@@ -54,7 +58,11 @@ func init() {
 	femaleVillagerImg, _, err12 = ebitenutil.NewImageFromFile(pkg.GetImagePath("female_villager_sprite"))
 	basicTitan1Img, _, err13 = ebitenutil.NewImageFromFile(pkg.GetImagePath("basic_titan1_sprite"))
 	basicTitan2Img, _, err14 = ebitenutil.NewImageFromFile(pkg.GetImagePath("basic_titan2_sprite"))
-	beastTitanImg, _, err15 = ebitenutil.NewImageFromFile(pkg.GetImagePath("beast_titan_sprite"))
+	beastTitanImg, _, err15 = ebitenutil.NewImageFromFile(pkg.GetImagePath("beast_titan_sprite_V2"))
+	armoredTitanImg, _, err16 = ebitenutil.NewImageFromFile(pkg.GetImagePath("armored_titan_sprite"))
+	colossalTitanImg, _, err17 = ebitenutil.NewImageFromFile(pkg.GetImagePath("colossal_titan_sprite"))
+	femaleTitanImg, _, err18 = ebitenutil.NewImageFromFile(pkg.GetImagePath("female_titan_sprite"))
+	erenTitanImg, _, err19 = ebitenutil.NewImageFromFile(pkg.GetImagePath("eren_titan_sprite"))
 
 	if err1 != nil {
 		log.Fatal(err1)
@@ -86,6 +94,14 @@ func init() {
 		log.Fatal(err14)
 	} else if err15 != nil {
 		log.Fatal(err15)
+	} else if err16 != nil {
+		log.Fatal(err16)
+	} else if err17 != nil {
+		log.Fatal(err17)
+	} else if err18 != nil {
+		log.Fatal(err18)
+	} else if err19 != nil {
+		log.Fatal(err19)
 	}
 
 	e = pkg.NewEnvironement(700, 1000)
@@ -127,6 +143,14 @@ func drawSprite(screen *ebiten.Image, o pkg.Object) {
 		img = basicTitan2Img
 	case pkg.BeastTitan:
 		img = beastTitanImg
+	case pkg.ArmoredTitan:
+		img = armoredTitanImg
+	case pkg.FemaleTitan:
+		img = femaleTitanImg
+	case pkg.ColossalTitan:
+		img = colossalTitanImg
+	case pkg.ErenTitanS:
+		img = erenTitanImg
 	default:
 		img = sHouseImg
 	}
