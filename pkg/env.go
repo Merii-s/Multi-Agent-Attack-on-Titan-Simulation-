@@ -1,5 +1,10 @@
 package pkg
 
+import (
+	"sync"
+	"time"
+)
+
 func createStaticObjects(H int, W int) []Object {
 	objects := make([]Object, 0)
 	var obj *Object
@@ -80,6 +85,34 @@ func createStaticObjects(H int, W int) []Object {
 	}
 
 	return objects
+}
+
+func SendEnvToUI(e *Environment, c chan *Environment) {
+
+}
+
+func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
+	var ind int
+	coords := [][]int{{250, 250}, {750, 250}, {750, 450}, {250, 450}}
+	for i, _ := range e.objects {
+		if e.objects[i].name == ColossalTitan {
+			ind = i
+			break
+		}
+	}
+
+	for {
+		for _, pos := range coords {
+			wg.Add(1)
+			go func(pos []int) {
+				e.objects[ind].SetPosition(Position{pos[0], pos[1]})
+				c <- e
+				time.Sleep(10 * time.Millisecond)
+				wg.Done()
+			}(pos)
+			wg.Wait()
+		}
+	}
 }
 
 func NewEnvironement(H int, W int) *Environment {
