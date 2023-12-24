@@ -90,7 +90,7 @@ func NewField(tl Position, life int, reserve int) *FieldObject {
 	}
 }
 
-func (f *Object) hitbox() (br *Position) {
+func (f *Object) hitbox() []Position {
 	var w, h int
 	switch f.name {
 	case Wall:
@@ -127,5 +127,9 @@ func (f *Object) hitbox() (br *Position) {
 		h = HField
 		w = WField
 	}
-	return &Position{X: f.tl.X + w, Y: f.tl.Y + h}
+
+	hb := make([]Position, 2)
+	hb[0] = f.TL()
+	hb[1] = Position{X: f.tl.X + w, Y: f.tl.Y + h}
+	return hb
 }
