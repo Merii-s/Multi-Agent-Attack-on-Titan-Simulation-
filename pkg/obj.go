@@ -1,6 +1,7 @@
 package pkg
 
 const (
+
 	//Screen Dimensions
 	Height = 700
 	Width  = 1000
@@ -66,7 +67,6 @@ const (
 
 	WSoldierF = 20
 	HSoldierF = 22
-
 	//Il faut  ajouter les durrees de vie des objets
 )
 
