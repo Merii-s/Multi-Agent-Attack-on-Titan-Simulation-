@@ -2,10 +2,11 @@ package pkg
 
 import (
 	"container/heap"
-	"math"
 	"log"
+	"math"
 	"math/rand"
 	"os"
+	"reflect"
 	"runtime"
 	"time"
 )
@@ -40,7 +41,7 @@ func GetImagePath(imgName string) string {
 	if runtime.GOOS == "windows" {
 		path = currentDir + "/assets/" + imgName + ".png"
 	} else if runtime.GOOS == "darwin" {
-		path = currentDir + "/../../assets/" + imgName + ".png"
+		path = currentDir + "/assets/" + imgName + ".png"
 	} else {
 		log.Fatal("OS not supported")
 	}
@@ -106,9 +107,10 @@ func getNeighbors(position Position, toAvoid []Position) []Position {
 	return filteredNeighbors
 }
 
-func contains(positions []Position, position Position) bool {
-	for _, p := range positions {
-		if p == position {
+// contains checks if the given list contains the specified object.
+func contains[T any](list []T, target T) bool {
+	for _, item := range list {
+		if reflect.DeepEqual(item, target) {
 			return true
 		}
 	}
@@ -217,100 +219,80 @@ func (p Position) Equals(other Position) bool {
 	return p.X == other.X && p.Y == other.Y
 }
 
-// define a function to get the vision of an agent
-// it takes the agent position, the agent vision and positions he can't see behind in argument
-// returns a list of positions that the agent can see (including the agent position)
+// returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
-func GetVision(agentPos Position, agentVision int, toAvoid []Position) []Position {
+func (a *Agent) GetVision(e *Environment) []Object {
 	// Get the top left and bottom right positions of the vision square
-	topLeft := Position{agentPos.X - agentVision, agentPos.Y + agentVision}
-	bottomRight := Position{agentPos.X + agentVision, agentPos.Y - agentVision}
+	topLeft := Position{a.Pos().X - a.Vision(), a.Pos().Y + a.Vision()}
+	bottomRight := Position{a.Pos().X + a.Vision(), a.Pos().Y - a.Vision()}
 
-	// Get the positions inside the vision square
-	positions := []Position{}
-	for x := topLeft.X; x <= bottomRight.X; x++ {
-		for y := bottomRight.Y; y <= topLeft.Y; y++ {
-			positions = append(positions, Position{x, y})
+	// Get the positions inside the vision square from the environment
+	perceptedObjects := e.PerceptedObjects(topLeft, bottomRight)
+
+	// Get the objects not seen by the agent
+	CantSeeBehindObjects := []Object{}
+	for _, obj := range perceptedObjects {
+		if contains(a.CantSeeBehind(), obj.Name()) {
+			CantSeeBehindObjects = append(CantSeeBehindObjects, obj)
 		}
 	}
-
 	// Filter out positions to avoid regarding the agent position
-	// If a toAvoid position is in the vision square, agent can't see behind it,
+	// If a CantSeeBehindObjects object is in the vision square, agent can't see behind it,
 	// depending on the angle between the agent and the position to avoid, the agent can't see every positions behind it following the perspective logic
-	for _, position := range positions {
-		if !contains(toAvoid, position) {
+
+	// Get the positions behind the CantSeeBehindObjects objects
+	objectsBehindPositions := []Position{}
+
+	for _, object := range perceptedObjects {
+		if !contains(CantSeeBehindObjects, object) {
 			continue
 		} else {
-			// If the position to avoid is in the vision square, the agent can't see behind it
+			// If a objCantSeeBehindObject is in the vision square, the agent can't see behind it
 			// Get the angle between the agent and the position to avoid
-			angle := getAngle(agentPos, position)
+			objectCenter := object.Center()
+			angle := getAngle(a.Pos(), objectCenter)
 
-			// Get the positions behind the position to avoid
-			positionsBehind := getPositionsBehind(position, angle, topLeft, bottomRight)
+			// Get the perceptedObjects behind the current position to avoid
+			objectsBehindCurrentObject := getObjectsBehindPositions(a.Pos(), angle, topLeft, bottomRight)
 
-			// Filter out positions behind the position to avoid
-			positions = filterOut(positionsBehind, positions)
+			for _, position := range objectsBehindCurrentObject {
+				objectsBehindPositions = append(objectsBehindPositions, position)
+			}
 		}
 	}
-	return positions
+
+	// Checks if the perceptedObjects are in a objectsBehindPositions position and remove them if they are
+	perceptedObjects = removeObjectsBehindPositions(perceptedObjects, objectsBehindPositions)
+
+	return perceptedObjects
 }
 
-func remove(positions []Position, position Position) []Position {
-	for i, p := range positions {
-		if p == position {
-			return append(positions[:i], positions[i+1:]...)
+func removeObjectsBehindPositions(perceptedObjects []Object, objectsBehindPositions []Position) []Object {
+	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
+	objectsToRemove := []Object{}
+	for _, object := range perceptedObjects {
+		if contains(objectsBehindPositions, object.Center()) {
+			objectsToRemove = append(objectsToRemove, object)
 		}
 	}
-	return positions
+
+	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+	perceptedObjects = removeObjects(perceptedObjects, objectsToRemove)
+
+	return perceptedObjects
 }
 
-func filterOut(positions []Position, toFilter []Position) []Position {
-	filteredPositions := toFilter
-	for _, position := range positions {
-		filteredPositions = remove(filteredPositions, position)
-	}
-	return filteredPositions
-}
-
-// TODO : improve the angle for straight positions and maybe deepness of unseeable positions
-func getPositionsBehind(position Position, angle float64, bottomLeft Position, topRight Position) []Position {
-	positions := []Position{}
-	// the angle order follows the counter-clockwise order
-	// if the position to avoid is in the bottom right quarter of the vision square
-	// the agent can't see the positions in the bottom right quarter of the vision square
-	if angle >= 0 && angle < 90 {
-		for x := position.X; x <= topRight.X; x++ {
-			for y := position.Y; y <= bottomLeft.Y; y++ {
-				positions = append(positions, Position{x, y})
-			}
-		}
-		// if the position to avoid is in the bottom left quarter of the vision square
-		// the agent can't see the positions in the bottom left quarter of the vision square
-	} else if angle >= 90 && angle < 180 {
-		for x := bottomLeft.X; x <= position.X; x++ {
-			for y := position.Y; y <= bottomLeft.Y; y++ {
-				positions = append(positions, Position{x, y})
-			}
-		}
-		// if the position to avoid is in the top left quarter of the vision square
-		// the agent can't see the positions in the top left quarter of the vision square
-	} else if angle >= 180 && angle < 270 {
-		for x := bottomLeft.X; x <= position.X; x++ {
-			for y := topRight.Y; y <= position.Y; y++ {
-				positions = append(positions, Position{x, y})
-			}
-		}
-		// if the position to avoid is in the top right quarter of the vision square
-		// the agent can't see the positions in the top right quarter of the vision square
-	} else if angle >= 270 && angle < 360 {
-		for x := position.X; x <= topRight.X; x++ {
-			for y := topRight.Y; y <= position.Y; y++ {
-				positions = append(positions, Position{x, y})
+func removeObjects(perceptedObjects []Object, objectsToRemove []Object) []Object {
+	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+	for _, object := range objectsToRemove {
+		for i, perceptedObject := range perceptedObjects {
+			if perceptedObject == object {
+				perceptedObjects = append(perceptedObjects[:i], perceptedObjects[i+1:]...)
 			}
 		}
 	}
 
-	return positions
+	return perceptedObjects
 }
 
 // define a function to get the angle between two positions
@@ -333,19 +315,81 @@ func getAngle(agentPos Position, position Position) float64 {
 	return angleDeg
 }
 
-// define a function to get the distance between two positions
-func getDistance(agentPos Position, position Position) float64 {
-	// Get the distance between the two positions using the Pythagorean theorem
-	distance := math.Sqrt(float64((agentPos.X-position.X)*(agentPos.X-position.X) + (agentPos.Y-position.Y)*(agentPos.Y-position.Y)))
+// define a function that takes two squares in parameters defined by top left and bottom right positions and returns true if they intersect
+func IntersectSquare(topLeft1 Position, bottomRight1 Position, topLeft2 Position, bottomRight2 Position) bool {
+	// Check if the two squares intersect
+	if topLeft1.X > bottomRight2.X || topLeft2.X > bottomRight1.X {
+		return false
+	}
+	if topLeft1.Y < bottomRight2.Y || topLeft2.Y < bottomRight1.Y {
+		return false
+	}
 
-	return distance
+	return true
 }
 
-func Contains(positions []Position, position Position) bool {
-	for _, p := range positions {
-		if p == position {
-			return true
+// TODO : Maybe use angle parameters instead of forced values
+func getObjectsBehindPositions(position Position, angle float64, topLeftVision Position, bottomRightVision Position) []Position {
+	objectsBehindPositions := []Position{}
+	// the angle order follows the counter-clockwise order
+
+	// if the position to avoid is in the straight right of the agent position
+	// the agent can't see the positions behind it from 315 to 45 degrees following the perspective logic
+	if angle > 345 && angle < 15 {
+		for i := 0; i < bottomRightVision.X; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X + i, position.Y})
 		}
+
+		// if the position to avoid is in the bottom right quarter of the vision square
+		// the agent can't see the positions in the bottom right quarter of the vision square
+	} else if angle >= 15 && angle < 75 {
+		for x := position.X; x <= bottomRightVision.X; x++ {
+			for y := position.Y; y <= topLeftVision.Y; y++ {
+				objectsBehindPositions = append(objectsBehindPositions, Position{x, y})
+			}
+		}
+		// if the position to avoid is in the straight bottom of the agent position
+		// the agent can't see the positions behind it from 45 to 135 degrees following the perspective logic
+	} else if angle > 75 && angle < 105 {
+		for i := 0; i < bottomRightVision.Y; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X, position.Y - i})
+		}
+
+		// if the position to avoid is in the bottom left of the agent position
+		// the agent can't see the positions behind it from 90 to 180 degrees following the perspective logic
+	} else if angle >= 105 && angle <= 165 {
+		for i := 0; i < 8; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X - i, position.Y - i})
+		}
+
+		// if the position to avoid is in the straight left of the agent position
+		// the agent can't see the positions behind it from 135 to 225 degrees following the perspective logic
+	} else if angle > 165 && angle < 195 {
+		for i := 0; i < topLeftVision.X; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X - i, position.Y})
+		}
+
+		// if the position to avoid is in the top left of the agent position
+		// the agent can't see the positions behind it from 180 to 270 degrees following the perspective logic
+	} else if angle >= 195 && angle <= 255 {
+		for i := 0; i < 8; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X - i, position.Y + i})
+		}
+
+		// if the position to avoid is in the straight top of the agent position
+		// the agent can't see the positions behind it from 225 to 315 degrees following the perspective logic
+	} else if angle > 255 && angle < 285 {
+		for i := 0; i < topLeftVision.Y; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X, position.Y + i})
+		}
+
+		// if the position to avoid is in the top right of the agent position
+		// the agent can't see the positions behind it from 270 to 360 degrees and from 0 to 90 degrees following the perspective logic
+	} else if angle >= 285 && angle <= 345 || angle >= 0 && angle <= 90 {
+		for i := 0; i < 8; i++ {
+			objectsBehindPositions = append(objectsBehindPositions, Position{position.X + i, position.Y + i})
+		}
+
 	}
-	return false
+	return objectsBehindPositions
 }
