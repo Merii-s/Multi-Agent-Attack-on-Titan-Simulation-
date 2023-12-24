@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"sync"
-	"time"
 )
 
 func createStaticObjects(H int, W int) []Object {
@@ -107,7 +106,7 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 			go func(pos []int) {
 				e.objects[ind].SetPosition(Position{pos[0], pos[1]})
 				c <- e
-				time.Sleep(10 * time.Millisecond)
+				//time.Sleep(10 * time.Millisecond)
 				wg.Done()
 			}(pos)
 			wg.Wait()

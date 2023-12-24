@@ -28,12 +28,6 @@ var (
 	}
 )
 
-func NewGame(c chan *pkg.Environment) *Game {
-	return &Game{
-		c: c,
-	}
-}
-
 func init() {
 	var errs []error
 
@@ -140,8 +134,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func (g *Game) ListenToSimu() {
 	var e *pkg.Environment
 	for {
-		g.Lock()
 		e = <-g.c
+		g.Lock()
 		g.objs = make([]pkg.Object, 10000)
 		copy(g.objs, e.Objects())
 	}
