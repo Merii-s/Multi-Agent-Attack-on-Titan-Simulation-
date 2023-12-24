@@ -37,6 +37,36 @@ const (
 	WFemaleVillager = 10
 	HFemaleVillager = 17
 
+	WBasicTitanF = 21
+	HBasicTitanF = 40
+
+	WBasicTitanM = 22
+	HBasicTitanM = 40
+
+	WArmoredTitan = 20
+	HArmoredTitan = 49
+
+	WBeastTitan = 31
+	HBeastTitan = 64
+
+	WColossalTitan = 28
+	HColossalTitan = 65
+
+	WErenTitan = 20
+	HErenTitan = 50
+
+	WFemaleTitan = 19
+	HFemaleTitan = 50
+
+	WJawTitan = 32
+	HJawTitan = 34
+
+	WSoldierM = 15
+	HSoldierM = 22
+
+	WSoldierF = 20
+	HSoldierF = 22
+
 	//Il faut  ajouter les durrees de vie des objets
 )
 
