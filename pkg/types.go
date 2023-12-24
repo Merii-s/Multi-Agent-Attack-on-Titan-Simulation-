@@ -66,6 +66,13 @@ const (
 	BasicTitan1    ObjectName = "BasicTitan1"
 	BasicTitan2    ObjectName = "BasicTitan2"
 	BeastTitan     ObjectName = "BeastTitan"
+	ColossalTitan  ObjectName = "ColossalTitan"
+	ArmoredTitan   ObjectName = "ArmoredTitan"
+	ErenTitanS     ObjectName = "ErenTitan"
+	FemaleTitan    ObjectName = "FemaleTitan"
+	JawTitan       ObjectName = "JawTitan"
+	MaleSoldier    ObjectName = "MaleSoldier"
+	FemaleSoldier  ObjectName = "FemaleSoldier"
 )
 
 type BehaviorI interface {

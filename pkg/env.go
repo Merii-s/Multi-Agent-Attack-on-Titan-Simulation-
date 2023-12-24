@@ -1,5 +1,10 @@
 package pkg
 
+import (
+	"sync"
+	"time"
+)
+
 func createStaticObjects(H int, W int) []Object {
 	objects := make([]Object, 0)
 	var obj *Object
@@ -71,22 +76,43 @@ func createStaticObjects(H int, W int) []Object {
 	objects = append(objects, *obj)
 
 	//Adding characters
-	obj = NewObject(Eren, Position{X: 500, Y: 350}, 1000000000)
-	objects = append(objects, *obj)
-	obj = NewObject(Mikasa, Position{X: 510, Y: 350}, 1000000000)
-	objects = append(objects, *obj)
-	obj = NewObject(MaleVillager, Position{X: 520, Y: 350}, 1000000000)
-	objects = append(objects, *obj)
-	obj = NewObject(FemaleVillager, Position{X: 530, Y: 350}, 1000000000)
-	objects = append(objects, *obj)
-	obj = NewObject(BasicTitan1, Position{X: 560, Y: 400}, 1000000000)
-	objects = append(objects, *obj)
-	obj = NewObject(BasicTitan2, Position{X: 590, Y: 400}, 1000000000)
-	objects = append(objects, *obj)
-	obj = NewObject(BeastTitan, Position{X: 610, Y: 350}, 1000000000)
-	objects = append(objects, *obj)
+	k := 0.6 * float32(H)
+	names := []ObjectName{Eren, Mikasa, MaleVillager, FemaleVillager, BasicTitan1, BasicTitan2, BeastTitan, ColossalTitan, ArmoredTitan, FemaleTitan, ErenTitanS, JawTitan, MaleSoldier, FemaleSoldier}
+	coords := [][]int{{500, 350}, {510, 350}, {520, 350}, {530, 350}, {560, 400}, {590, 400}, {610, 350}, {610 + 30, 350}, {wall_Tl_X + CWall + int(wWall/4) + 25, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 50, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 75, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 100, int(k) + 20}, {450, 350}, {460, 350}}
+	for i := 0; i < len(names); i++ {
+		obj = NewObject(names[i], Position{X: coords[i][0], Y: coords[i][1]}, 1000000000)
+		objects = append(objects, *obj)
+	}
 
 	return objects
+}
+
+func SendEnvToUI(e *Environment, c chan *Environment) {
+
+}
+
+func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
+	var ind int
+	coords := [][]int{{250, 250}, {750, 250}, {750, 450}, {250, 450}}
+	for i, _ := range e.objects {
+		if e.objects[i].name == ColossalTitan {
+			ind = i
+			break
+		}
+	}
+
+	for {
+		for _, pos := range coords {
+			wg.Add(1)
+			go func(pos []int) {
+				e.objects[ind].SetPosition(Position{pos[0], pos[1]})
+				c <- e
+				time.Sleep(10 * time.Millisecond)
+				wg.Done()
+			}(pos)
+			wg.Wait()
+		}
+	}
 }
 
 func NewEnvironement(H int, W int) *Environment {
