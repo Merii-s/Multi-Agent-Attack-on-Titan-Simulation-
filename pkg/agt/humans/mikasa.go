@@ -116,11 +116,31 @@ func (m *Mikasa) Attack(agt pkg.Agent) {
 	if rand.Float64() < m.attack_success(m.attributes.agentAttributes.Speed(), m.attributes.agentAttributes.Reach(), agt.Speed()) {
 		// If the attack is successful, the agent loses HP
 		agt.SetHp(agt.Hp() - m.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", m.Id(), agt.Id(), agt.Hp())
+		fmt.Printf("Attack successful from %m : %m lost  %d HP \n", m.Id(), agt.Id(), agt.Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
 	}
+}
+
+func (m *Mikasa) Pos() pkg.Position {
+	return m.attributes.agentAttributes.Pos()
+}
+
+func (m *Mikasa) Vision() int {
+	return m.attributes.agentAttributes.Vision()
+}
+
+func (m *Mikasa) Object() pkg.Object {
+	return m.attributes.agentAttributes.Object()
+}
+
+func (m *Mikasa) PerceivedObjects() []pkg.Object {
+	return m.attributes.agentAttributes.PerceivedObjects()
+}
+
+func (m *Mikasa) PerceivedAgents() []pkg.AgentI {
+	return m.attributes.agentAttributes.PerceivedAgents()
 }
 
 // Define the behavior struct of Mikasa
@@ -129,7 +149,23 @@ type MikasaBehavior struct {
 }
 
 func (mb *MikasaBehavior) Percept(e *pkg.Environment) {
+	println("Mikasa Percept")
+	// Get the perceived objects and agents
+	perceivedObjects, perceivedAgents := mb.m.attributes.agentAttributes.GetVision(e)
 
+	// Add the percepted agents to the list of percepted agents
+	for _, obj := range perceivedObjects {
+		fmt.Printf("Percepted object: %m\n", obj.Name())
+		mb.m.attributes.agentAttributes.AddPerceivedObject(obj)
+	}
+
+	// Add the percepted agents to the list of percepted agents
+	for _, agt := range perceivedAgents {
+		fmt.Printf("Percepted agent: %m\n", agt.Id())
+		mb.m.attributes.agentAttributes.AddPerceivedAgent(agt)
+	}
+
+	time.Sleep(100 * time.Millisecond)
 }
 
 func (mb *MikasaBehavior) Deliberate() {

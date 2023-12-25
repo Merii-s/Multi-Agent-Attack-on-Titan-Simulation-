@@ -37,7 +37,7 @@ type AgentI interface {
 	Vision() int
 	PerceivedObjects() []Object
 	PerceivedAgents() []AgentI
-	Object() Object
+	Object() *Object
 }
 
 type Id string

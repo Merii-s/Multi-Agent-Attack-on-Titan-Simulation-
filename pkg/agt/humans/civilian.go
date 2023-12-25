@@ -2,6 +2,7 @@ package agt
 
 import (
 	pkg "AOT/pkg"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -100,7 +101,29 @@ func (c *Civilian) build() {
 
 }
 
-func (c *Civilian) getFood()
+func (c *Civilian) getFood() {
+
+}
+
+func (c *Civilian) Pos() pkg.Position {
+	return c.attributes.agentAttributes.Pos()
+}
+
+func (c *Civilian) Vision() int {
+	return c.attributes.agentAttributes.Vision()
+}
+
+func (c *Civilian) Object() pkg.Object {
+	return c.attributes.agentAttributes.Object()
+}
+
+func (c *Civilian) PerceivedObjects() []pkg.Object {
+	return c.attributes.agentAttributes.PerceivedObjects()
+}
+
+func (c *Civilian) PerceivedAgents() []pkg.AgentI {
+	return c.attributes.agentAttributes.PerceivedAgents()
+}
 
 // Define the behavior struct of the Civilian :
 type CivilianBehavior struct {
@@ -108,7 +131,23 @@ type CivilianBehavior struct {
 }
 
 func (cb *CivilianBehavior) Percept(e *pkg.Environment) {
+	println("Civilian Percept")
+	// Get the perceived objects and agents
+	perceivedObjects, perceivedAgents := cb.c.attributes.agentAttributes.GetVision(e)
 
+	// Add the percepted agents to the list of percepted agents
+	for _, obj := range perceivedObjects {
+		fmt.Printf("Percepted object: %c\n", obj.Name())
+		cb.c.attributes.agentAttributes.AddPerceivedObject(obj)
+	}
+
+	// Add the percepted agents to the list of percepted agents
+	for _, agt := range perceivedAgents {
+		fmt.Printf("Percepted agent: %c\n", agt.Id())
+		cb.c.attributes.agentAttributes.AddPerceivedAgent(agt)
+	}
+
+	time.Sleep(100 * time.Millisecond)
 }
 
 func (cb *CivilianBehavior) Deliberate() {

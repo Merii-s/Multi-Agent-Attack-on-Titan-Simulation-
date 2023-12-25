@@ -116,11 +116,31 @@ func (eren *Eren) attack(agt pkg.Agent) {
 	if rand.Float64() < eren.attack_success(eren.attributes.agentAttributes.Speed(), eren.attributes.agentAttributes.Reach(), agt.Speed()) {
 		// If the attack is successful, the agent loses HP
 		agt.SetHp(agt.Hp() - eren.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", eren.Id(), agt.Id(), agt.Hp())
+		fmt.Printf("Attack successful from %eren : %eren lost  %d HP \n", eren.Id(), agt.Id(), agt.Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
 	}
+}
+
+func (eren *Eren) Pos() pkg.Position {
+	return eren.attributes.agentAttributes.Pos()
+}
+
+func (eren *Eren) Vision() int {
+	return eren.attributes.agentAttributes.Vision()
+}
+
+func (eren *Eren) Object() pkg.Object {
+	return eren.attributes.agentAttributes.Object()
+}
+
+func (eren *Eren) PerceivedObjects() []pkg.Object {
+	return eren.attributes.agentAttributes.PerceivedObjects()
+}
+
+func (eren *Eren) PerceivedAgents() []pkg.AgentI {
+	return eren.attributes.agentAttributes.PerceivedAgents()
 }
 
 // Define the behavior struct of Eren
@@ -129,7 +149,23 @@ type ErenBehavior struct {
 }
 
 func (eb *ErenBehavior) Percept(e *pkg.Environment) {
-	// TODO: Implement perception logic for Eren
+	println("Eren Percept")
+	// Get the perceived objects and agents
+	perceivedObjects, perceivedAgents := eb.eren.attributes.agentAttributes.GetVision(e)
+
+	// Add the percepted agents to the list of percepted agents
+	for _, obj := range perceivedObjects {
+		fmt.Printf("Percepted object: %eren\n", obj.Name())
+		eb.eren.attributes.agentAttributes.AddPerceivedObject(obj)
+	}
+
+	// Add the percepted agents to the list of percepted agents
+	for _, agt := range perceivedAgents {
+		fmt.Printf("Percepted agent: %eren\n", agt.Id())
+		eb.eren.attributes.agentAttributes.AddPerceivedAgent(agt)
+	}
+
+	time.Sleep(100 * time.Millisecond)
 }
 
 func (eb *ErenBehavior) Deliberate() {

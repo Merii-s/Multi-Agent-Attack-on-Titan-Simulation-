@@ -125,19 +125,85 @@ func (s *Soldier) attack(agt pkg.Agent) {
 	}
 }
 
+func (s *Soldier) Pos() pkg.Position {
+	return s.attributes.agentAttributes.Pos()
+}
+
+func (s *Soldier) Vision() int {
+	return s.attributes.agentAttributes.Vision()
+}
+
+func (s *Soldier) Object() pkg.Object {
+	return s.attributes.agentAttributes.Object()
+}
+
+func (s *Soldier) PerceivedObjects() []pkg.Object {
+	return s.attributes.agentAttributes.PerceivedObjects()
+}
+
+func (s *Soldier) PerceivedAgents() []pkg.AgentI {
+	return s.attributes.agentAttributes.PerceivedAgents()
+}
+
 // Define the behavior struct of the Soldier :
 type SoldierBehavior struct {
 	s *Soldier
 }
 
 func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
+	println("Soldier Percept")
+	// Get the perceived objects and agents
+	perceivedObjects, perceivedAgents := sb.s.attributes.agentAttributes.GetVision(e)
 
+	// Add the percepted agents to the list of percepted agents
+	for _, obj := range perceivedObjects {
+		fmt.Printf("Percepted object: %s\n", obj.Name())
+		sb.s.attributes.agentAttributes.AddPerceivedObject(obj)
+	}
+
+	// Add the percepted agents to the list of percepted agents
+	for _, agt := range perceivedAgents {
+		fmt.Printf("Percepted agent: %s\n", agt.Id())
+		sb.s.attributes.agentAttributes.AddPerceivedAgent(agt)
+	}
+
+	time.Sleep(100 * time.Millisecond)
 }
 
-func (sb *SoldierBehavior) Deliberate() {
+func (sb *SoldierBehavior) Deliberate(objects *[]pkg.Object, agents []pkg.AgentI) (pkg.Position, bool) {
+	// Initialize variables for counting titans
+	numTitans := 0
+	var firstTitanPos pkg.Position
 
+	// TO DO: randomize the choice
+
+	// Count the number of titans and store the position of the first titan
+	for _, agt := range agents {
+		// if the agent is a special titan, the soldier moves away in the opposite direction
+		if agt.Object().Name() == "BeastTitan" || agt.Object().Name() == "ColossalTitan" || agt.Object().Name() == "ArmoredTitan" || agt.Object().Name() == "FemaleTitan" || agt.Object().Name() == "JawTitan" {
+			return oppositeDirection(sb.s.attributes.agentAttributes.Pos(), agt.Pos()), false
+		}
+		if agt.Object().Name() == "BasicTitan1" || agt.Object().Name() == "BasicTitan2" {
+			numTitans++
+			if numTitans == 1 {
+				firstTitanPos = agt.Pos()
+			}
+		}
+	}
+	// Decide action based on the number of titans
+	if numTitans < 2 {
+		// Attack the first titan if there are fewer than two titans
+		return firstTitanPos, true
+	} else {
+		return oppositeDirection(sb.s.attributes.agentAttributes.Pos(), firstTitanPos), false
+	}
 }
 
 func (sb *SoldierBehavior) Act(e *pkg.Environment) {
 
+}
+
+// Calculate the opposite direction of a position
+func oppositeDirection(currentPos, targetPos pkg.Position) pkg.Position {
+	return pkg.Position{X: 2*currentPos.X - targetPos.X, Y: 2*currentPos.Y - targetPos.Y}
 }

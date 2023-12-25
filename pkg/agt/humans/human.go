@@ -13,6 +13,6 @@ type Human struct {
 	agentAttributes pkg.Agent
 }
 
-func NewHuman(id pkg.Id, tl pkg.Position, life int, r int, s int, spd int, v int, o pkg.ObjectName) *Human {
-	return &Human{agentAttributes: *pkg.NewAgent(id, tl, life, r, s, spd, v, o)}
+func NewHuman(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, object pkg.ObjectName) *Human {
+	return &Human{agentAttributes: *pkg.NewAgent(id, tl, life, reach, strength, speed, vision, object)}
 }
