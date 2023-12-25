@@ -22,7 +22,7 @@ type AgentI interface {
 	Percept(*Environment)
 	Deliberate()
 	Act(*Environment)
-	Start()
+	Start(*Environment)
 	Id() Id
 
 	Move(pos Position)
@@ -31,8 +31,10 @@ type AgentI interface {
 	AttackSuccess(spdAtk int, spdDef int) float64
 
 	Pos() Position
-	SeenPositions() map[Position]ObjectName
 	Vision() int
+	PerceivedObjects() []Object
+	PerceivedAgents() []AgentI
+	Object() Object
 }
 
 type Id string
@@ -41,16 +43,6 @@ type Position struct {
 	X int
 	Y int
 }
-
-type Type string
-
-const (
-	Civilian     Type = "Civilian"
-	Soldier      Type = "Soldier"
-	Titan        Type = "Titan"
-	SpecialTitan Type = "SpecialTitan"
-	ErenTitan    Type = "ErenTitan"
-)
 
 type ObjectName string
 

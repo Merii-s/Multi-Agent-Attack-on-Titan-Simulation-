@@ -219,54 +219,6 @@ func (p Position) Equals(other Position) bool {
 	return p.X == other.X && p.Y == other.Y
 }
 
-// returns a list of objects that the agent can see
-// the vision is a square centered on the agent position
-func (a *Agent) GetVision(e *Environment) []Object {
-	// Get the top left and bottom right positions of the vision square
-	topLeft := Position{a.Pos().X - a.Vision(), a.Pos().Y + a.Vision()}
-	bottomRight := Position{a.Pos().X + a.Vision(), a.Pos().Y - a.Vision()}
-
-	// Get the positions inside the vision square from the environment
-	perceptedObjects := e.PerceptedObjects(topLeft, bottomRight)
-
-	// Get the objects not seen by the agent
-	CantSeeBehindObjects := []Object{}
-	for _, obj := range perceptedObjects {
-		if contains(a.CantSeeBehind(), obj.Name()) {
-			CantSeeBehindObjects = append(CantSeeBehindObjects, obj)
-		}
-	}
-	// Filter out positions to avoid regarding the agent position
-	// If a CantSeeBehindObjects object is in the vision square, agent can't see behind it,
-	// depending on the angle between the agent and the position to avoid, the agent can't see every positions behind it following the perspective logic
-
-	// Get the positions behind the CantSeeBehindObjects objects
-	objectsBehindPositions := []Position{}
-
-	for _, object := range perceptedObjects {
-		if !contains(CantSeeBehindObjects, object) {
-			continue
-		} else {
-			// If a objCantSeeBehindObject is in the vision square, the agent can't see behind it
-			// Get the angle between the agent and the position to avoid
-			objectCenter := object.Center()
-			angle := getAngle(a.Pos(), objectCenter)
-
-			// Get the perceptedObjects behind the current position to avoid
-			objectsBehindCurrentObject := getObjectsBehindPositions(a.Pos(), angle, topLeft, bottomRight)
-
-			for _, position := range objectsBehindCurrentObject {
-				objectsBehindPositions = append(objectsBehindPositions, position)
-			}
-		}
-	}
-
-	// Checks if the perceptedObjects are in a objectsBehindPositions position and remove them if they are
-	perceptedObjects = removeObjectsBehindPositions(perceptedObjects, objectsBehindPositions)
-
-	return perceptedObjects
-}
-
 func removeObjectsBehindPositions(perceptedObjects []Object, objectsBehindPositions []Position) []Object {
 	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
 	objectsToRemove := []Object{}
@@ -282,6 +234,23 @@ func removeObjectsBehindPositions(perceptedObjects []Object, objectsBehindPositi
 	return perceptedObjects
 }
 
+// generalize removeObjectsBehindPositions with any type
+
+func removeAgentsBehindPositions(perceptedAgents []AgentI, objectsBehindPositions []Position) []AgentI {
+	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
+	objectsToRemove := []AgentI{}
+	for _, object := range perceptedAgents {
+		if contains(objectsBehindPositions, object.Pos()) {
+			objectsToRemove = append(objectsToRemove, object)
+		}
+	}
+
+	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+	perceptedAgents = removeAgents(perceptedAgents, objectsToRemove)
+
+	return perceptedAgents
+}
+
 func removeObjects(perceptedObjects []Object, objectsToRemove []Object) []Object {
 	// Remove the objects in the objectsToRemove list from the perceptedObjects list
 	for _, object := range objectsToRemove {
@@ -293,6 +262,19 @@ func removeObjects(perceptedObjects []Object, objectsToRemove []Object) []Object
 	}
 
 	return perceptedObjects
+}
+
+func removeAgents(perceptedAgents []AgentI, objectsToRemove []AgentI) []AgentI {
+	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+	for _, object := range objectsToRemove {
+		for i, perceptedObject := range perceptedAgents {
+			if perceptedObject == object {
+				perceptedAgents = append(perceptedAgents[:i], perceptedAgents[i+1:]...)
+			}
+		}
+	}
+
+	return perceptedAgents
 }
 
 // define a function to get the angle between two positions
