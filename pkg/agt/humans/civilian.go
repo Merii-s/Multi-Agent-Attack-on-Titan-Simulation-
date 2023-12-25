@@ -2,6 +2,7 @@ package agt
 
 import (
 	pkg "AOT/pkg"
+	"sync"
 )
 
 type CivilianI interface {
@@ -12,49 +13,98 @@ type CivilianI interface {
 
 type Civilian struct {
 	attributes Human
+	stopCh     chan struct{}
+	syncChan   chan string
+	mu         sync.Mutex
+	pkg.BehaviorI
 }
 
-func NewCivilian(id pkg.Id, topLeft pkg.Position, bottomRight pkg.Position, hp int, reach int, speed int, strength int) *Civilian {
-	x, y := pkg.GetRandomCoords(topLeft, bottomRight)
-	pos := pkg.Position{X: x, Y: y}
-	atts := NewHuman(id, pos, hp, reach, strength, speed)
-	return &Civilian{attributes: *atts}
+func NewCivilian(id pkg.Id, t pkg.Type, topLeft pkg.Position, hp int, reach int, strength int, speed int) *Civilian {
+	atts := NewHuman(id, t, topLeft, hp, reach, strength, speed)
+	return &Civilian{
+		attributes: *atts,
+		stopCh:     make(chan struct{}),
+		syncChan:   make(chan string),
+		mu:         sync.Mutex{},
+		BehaviorI:  &CivilianBehavior{},
+	}
 }
 
-func (*Civilian) Percept(*pkg.Environment) {
+// Setter and getter methods for Civilian
+func (c *Civilian) SyncChan() chan string {
+	return c.syncChan
+}
+
+func (c *Civilian) StopCh() chan struct{} {
+	return c.stopCh
+}
+
+// func (c *Civilian) Mu() sync.Mutex {
+// 	return c.mu
+// }
+
+// methods for civilian
+func (c *Civilian) Percept(e *pkg.Environment) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.BehaviorI.Percept(e)
+}
+
+func (c *Civilian) Deliberate() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.BehaviorI.Deliberate()
 
 }
 
-func (*Civilian) Deliberate() {
-
+func (c *Civilian) Act(e *pkg.Environment) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.BehaviorI.Act(e)
 }
 
-func (*Civilian) Act(*pkg.Environment) {
-
+func (c *Civilian) Id() pkg.Id {
+	return c.attributes.agentAttributes.Id()
 }
 
 func (*Civilian) Start() {
 
 }
 
-func (*Civilian) Id() {
-
+func (c *Civilian) move() {
+	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
+	new_X_pos := c.attributes.agentAttributes.Pos().X + c.attributes.agentAttributes.Speed()
+	new_Y_pos := c.attributes.agentAttributes.Pos().Y + c.attributes.agentAttributes.Speed()
+	new_pos := pkg.Position{X: new_X_pos, Y: new_Y_pos}
+	c.attributes.agentAttributes.SetPos(new_pos)
 }
 
-func (*Civilian) move() {
-
-}
-
-func (*Civilian) eat() {
+func (c *Civilian) eat() {
 
 }
 
 func (*Civilian) sleep() {
+	//time.Sleep(?)
+}
+
+func (c *Civilian) build() {
 
 }
 
-func (*Civilian) build() {
+func (c *Civilian) getFood()
+
+// Define the behavior struct of the Soldier :
+type CivilianBehavior struct {
+}
+
+func (cb *CivilianBehavior) Percept(e *pkg.Environment) {
 
 }
 
-func (*Civilian) getFood()
+func (cb *CivilianBehavior) Deliberate() {
+
+}
+
+func (cb *CivilianBehavior) Act(e *pkg.Environment) {
+
+}
