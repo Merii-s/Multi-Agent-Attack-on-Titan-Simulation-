@@ -226,3 +226,14 @@ func (p *Environment) Objects() []Object {
 func (p *Environment) Agents() []Object {
 	return p.agents
 }
+
+func (e *Environment) PerceptedObjects(topLeft Position, bottomRight Position) []Object {
+	positions := make([]Object, 0)
+	for _, obj := range e.objects {
+		tl, br := obj.Hitbox()[0], obj.Hitbox()[1]
+		if IntersectSquare(tl, br, topLeft, bottomRight) {
+			positions = append(positions, obj)
+		}
+	}
+	return positions
+}

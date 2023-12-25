@@ -1,14 +1,17 @@
 package pkg
 
 type Agent struct {
-	id       Id
-	type_agt Type
-	pos      Position
-	reach    int
-	strength int
-	speed    int
-	hp       int
-	maxHP    int
+	id            Id
+	type_agt      Type
+	pos           Position
+	reach         int
+	strength      int
+	speed         int
+	hp            int
+	maxHP         int
+	vision        int
+	seenPositions map[Position]ObjectName
+	cantSeeBehind []ObjectName
 }
 
 func NewAgent(id Id, t Type, p Position, hp int, r int, s int, spd int) *Agent {
@@ -43,10 +46,12 @@ func (t *Agent) Hp() int {
 	return t.hp
 }
 
-func (t *Agent) SetPos(pos Position) {
-	t.pos = pos
-}
+func (t *Agent) SetPos(pos Position) { t.pos = pos }
 
-func (t *Agent) SetHp(hp int) {
-	t.hp = hp
-}
+func (t *Agent) SetHp(hp int) { t.hp = hp }
+
+func (t *Agent) Vision() int { return t.vision }
+
+func (t *Agent) SeenPositions() map[Position]ObjectName { return t.seenPositions }
+
+func (t *Agent) CantSeeBehind() []ObjectName { return t.cantSeeBehind }

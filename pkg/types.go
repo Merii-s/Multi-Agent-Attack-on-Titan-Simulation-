@@ -26,13 +26,16 @@ type AgentI interface {
 	Deliberate()
 	Act(*Environment)
 	Start()
-	Id()
+	Id() Id
 
-	move(Position)
-	eat()
-	sleep()
-	attack_success(spd_atk int, reach_atk int, spd_def int) float64
-	Pos()
+	Move(pos Position)
+	Eat()
+	Sleep()
+	AttackSuccess(spdAtk int, spdDef int) float64
+
+	Pos() Position
+	SeenPositions() map[Position]ObjectName
+	Vision() int
 }
 
 type Id string
