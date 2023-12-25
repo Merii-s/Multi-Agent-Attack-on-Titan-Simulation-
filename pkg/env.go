@@ -14,7 +14,7 @@ func createStaticObjects(H int, W int) []Object {
 	nH := H / CGrass
 	for i := 0; i < nH; i++ {
 		for j := 0; j < nW; j++ {
-			obj = NewObject(Grass, Position{X: j * CGrass, Y: i * CGrass}, 1000000000)
+			obj = NewObject(Grass, Position{X: j * CGrass, Y: i * CGrass}, GRASS_LIFE)
 			objects = append(objects, *obj)
 			nb_objects = nb_objects + 1
 		}
@@ -27,17 +27,18 @@ func createStaticObjects(H int, W int) []Object {
 	hWall := int((6. / 7.) * float32(H)) //Hauteur du mur
 	nW = wWall / CWall                   //Nombre de sprites en largeur
 	nH = hWall / CWall                   //Nombre de sprites en hauteur
+
 	//Mur du Nord, Horizontal
 	for i := 0; i < nW+1; i++ {
-		obj = NewObject(Wall, Position{X: wall_Tl_X + i*CWall, Y: wall_Tl_Y}, 1000000000)
+		obj = NewObject(Wall, Position{X: wall_Tl_X + i*CWall, Y: wall_Tl_Y}, WALL_LIFE)
 		objects = append(objects, *obj)
 		nb_objects = nb_objects + 1
 	}
 	//Murs cotes, Verticaux
 	for i := 1; i < nH; i++ {
-		obj = NewObject(Wall, Position{X: wall_Tl_X, Y: wall_Tl_Y + i*CWall}, 1000000000)
+		obj = NewObject(Wall, Position{X: wall_Tl_X, Y: wall_Tl_Y + i*CWall}, WALL_LIFE)
 		objects = append(objects, *obj)
-		obj = NewObject(Wall, Position{X: wall_Tl_X + wWall, Y: wall_Tl_Y + i*CWall}, 1000000000)
+		obj = NewObject(Wall, Position{X: wall_Tl_X + wWall, Y: wall_Tl_Y + i*CWall}, WALL_LIFE)
 		objects = append(objects, *obj)
 		nb_objects = nb_objects + 2
 	}
@@ -53,7 +54,7 @@ func createStaticObjects(H int, W int) []Object {
 			x = wall_Tl_X + CWall + int(wWall/4) + (i-7)*WField
 			y = wall_Tl_Y + CWall + int(hWall/10) + HField*2
 		}
-		obj = NewObject(Field, Position{X: x, Y: y}, 1000000000)
+		obj = NewObject(Field, Position{X: x, Y: y}, FIELD_LIFE)
 		objects = append(objects, *obj)
 		nb_objects = nb_objects + 1
 	}
@@ -62,7 +63,7 @@ func createStaticObjects(H int, W int) []Object {
 	coefsCoords := [][]float32{{0.29, 0.4}, {1 - 0.29, 0.4}, {0.29, 0.85}, {1 - 0.29, 0.85}, {0.29, 0.55}, {1 - 0.29, 0.65}, {0.5, 0.85}}
 	for _, coords := range coefsCoords {
 
-		obj = NewObject(SmallHouse, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
+		obj = NewObject(SmallHouse, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, SMALL_HOUSE_LIFE)
 		objects = append(objects, *obj)
 		nb_objects = nb_objects + 1
 	}
@@ -70,18 +71,18 @@ func createStaticObjects(H int, W int) []Object {
 	//Grandes maisons 1 et 2
 	coefsCoords = [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.60, 0.7}}
 	for _, coords := range coefsCoords {
-		obj = NewObject(BigHouse1, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
+		obj = NewObject(BigHouse1, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, BIG_HOUSE_LIFE)
 		objects = append(objects, *obj)
 		nb_objects = nb_objects + 1
 	}
 
 	//Donjons
-	obj = NewObject(Dungeon, Position{X: int(0.2*float32(W) + CWall), Y: int(0.2*float32(H) + CWall)}, 1000000000)
+	obj = NewObject(Dungeon, Position{X: int(0.2*float32(W) + CWall), Y: int(0.2*float32(H) + CWall)}, DUNGEON_LIFE)
 	objects = append(objects, *obj)
-	obj = NewObject(Dungeon, Position{X: int(0.8*float32(W) - CWall - WDungeon/2), Y: int(0.2*float32(H) + CWall)}, 1000000000)
+	obj = NewObject(Dungeon, Position{X: int(0.8*float32(W) - CWall - WDungeon/2), Y: int(0.2*float32(H) + CWall)}, DUNGEON_LIFE)
 	objects = append(objects, *obj)
 
-	obj = NewObject(ColossalTitan, Position{X: 640, Y: 350}, 1000000000)
+	obj = NewObject(ColossalTitan, Position{X: 640, Y: 350}, COLOSSAL_TITAN_LIFE)
 	objects = append(objects, *obj)
 	nb_objects = nb_objects + 3
 
@@ -113,68 +114,108 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 
 func createHumans(objs []Object, tl_village Position, br_village Position) []Object {
 	var human *Object
-	var end bool
-	var counter int
-	var nb_grass int
 
 	//A modifier quand le construteur d'humain sera pret
 	humans := make([]Object, 0)
 
 	for i := 0; i < NB_HUMANS; i++ {
+		x, y := GetRandomCoords(tl_village, br_village)
 		if i < NB_VILLAGERS {
-			x, y := GetRandomCoords(tl_village, br_village)
 			if i < NB_VILLAGERS/2 {
 				//A modifier quand le construteur d'humain sera pret
-				human = NewObject(MaleVillager, Position{x, y}, 100)
+				human = NewObject(MaleVillager, Position{x, y}, VILLAGER_LIFE)
 			} else {
 				//A modifier quand le construteur d'humain sera pret
-				human = NewObject(FemaleVillager, Position{x, y}, 100)
+				human = NewObject(FemaleVillager, Position{x, y}, VILLAGER_LIFE)
 			}
+		} else if i < NB_VILLAGERS+NB_SOLDIERS {
+			if i < NB_VILLAGERS+NB_SOLDIERS/2 {
+				//A modifier quand le construteur d'humain sera pret
+				human = NewObject(MaleSoldier, Position{x, y}, SOLDIER_LIFE)
+			} else {
+				//A modifier quand le construteur d'humain sera pret
+				human = NewObject(FemaleSoldier, Position{x, y}, SOLDIER_LIFE)
+			}
+		} else if i < NB_VILLAGERS+NB_SOLDIERS+1 {
+			//A modifier quand le construteur d'humain sera pret
+			human = NewObject(Eren, Position{X: x, Y: y}, EREN_LIFE)
+		} else {
+			//A modifier quand le construteur d'humain sera pret
+			human = NewObject(Mikasa, Position{X: x, Y: y}, MIKASA_LIFE)
 		}
 
-		end = false
-		for !end {
-			counter = 0
-			nb_grass = 0
-			for _, obj := range objs {
-				if obj.name != Grass {
-					if DetectCollision(*human, obj) {
-						x, y := GetRandomCoords(tl_village, br_village)
-						human.SetPosition(Position{x, y})
-						break
-					} else {
-						counter++
-					}
-				} else {
-					nb_grass++
-				}
-			}
-
-			for _, hu := range humans {
-				if DetectCollision(*human, hu) {
-					x, y := GetRandomCoords(tl_village, br_village)
-					human.SetPosition(Position{x, y})
-					break
-				} else {
-					counter++
-				}
-			}
-
-			if counter == len(objs)+len(humans)-nb_grass {
-				end = true
-			}
-		}
-
-		humans = append(humans, *human)
+		//Place l'humain dans des coordonnees aleatoires valides (i.e sans collisions) dans le village
+		humans = PlaceHuman(objs, humans, human, tl_village, br_village)
 	}
 	return humans
+}
+
+func createTitans(H int, W int) []Object {
+	var titan *Object
+	tl_screen := Position{X: 0, Y: 0}
+	br_screen := Position{X: W, Y: H}
+
+	dir := 0
+
+	//A modifier quand le construteur de titan sera pret
+	titans := make([]Object, 0)
+
+	for i := 0; i < NB_TITANS; i++ {
+		x, y := GetRandomCoords(tl_screen, br_screen)
+
+		if dir == 0 {
+			y = y - H
+			dir = 1
+		} else if dir == 1 {
+			x = x - W
+			dir = 2
+		} else {
+			x = x + W
+			dir = 0
+		}
+
+		if i < NB_BASIC_TITANS {
+			if i < NB_BASIC_TITANS/2 {
+				//A modifier quand le construteur d'humain sera pret
+				titan = NewObject(BasicTitan1, Position{x, y}, BASIC_TITAN_LIFE)
+			} else {
+				//A modifier quand le construteur d'humain sera pret
+				titan = NewObject(BasicTitan2, Position{x, y}, BASIC_TITAN_LIFE)
+			}
+		} else if i < NB_BASIC_TITANS+NB_SPECIAL_TITANS {
+			if i < NB_BASIC_TITANS+1 {
+				//A modifier quand le construteur d'humain sera pret
+				titan = NewObject(ColossalTitan, Position{x, y}, COLOSSAL_TITAN_LIFE)
+			} else if i < NB_BASIC_TITANS+2 {
+				//A modifier quand le construteur d'humain sera pret
+				titan = NewObject(BeastTitan, Position{x, y}, BEAST_TITAN_LIFE)
+			} else if i < NB_BASIC_TITANS+3 {
+				titan = NewObject(FemaleTitan, Position{x, y}, FEMALE_TITAN_LIFE)
+			} else if i < NB_BASIC_TITANS+4 {
+				titan = NewObject(JawTitan, Position{x, y}, JAW_TITAN_LIFE)
+			} else if i < NB_BASIC_TITANS+5 {
+				titan = NewObject(ArmoredTitan, Position{x, y}, ARMORED_TITAN_LIFE)
+			}
+		}
+
+		//Place l'humain dans des coordonnees aleatoires valides (i.e sans collisions) dans le village
+		titans = PlaceTitan(titan, titans, H, W, dir)
+	}
+	return titans
+
 }
 
 func NewEnvironement(H int, W int) *Environment {
 	objects := createStaticObjects(H, W)
 	humans := createHumans(objects, Position{X: int(0.2*float32(W)) + CWall, Y: int(0.2*float32(H)) + CWall}, Position{X: int(0.8 * float32(W)), Y: 700 - HMaleVillager})
-
-	return &Environment{agents: humans, objects: objects}
+	titans := createTitans(H, W)
+	// for _, titan := range titans {
+	// 	fmt.Println(titan)
+	// }
+	merged_agents := make([]Object, len(titans)+len(humans))
+	merged_agents = append(merged_agents, humans...)
+	merged_agents = append(merged_agents, titans...)
+	return &Environment{agents: merged_agents, objects: objects}
 }
 
 func (p *Environment) Objects() []Object {

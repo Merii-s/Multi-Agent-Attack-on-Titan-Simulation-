@@ -7,7 +7,7 @@ import (
 type Environment struct {
 	sync.RWMutex
 
-	//A modifier quand le constructeur d'agent sera pret
+	//A modifier quand le constructeur d'agent sera pret, C'est un tableau d'agents
 	agents []Object
 
 	objects []Object
