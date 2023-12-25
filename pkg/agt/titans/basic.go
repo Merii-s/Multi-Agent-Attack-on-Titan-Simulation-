@@ -1,7 +1,7 @@
 package agt
 
 import (
-	pkg "AOT/pkg"
+	"AOT/pkg"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -17,18 +17,23 @@ type BasicTitan struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	pkg.BehaviorI
+	behavior   pkg.BehaviorI
 }
 
-func NewBasicTitan(id pkg.Id, pos pkg.Position, hp int, reach int, speed int, strength int, height int, regen int) *BasicTitan {
-	atts := NewTitan(id, pkg.Titan, pos, hp, reach, strength, speed, height, regen)
-	return &BasicTitan{
+func NewBasicTitan(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName, regen int) *BasicTitan {
+	if obj != pkg.BasicTitan1 && obj != pkg.BasicTitan2 {
+		return nil
+	}
+	atts := NewTitan(id, tl, life, reach, strength, speed, vision, obj, regen)
+	bt := &BasicTitan{
 		attributes: *atts,
 		stopCh:     make(chan struct{}),
 		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
-		BehaviorI:  &BasicTitanBehavior{},
 	}
+	behavior := &BasicTitanBehavior{bt: bt}
+	bt.SetBehavior(behavior)
+	return bt
 }
 
 // Setter and getter methods for BasicTitan
@@ -40,44 +45,39 @@ func (bt *BasicTitan) StopCh() chan struct{} {
 	return bt.stopCh
 }
 
-func (bt *BasicTitan) Behavior() pkg.BehaviorI {
-	return bt.BehaviorI
+func (bt *BasicTitan) Behavior() *pkg.BehaviorI {
+	return &bt.behavior
 }
 
 func (bt *BasicTitan) SetBehavior(b pkg.BehaviorI) {
-	bt.BehaviorI = b
+	bt.behavior = b
 }
 
 // Methods for BasicTitan
 func (bt *BasicTitan) Percept(e *pkg.Environment) {
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-	bt.BehaviorI.Percept(e)
+	bt.behavior.Percept(e)
 }
 
 func (bt *BasicTitan) Deliberate() {
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-	bt.BehaviorI.Deliberate()
+	bt.behavior.Deliberate()
 
 }
 
 func (bt *BasicTitan) Act(e *pkg.Environment) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
-	bt.BehaviorI.Act(e)
+	bt.behavior.Act(e)
 }
 
-func (bt *BasicTitan) Start() {
-	// launch the agent goroutine Percept-Act cycle
+func (bt *BasicTitan) Start(e *pkg.Environment) {
+	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
 		for {
-			// Percept
-			// TODO : Percept
-			// Deliberate
-			// TODO : Deliberate
-			// Act
-			// TODO : Act
+			println("BasicTitan Start")
+			bt.behavior.Percept(e)
+			time.Sleep(100 * time.Millisecond)
+			bt.behavior.Deliberate()
+			bt.behavior.Act(e)
 		}
 	}()
 
@@ -131,12 +131,20 @@ func (bt *BasicTitan) Pos() pkg.Position {
 	return bt.attributes.agentAttributes.Pos()
 }
 
-func (bt *BasicTitan) SeenPositions() map[pkg.Position]pkg.ObjectName {
-	return bt.attributes.agentAttributes.SeenPositions()
-}
-
 func (bt *BasicTitan) Vision() int {
 	return bt.attributes.agentAttributes.Vision()
+}
+
+func (bt *BasicTitan) Object() pkg.Object {
+	return bt.attributes.agentAttributes.Object()
+}
+
+func (bt *BasicTitan) PerceivedObjects() []pkg.Object {
+	return bt.attributes.agentAttributes.PerceivedObjects()
+}
+
+func (bt *BasicTitan) PerceivedAgents() []pkg.AgentI {
+	return bt.attributes.agentAttributes.PerceivedAgents()
 }
 
 // Regenerate method for BasicTitan
@@ -181,9 +189,28 @@ func (bt *BasicTitan) StopRegeneration() {
 
 // Define the behavior struct of the BasicTitan :
 type BasicTitanBehavior struct {
+	bt *BasicTitan
 }
 
-func (btb *BasicTitanBehavior) Percept(e *pkg.Environment) {}
+func (btb *BasicTitanBehavior) Percept(e *pkg.Environment) {
+	println("BasicTitan Percept")
+	// Get the perceived objects and agents
+	perceivedObjects, perceivedAgents := btb.bt.attributes.agentAttributes.GetVision(e)
+
+	// Add the percepted agents to the list of percepted agents
+	for _, obj := range perceivedObjects {
+		fmt.Printf("Percepted object: %s\n", obj.Name())
+		btb.bt.attributes.agentAttributes.AddPerceivedObject(obj)
+	}
+
+	// Add the percepted agents to the list of percepted agents
+	for _, agt := range perceivedAgents {
+		fmt.Printf("Percepted agent: %s\n", agt.Id())
+		btb.bt.attributes.agentAttributes.AddPerceivedAgent(agt)
+	}
+
+	time.Sleep(100 * time.Millisecond)
+}
 
 func (btb *BasicTitanBehavior) Deliberate() {}
 

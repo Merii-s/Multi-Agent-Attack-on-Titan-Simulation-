@@ -227,7 +227,7 @@ func (p *Environment) Agents() []Object {
 	return p.agents
 }
 
-func (e *Environment) PerceptedObjects(topLeft Position, bottomRight Position) []Object {
+func (e *Environment) PerceivedObjects(topLeft Position, bottomRight Position) []Object {
 	positions := make([]Object, 0)
 	for _, obj := range e.objects {
 		tl, br := obj.Hitbox()[0], obj.Hitbox()[1]
@@ -236,4 +236,20 @@ func (e *Environment) PerceptedObjects(topLeft Position, bottomRight Position) [
 		}
 	}
 	return positions
+}
+
+func (e *Environment) PerceivedAgents(topLeft Position, bottomRight Position, agtId Id) []AgentI {
+	positions := make([]AgentI, 0)
+	for _, agt := range e.Agents() {
+		object := agt.Object()
+		tl, br := object.Hitbox()[0], object.Hitbox()[1]
+		if IntersectSquare(tl, br, topLeft, bottomRight) && agt.Id() != agtId {
+			positions = append(positions, agt)
+		}
+	}
+	return positions
+}
+
+func (e *Environment) Add(a AgentI) {
+	e.agents = append(e.agents, a)
 }

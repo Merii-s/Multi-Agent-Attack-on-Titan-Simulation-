@@ -70,10 +70,9 @@ const (
 )
 
 type Object struct {
-	name    ObjectName
-	tl      Position
-	life    int
-	idAgent Id
+	name ObjectName
+	tl   Position
+	life int
 }
 
 func NewObject(name ObjectName, tl Position, life int) *Object {
@@ -102,10 +101,6 @@ func (o *Object) Name() ObjectName {
 
 func (o *Object) TL() Position {
 	return o.tl
-}
-
-func (o *Object) IdAgent() Id {
-	return o.idAgent
 }
 
 type FieldObject struct {
