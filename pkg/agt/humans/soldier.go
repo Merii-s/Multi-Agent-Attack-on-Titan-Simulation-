@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 type SoldierI interface {
@@ -16,18 +17,20 @@ type Soldier struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	pkg.BehaviorI
+	bahavior   pkg.BehaviorI
 }
 
-func NewSoldier(id pkg.Id, t pkg.Type, topLeft pkg.Position, hp int, reach int, strength int, speed int) *Soldier {
-	atts := NewHuman(id, t, topLeft, hp, reach, strength, speed)
-	return &Soldier{
+func NewSoldier(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Soldier {
+	atts := NewHuman(id, tl, life, reach, strength, speed, vision, obj)
+	s := &Soldier{
 		attributes: *atts,
 		stopCh:     make(chan struct{}),
 		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
-		BehaviorI:  &SoldierBehavior{},
 	}
+	behavior := &SoldierBehavior{s: s}
+	s.SetBehavior(behavior)
+	return s
 }
 
 // Setter and getter methods for Soldier
@@ -39,44 +42,49 @@ func (s *Soldier) StopCh() chan struct{} {
 	return s.stopCh
 }
 
-// func (s *Soldier) Mu() sync.Mutex {
-// 	return s.mu
-// }
+func (s *Soldier) Behavior() *pkg.BehaviorI {
+	return &s.bahavior
+}
+
+func (s *Soldier) SetBehavior(b pkg.BehaviorI) {
+	s.bahavior = b
+}
 
 // Methods for Soldier
 func (s *Soldier) Percept(e *pkg.Environment) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.BehaviorI.Percept(e)
+	s.bahavior.Percept(e)
 }
 
 func (s *Soldier) Deliberate() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.BehaviorI.Deliberate()
-
+	s.bahavior.Deliberate()
 }
 
 func (s *Soldier) Act(e *pkg.Environment) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.BehaviorI.Act(e)
+	s.bahavior.Act(e)
 }
 
 func (s *Soldier) Id() pkg.Id {
 	return s.attributes.agentAttributes.Id()
 }
 
-func (*Soldier) Start() {
-
+func (s *Soldier) Start(e *pkg.Environment) {
+	// launch the agent goroutine Percept-Deliberate-Act cycle
+	go func() {
+		for {
+			println("Soldier Start")
+			s.bahavior.Percept(e)
+			time.Sleep(100 * time.Millisecond)
+			s.bahavior.Deliberate()
+			s.bahavior.Act(e)
+		}
+	}()
 }
 
-func (s *Soldier) move() {
+func (s *Soldier) move(pos pkg.Position) {
 	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
-	new_X_pos := s.attributes.agentAttributes.Pos().X + s.attributes.agentAttributes.Speed()
-	new_Y_pos := s.attributes.agentAttributes.Pos().Y + s.attributes.agentAttributes.Speed()
-	new_pos := pkg.Position{X: new_X_pos, Y: new_Y_pos}
-	s.attributes.agentAttributes.SetPos(new_pos)
+	s.attributes.agentAttributes.SetPos(pos)
 }
 
 func (s *Soldier) eat() {
@@ -119,6 +127,7 @@ func (s *Soldier) attack(agt pkg.Agent) {
 
 // Define the behavior struct of the Soldier :
 type SoldierBehavior struct {
+	s *Soldier
 }
 
 func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
