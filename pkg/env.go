@@ -7,6 +7,7 @@ import (
 func createStaticObjects(H int, W int) []Object {
 	objects := make([]Object, 0)
 	var obj *Object
+	nb_objects := 0
 
 	//Grass Sprites
 	nW := W / CGrass
@@ -15,6 +16,7 @@ func createStaticObjects(H int, W int) []Object {
 		for j := 0; j < nW; j++ {
 			obj = NewObject(Grass, Position{X: j * CGrass, Y: i * CGrass}, 1000000000)
 			objects = append(objects, *obj)
+			nb_objects = nb_objects + 1
 		}
 	}
 
@@ -29,6 +31,7 @@ func createStaticObjects(H int, W int) []Object {
 	for i := 0; i < nW+1; i++ {
 		obj = NewObject(Wall, Position{X: wall_Tl_X + i*CWall, Y: wall_Tl_Y}, 1000000000)
 		objects = append(objects, *obj)
+		nb_objects = nb_objects + 1
 	}
 	//Murs cotes, Verticaux
 	for i := 1; i < nH; i++ {
@@ -36,6 +39,7 @@ func createStaticObjects(H int, W int) []Object {
 		objects = append(objects, *obj)
 		obj = NewObject(Wall, Position{X: wall_Tl_X + wWall, Y: wall_Tl_Y + i*CWall}, 1000000000)
 		objects = append(objects, *obj)
+		nb_objects = nb_objects + 2
 	}
 
 	//Champs
@@ -51,6 +55,7 @@ func createStaticObjects(H int, W int) []Object {
 		}
 		obj = NewObject(Field, Position{X: x, Y: y}, 1000000000)
 		objects = append(objects, *obj)
+		nb_objects = nb_objects + 1
 	}
 
 	//Petites maisons
@@ -59,6 +64,7 @@ func createStaticObjects(H int, W int) []Object {
 
 		obj = NewObject(SmallHouse, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
 		objects = append(objects, *obj)
+		nb_objects = nb_objects + 1
 	}
 
 	//Grandes maisons 1 et 2
@@ -66,6 +72,7 @@ func createStaticObjects(H int, W int) []Object {
 	for _, coords := range coefsCoords {
 		obj = NewObject(BigHouse1, Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, 1000000000)
 		objects = append(objects, *obj)
+		nb_objects = nb_objects + 1
 	}
 
 	//Donjons
@@ -74,20 +81,11 @@ func createStaticObjects(H int, W int) []Object {
 	obj = NewObject(Dungeon, Position{X: int(0.8*float32(W) - CWall - WDungeon/2), Y: int(0.2*float32(H) + CWall)}, 1000000000)
 	objects = append(objects, *obj)
 
-	//Adding characters
-	k := 0.6 * float32(H)
-	names := []ObjectName{Eren, Mikasa, MaleVillager, FemaleVillager, BasicTitan1, BasicTitan2, BeastTitan, ColossalTitan, ArmoredTitan, FemaleTitan, ErenTitanS, JawTitan, MaleSoldier, FemaleSoldier}
-	coords := [][]int{{500, 350}, {510, 350}, {520, 350}, {530, 350}, {560, 400}, {590, 400}, {610, 350}, {610 + 30, 350}, {wall_Tl_X + CWall + int(wWall/4) + 25, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 50, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 75, int(k)}, {wall_Tl_X + CWall + int(wWall/4) + 100, int(k) + 20}, {450, 350}, {460, 350}}
-	for i := 0; i < len(names); i++ {
-		obj = NewObject(names[i], Position{X: coords[i][0], Y: coords[i][1]}, 1000000000)
-		objects = append(objects, *obj)
-	}
+	obj = NewObject(ColossalTitan, Position{X: 640, Y: 350}, 1000000000)
+	objects = append(objects, *obj)
+	nb_objects = nb_objects + 3
 
 	return objects
-}
-
-func SendEnvToUI(e *Environment, c chan *Environment) {
-
 }
 
 func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
@@ -106,7 +104,6 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 			go func(pos []int) {
 				e.objects[ind].SetPosition(Position{pos[0], pos[1]})
 				c <- e
-				//time.Sleep(10 * time.Millisecond)
 				wg.Done()
 			}(pos)
 			wg.Wait()
@@ -114,15 +111,77 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 	}
 }
 
+func createHumans(objs []Object, tl_village Position, br_village Position) []Object {
+	var human *Object
+	var end bool
+	var counter int
+	var nb_grass int
+
+	//A modifier quand le construteur d'humain sera pret
+	humans := make([]Object, 0)
+
+	for i := 0; i < NB_HUMANS; i++ {
+		if i < NB_VILLAGERS {
+			x, y := GetRandomCoords(tl_village, br_village)
+			if i < NB_VILLAGERS/2 {
+				//A modifier quand le construteur d'humain sera pret
+				human = NewObject(MaleVillager, Position{x, y}, 100)
+			} else {
+				//A modifier quand le construteur d'humain sera pret
+				human = NewObject(FemaleVillager, Position{x, y}, 100)
+			}
+		}
+
+		end = false
+		for !end {
+			counter = 0
+			nb_grass = 0
+			for _, obj := range objs {
+				if obj.name != Grass {
+					if DetectCollision(*human, obj) {
+						x, y := GetRandomCoords(tl_village, br_village)
+						human.SetPosition(Position{x, y})
+						break
+					} else {
+						counter++
+					}
+				} else {
+					nb_grass++
+				}
+			}
+
+			for _, hu := range humans {
+				if DetectCollision(*human, hu) {
+					x, y := GetRandomCoords(tl_village, br_village)
+					human.SetPosition(Position{x, y})
+					break
+				} else {
+					counter++
+				}
+			}
+
+			if counter == len(objs)+len(humans)-nb_grass {
+				end = true
+			}
+		}
+
+		humans = append(humans, *human)
+	}
+	return humans
+}
+
 func NewEnvironement(H int, W int) *Environment {
 	objects := createStaticObjects(H, W)
-	return &Environment{objects: objects}
+	humans := createHumans(objects, Position{X: int(0.2*float32(W)) + CWall, Y: int(0.2*float32(H)) + CWall}, Position{X: int(0.8 * float32(W)), Y: 700 - HMaleVillager})
+
+	return &Environment{agents: humans, objects: objects}
 }
 
 func (p *Environment) Objects() []Object {
 	return p.objects
 }
 
-func (p *Environment) Agents() []AgentI {
+// A modifier quand le construteur d'agent sera pret
+func (p *Environment) Agents() []Object {
 	return p.agents
 }

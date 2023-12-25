@@ -6,7 +6,10 @@ import (
 
 type Environment struct {
 	sync.RWMutex
-	agents  []AgentI
+
+	//A modifier quand le constructeur d'agent sera pret
+	agents []Object
+
 	objects []Object
 
 	screenH int

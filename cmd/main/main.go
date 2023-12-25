@@ -12,8 +12,8 @@ import (
 
 type Game struct {
 	sync.Mutex
-	c    chan *pkg.Environment
-	objs []pkg.Object
+	c        chan *pkg.Environment
+	elements []pkg.Object
 }
 
 var (
@@ -35,12 +35,13 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) drawEnvironment(screen *ebiten.Image) {
-	for _, o := range g.objs {
+	for _, o := range g.elements {
 		if o.Life() > 0 {
 			gui.DrawSprite(screen, o, imageVariables)
 		}
 	}
 }
+
 func (g *Game) Draw(screen *ebiten.Image) {
 	time.Sleep(100 * time.Millisecond)
 	g.drawEnvironment(screen)
@@ -56,8 +57,9 @@ func (g *Game) ListenToSimu() {
 	for {
 		e = <-g.c
 		g.Lock()
-		g.objs = make([]pkg.Object, 10000)
-		copy(g.objs, e.Objects())
+		g.elements = make([]pkg.Object, len(e.Objects())+len(e.Agents()))
+		mergedSlice := append(e.Objects(), e.Agents()...)
+		copy(g.elements, mergedSlice)
 	}
 }
 

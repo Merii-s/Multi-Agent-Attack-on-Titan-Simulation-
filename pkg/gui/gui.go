@@ -33,7 +33,6 @@ func Load_Sprites() ([]error, map[string]**ebiten.Image) {
 	}
 
 	return errs, imageVariables
-
 }
 
 func DrawSprite(screen *ebiten.Image, o pkg.Object, imageVariables map[string]**ebiten.Image) {

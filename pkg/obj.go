@@ -67,7 +67,6 @@ const (
 
 	WSoldierF = 20
 	HSoldierF = 22
-	//Il faut  ajouter les durrees de vie des objets
 )
 
 type Object struct {
@@ -123,6 +122,7 @@ func NewField(tl Position, life int, reserve int) *FieldObject {
 func (f *Object) hitbox() []Position {
 	var w, h int
 	switch f.name {
+
 	case Wall:
 		h = CWall
 		w = CWall
@@ -153,6 +153,36 @@ func (f *Object) hitbox() []Position {
 	case FemaleVillager:
 		h = HFemaleVillager
 		w = WFemaleVillager
+	case BasicTitan1:
+		h = HBasicTitanF
+		w = WBasicTitanF
+	case BasicTitan2:
+		h = HBasicTitanM
+		w = WBasicTitanM
+	case ArmoredTitan:
+		h = HArmoredTitan
+		w = WArmoredTitan
+	case BeastTitan:
+		h = HBeastTitan
+		w = WBeastTitan
+	case ColossalTitan:
+		h = HColossalTitan
+		w = WColossalTitan
+	case ErenTitanS:
+		h = HErenTitan
+		w = WErenTitan
+	case FemaleTitan:
+		h = HFemaleTitan
+		w = WFemaleTitan
+	case JawTitan:
+		h = HJawTitan
+		w = WJawTitan
+	case FemaleSoldier:
+		h = HSoldierF
+		w = WSoldierF
+	case MaleSoldier:
+		h = HSoldierM
+		w = WSoldierM
 	default:
 		h = HField
 		w = WField
@@ -161,5 +191,6 @@ func (f *Object) hitbox() []Position {
 	hb := make([]Position, 2)
 	hb[0] = f.TL()
 	hb[1] = Position{X: f.tl.X + w, Y: f.tl.Y + h}
+
 	return hb
 }
