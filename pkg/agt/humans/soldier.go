@@ -180,10 +180,9 @@ func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
 func (sb *SoldierBehavior) Deliberate() {
 	// Initialize variables for counting titans
 	numTitans := 0
-	var firstTitanPos pkg.Position
 	var agentToAttack pkg.AgentI
 
-	// Count the number of titans and store the position of the first titan
+	// Count the number of titans and store the position of the titan to attack
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
 		// if the agent is a special titan, the soldier moves away in the opposite direction
 		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" {
@@ -193,7 +192,6 @@ func (sb *SoldierBehavior) Deliberate() {
 		if agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
 			numTitans++
 			if numTitans == 1 {
-				firstTitanPos = agt.Pos()
 				agentToAttack = agt
 			}
 		}
@@ -202,9 +200,9 @@ func (sb *SoldierBehavior) Deliberate() {
 	if numTitans < 2 {
 		sb.s.attributes.agentAttributes.SetAgentToAttack(agentToAttack)
 		sb.s.attributes.agentAttributes.SetAttack(true)
-		sb.s.attributes.agentAttributes.SetNextPos(firstTitanPos)
+		sb.s.attributes.agentAttributes.SetNextPos(agentToAttack.Pos())
 	} else {
-		sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), firstTitanPos))
+		sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agentToAttack.Pos()))
 	}
 }
 

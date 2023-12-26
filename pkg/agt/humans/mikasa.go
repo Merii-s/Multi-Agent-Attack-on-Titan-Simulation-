@@ -113,14 +113,14 @@ func (m *Mikasa) attack_success(spd_atk int, reachAtk int, spd_def int) float64 
 	}
 }
 
-func (m *Mikasa) Attack(agt pkg.Agent) {
+func (m *Mikasa) Attack(agt pkg.AgentI) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < m.attack_success(m.attributes.agentAttributes.Speed(), m.attributes.agentAttributes.Reach(), agt.Speed()) {
+	if rand.Float64() < m.attack_success(m.attributes.agentAttributes.Speed(), m.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.SetHp(agt.Hp() - m.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %m : %m lost  %d HP \n", m.Id(), agt.Id(), agt.Hp())
+		agt.Agent().SetHp(agt.Agent().Hp() - m.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %m : %m lost  %d HP \n", m.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
