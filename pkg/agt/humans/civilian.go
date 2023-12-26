@@ -71,6 +71,10 @@ func (c *Civilian) Id() pkg.Id {
 	return c.attributes.agentAttributes.Id()
 }
 
+func (c *Civilian) Agent() *pkg.Agent {
+	return &c.attributes.agentAttributes
+}
+
 func (c *Civilian) Start(e *pkg.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {

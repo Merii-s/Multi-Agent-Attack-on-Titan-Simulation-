@@ -7,6 +7,8 @@ type Agent struct {
 	speed            int
 	maxHP            int
 	vision           int
+	attack           bool
+	nextPosition     Position
 	perceivedObjects []Object
 	perceivedAgents  []AgentI
 	cantSeeBehind    []ObjectName
@@ -20,6 +22,8 @@ func NewAgent(id Id, tl Position, life int, reach int, strength int, speed int, 
 		strength:         strength,
 		speed:            speed,
 		vision:           vision,
+		attack:           false,
+		nextPosition:     tl,
 		perceivedObjects: []Object{},
 		perceivedAgents:  []AgentI{},
 		cantSeeBehind:    []ObjectName{},

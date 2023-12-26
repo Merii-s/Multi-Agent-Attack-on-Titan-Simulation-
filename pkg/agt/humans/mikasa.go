@@ -69,6 +69,10 @@ func (m *Mikasa) Id() pkg.Id {
 	return m.attributes.agentAttributes.Id()
 }
 
+func (m *Mikasa) Agent() *pkg.Agent {
+	return &m.attributes.agentAttributes
+}
+
 func (m *Mikasa) Start(e *pkg.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {

@@ -69,6 +69,10 @@ func (eren *Eren) Id() pkg.Id {
 	return eren.attributes.agentAttributes.Id()
 }
 
+func (eren *Eren) Agent() *pkg.Agent {
+	return &eren.attributes.agentAttributes
+}
+
 func (eren *Eren) Start(e *pkg.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {

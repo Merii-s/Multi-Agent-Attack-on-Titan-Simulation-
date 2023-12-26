@@ -18,7 +18,6 @@ type Soldier struct {
 	syncChan   chan string
 	mu         sync.Mutex
 	bahavior   pkg.BehaviorI
-	attack     bool
 }
 
 func NewSoldier(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Soldier {
@@ -121,10 +120,10 @@ func (s *Soldier) Attack(agt pkg.AgentI) {
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		// If the percentage is less than the success rate, the attack is successful
-		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Speed()) {
+		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
 			// If the attack is successful, the agent loses HP
-			agt.SetHp(agt.Hp() - s.attributes.agentAttributes.Strength())
-			fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Hp())
+			agt.Agent().SetHp(agt.Agent().Hp() - s.attributes.agentAttributes.Strength())
+			fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Agent().Hp())
 		} else {
 			fmt.Println("Attack unsuccessful.")
 			// If the attack is unsuccessful, nothing happens
@@ -195,19 +194,19 @@ func (sb *SoldierBehavior) Deliberate() {
 			numTitans++
 			if numTitans == 1 {
 				firstTitanPos = agt.Pos()
-				AgentToAttack = agt.
+				AgentToAttack := agt
 			}
 		}
 	}
 	// Decide action based on the number of titans
 	if numTitans < 2 {
-		sb.s.attack(AgentToAttack.Agent())
+		sb.s.Attack(AgentToAttack.Agent())
 	} else {
 		// TO DO: Move away
 	}
 }
 
-func (sb *SoldierBehavior) Act(e *pkg.Environment, pos pkg.Position, attack bool, agtId pkg.Id) {
+func (sb *SoldierBehavior) Act(e *pkg.Environment) {
 	// Perform the action based on the parameters
 	if attack {
 		sb.s.attributes.agentAttributes.SetPos(pos)
@@ -216,11 +215,4 @@ func (sb *SoldierBehavior) Act(e *pkg.Environment, pos pkg.Position, attack bool
 		// Move towards the specified position
 		sb.s.move(pos)
 	}
-}
-
-
-// Calculate the opposite direction of a position
-// A mettre dans utilitaries
-func OppositeDirection(currentPos, targetPos pkg.Position) pkg.Position {
-	return pkg.Position{X: 2*currentPos.X - targetPos.X, Y: 2*currentPos.Y - targetPos.Y}
 }
