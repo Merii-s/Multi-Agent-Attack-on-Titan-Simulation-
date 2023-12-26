@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"AOT/pkg"
 	"sync"
 )
 
@@ -33,13 +32,13 @@ type AgentI interface {
 	Eat()
 	Sleep()
 	AttackSuccess(spdAtk int, spdDef int) float64
-	Attack(pkg.AgentI)
+	Attack(AgentI)
 
 	Pos() Position
 	Vision() int
 	PerceivedObjects() []Object
 	PerceivedAgents() []AgentI
-	Object() *Object
+	Object() Object
 	Agent() *Agent
 }
 
