@@ -2,12 +2,10 @@ package pkg
 
 import (
 	"container/heap"
-	"log"
 	"math"
 	"math/rand"
 	"os"
 	"reflect"
-	"runtime"
 	"time"
 )
 
@@ -32,8 +30,8 @@ func GetImagePath(imgName string) string {
 // DetectCollision checks if there is a collision between two objects using AABB collision detection
 func DetectCollision(obj1, obj2 Object) bool {
 
-	obj1TopLeft, obj1BottomRight := obj1.hitbox()[0], obj1.hitbox()[1]
-	obj2TopLeft, obj2BottomRight := obj2.hitbox()[0], obj2.hitbox()[1]
+	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
+	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
 
 	// Check for collision on the X-axis
 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
@@ -289,19 +287,19 @@ func (p Position) Equals(other Position) bool {
 	return p.X == other.X && p.Y == other.Y
 }
 
-func removeObjectsBehindPositions(perceptedObjects []Object, objectsBehindPositions []Position) []Object {
+func removeObjectsBehindPositions(perceivedObjects []Object, objectsBehindPositions []Position) []Object {
 	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
 	objectsToRemove := []Object{}
-	for _, object := range perceptedObjects {
-		if contains(objectsBehindPositions, object.Center()) {
+	for _, object := range perceivedObjects {
+		if contains(objectsBehindPositions, object.Center()) || object.Name() == Grass {
 			objectsToRemove = append(objectsToRemove, object)
 		}
 	}
 
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
-	perceptedObjects = removeObjects(perceptedObjects, objectsToRemove)
+	// Remove the objects in the objectsToRemove list from the perceivedObjects list
+	perceivedObjects = removeObjects(perceivedObjects, objectsToRemove)
 
-	return perceptedObjects
+	return perceivedObjects
 }
 
 // generalize removeObjectsBehindPositions with any type
@@ -315,23 +313,23 @@ func removeAgentsBehindPositions(perceptedAgents []AgentI, objectsBehindPosition
 		}
 	}
 
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+	// Remove the objects in the objectsToRemove list from the perceivedObjects list
 	perceptedAgents = removeAgents(perceptedAgents, objectsToRemove)
 
 	return perceptedAgents
 }
 
-func removeObjects(perceptedObjects []Object, objectsToRemove []Object) []Object {
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+func removeObjects(perceivedObjects []Object, objectsToRemove []Object) []Object {
+	// Remove the objects in the objectsToRemove list from the perceivedObjects list
 	for _, object := range objectsToRemove {
-		for i, perceptedObject := range perceptedObjects {
+		for i, perceptedObject := range perceivedObjects {
 			if perceptedObject == object {
-				perceptedObjects = append(perceptedObjects[:i], perceptedObjects[i+1:]...)
+				perceivedObjects = append(perceivedObjects[:i], perceivedObjects[i+1:]...)
 			}
 		}
 	}
 
-	return perceptedObjects
+	return perceivedObjects
 }
 
 func removeAgents(perceptedAgents []AgentI, objectsToRemove []AgentI) []AgentI {
