@@ -30,12 +30,141 @@ func GetImagePath(imgName string) string {
 // DetectCollision checks if there is a collision between two objects using AABB collision detection
 func DetectCollision(obj1, obj2 Object) bool {
 
-	obj1TopLeft, obj1BottomRight := obj1.hitbox()[0], obj1.hitbox()[1]
-	obj2TopLeft, obj2BottomRight := obj2.hitbox()[0], obj2.hitbox()[1]
+	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
+	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
 
 	// Check for collision on the X-axis
 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
 		return false // No collision on X-axis
+	}
+
+	// Filter out positions to avoid
+	filteredNeighbors := []Position{}
+	for _, neighbor := range neighbors {
+		if !contains(toAvoid, neighbor) {
+			filteredNeighbors = append(filteredNeighbors, neighbor)
+		}
+	}
+
+	return filteredNeighbors
+}
+
+// A modifier quand les constructeurs seront pret
+func PlaceHuman(objs []Object, humans []Object, human *Object, tl_village Position, br_village Position) []Object {
+	end := false
+	for !end {
+		counter := 0
+		nb_grass := 0
+		for _, obj := range objs {
+			if obj.name != Grass {
+				if DetectCollision(*human, obj) {
+					x, y := GetRandomCoords(tl_village, br_village)
+					human.SetPosition(Position{x, y})
+					break
+				} else {
+					counter++
+				}
+			} else {
+				nb_grass++
+			}
+		}
+
+		for _, hu := range humans {
+			if DetectCollision(*human, hu) {
+				x, y := GetRandomCoords(tl_village, br_village)
+				human.SetPosition(Position{x, y})
+				break
+			} else {
+				counter++
+			}
+		}
+
+		if counter == len(objs)+len(humans)-nb_grass {
+			end = true
+		}
+	}
+
+	humans = append(humans, *human)
+	return humans
+}
+
+func PlaceTitan(titan *Object, titans []Object, W int, H int, dir int) []Object {
+	tl_screen := Position{X: 0, Y: 0}
+	br_screen := Position{X: W, Y: H}
+	counter := 0
+	end := false
+	for !end {
+		for _, ti := range titans {
+			if DetectCollision(*titan, ti) {
+				x, y := GetRandomCoords(tl_screen, br_screen)
+				if dir == 0 {
+					y = y - H
+				} else if dir == 1 {
+					x = x - W
+				} else {
+					x = x + W
+				}
+				titan.SetPosition(Position{x, y})
+				break
+			} else {
+				counter++
+			}
+		}
+
+		if counter == len(titans) {
+			end = true
+		}
+	}
+
+	titans = append(titans, *titan)
+	return titans
+}
+
+// define a function that takes a position in argument and an agent position
+// and returns the shortest path to reach the position from the agent position
+
+type Node struct {
+	position Position
+	parent   *Node
+	g        int
+	h        int
+	f        int
+}
+
+type NodeHeap []*Node
+
+func (h NodeHeap) Len() int           { return len(h) }
+func (h NodeHeap) Less(i, j int) bool { return h[i].f < h[j].f }
+func (h NodeHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *NodeHeap) Push(x interface{}) {
+	*h = append(*h, x.(*Node))
+}
+
+func (h *NodeHeap) Pop() interface{} {
+	old := *h
+	n := len(old)
+	node := old[n-1]
+	*h = old[0 : n-1]
+	return node
+}
+
+func calculateHeuristic(start Position, target Position) int {
+	dx := abs(target.X - start.X)
+	dy := abs(target.Y - start.Y)
+	return dx + dy + min(dx, dy)
+}
+
+func getNeighbors(position Position, toAvoid []Position) []Position {
+	neighbors := []Position{
+		{position.X, position.Y - 1},     // above
+		{position.X, position.Y + 1},     // below
+		{position.X - 1, position.Y},     // left
+		{position.X + 1, position.Y},     // right
+		{position.X - 1, position.Y - 1}, // top left
+		{position.X + 1, position.Y - 1}, // top right
+		{position.X - 1, position.Y + 1}, // bottom left
+		{position.X + 1, position.Y + 1}, // bottom right
 	}
 
 	// Filter out positions to avoid
@@ -161,19 +290,19 @@ func (p Position) Equals(other Position) bool {
 	return p.X == other.X && p.Y == other.Y
 }
 
-func removeObjectsBehindPositions(perceptedObjects []Object, objectsBehindPositions []Position) []Object {
+func removeObjectsBehindPositions(perceivedObjects []Object, objectsBehindPositions []Position) []Object {
 	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
 	objectsToRemove := []Object{}
-	for _, object := range perceptedObjects {
-		if contains(objectsBehindPositions, object.Center()) {
+	for _, object := range perceivedObjects {
+		if contains(objectsBehindPositions, object.Center()) || object.Name() == Grass {
 			objectsToRemove = append(objectsToRemove, object)
 		}
 	}
 
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
-	perceptedObjects = removeObjects(perceptedObjects, objectsToRemove)
+	// Remove the objects in the objectsToRemove list from the perceivedObjects list
+	perceivedObjects = removeObjects(perceivedObjects, objectsToRemove)
 
-	return perceptedObjects
+	return perceivedObjects
 }
 
 // generalize removeObjectsBehindPositions with any type
@@ -187,23 +316,23 @@ func removeAgentsBehindPositions(perceptedAgents []AgentI, objectsBehindPosition
 		}
 	}
 
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+	// Remove the objects in the objectsToRemove list from the perceivedObjects list
 	perceptedAgents = removeAgents(perceptedAgents, objectsToRemove)
 
 	return perceptedAgents
 }
 
-func removeObjects(perceptedObjects []Object, objectsToRemove []Object) []Object {
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
+func removeObjects(perceivedObjects []Object, objectsToRemove []Object) []Object {
+	// Remove the objects in the objectsToRemove list from the perceivedObjects list
 	for _, object := range objectsToRemove {
-		for i, perceptedObject := range perceptedObjects {
+		for i, perceptedObject := range perceivedObjects {
 			if perceptedObject == object {
-				perceptedObjects = append(perceptedObjects[:i], perceptedObjects[i+1:]...)
+				perceivedObjects = append(perceivedObjects[:i], perceivedObjects[i+1:]...)
 			}
 		}
 	}
 
-	return perceptedObjects
+	return perceivedObjects
 }
 
 func removeAgents(perceptedAgents []AgentI, objectsToRemove []AgentI) []AgentI {
