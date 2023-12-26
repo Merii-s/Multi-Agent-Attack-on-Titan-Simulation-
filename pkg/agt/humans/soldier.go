@@ -14,42 +14,42 @@ type Soldier struct {
 	attributes Human
 }
 
-func (*Soldier) Percept(*pkg.Environment) {
+func (Soldier) Percept(*pkg.Environment) {
 
 }
 
-func (*Soldier) Deliberate() {
+func (Soldier) Deliberate() {
 
 }
 
-func (*Soldier) Act(*pkg.Environment) {
+func (Soldier) Act(*pkg.Environment) {
 
 }
 
-func (*Soldier) Start() {
+func (Soldier) Start() {
 
 }
 
-func (*Soldier) Id() {
+func (Soldier) Id() {
 
 }
 
-func (*Soldier) move() {
+func (Soldier) move() {
 
 }
 
-func (*Soldier) eat() {
+func (Soldier) eat() {
 
 }
 
-func (*Soldier) sleep() {
+func (Soldier) sleep() {
 
 }
 
-func (*Soldier) Gard() {
+func (Soldier) Gard() {
 
 }
 
-func (*Soldier) Attack() {
+func (Soldier) Attack() {
 
 }
