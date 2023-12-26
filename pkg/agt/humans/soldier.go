@@ -119,6 +119,7 @@ func (s *Soldier) Attack(agt pkg.AgentI) {
 	if agt.Id() != s.attributes.agentAttributes.Id() {
 		s.mu.Lock()
 		defer s.mu.Unlock()
+		// TO DO: consider the reach of the agent
 		// If the percentage is less than the success rate, the attack is successful
 		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
 			// If the attack is successful, the agent loses HP
@@ -182,13 +183,12 @@ func (sb *SoldierBehavior) Deliberate() {
 	var firstTitanPos pkg.Position
 	var agentToAttack pkg.AgentI
 
-	// TO DO: randomize the choice
-
 	// Count the number of titans and store the position of the first titan
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
 		// if the agent is a special titan, the soldier moves away in the opposite direction
 		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" {
 			sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agt.Pos()))
+			break
 		}
 		if agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
 			numTitans++
@@ -211,13 +211,13 @@ func (sb *SoldierBehavior) Deliberate() {
 func (sb *SoldierBehavior) Act(e *pkg.Environment) {
 	// Perform the action based on the parameters
 	if sb.s.attributes.agentAttributes.Attack() {
-		sb.s.attributes.agentAttributes.SetPos(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.move(sb.s.attributes.agentAttributes.NextPos())
 		sb.s.Attack(sb.s.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		sb.s.attributes.agentAttributes.SetAttack(false)
 		sb.s.attributes.agentAttributes.SetAgentToAttack(nil)
 	} else {
 		// Move towards the specified position
-		sb.s.attributes.agentAttributes.SetPos(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.move(sb.s.attributes.agentAttributes.NextPos())
 	}
 }

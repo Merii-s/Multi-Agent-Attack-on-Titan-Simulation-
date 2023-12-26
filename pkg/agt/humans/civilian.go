@@ -3,6 +3,7 @@ package agt
 import (
 	pkg "AOT/pkg"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -155,9 +156,27 @@ func (cb *CivilianBehavior) Percept(e *pkg.Environment) {
 }
 
 func (cb *CivilianBehavior) Deliberate() {
+	titanFound := false
 
+	for _, agt := range cb.c.attributes.agentAttributes.PerceivedAgents() {
+		// if the agent is a titan, the civilian escapes
+		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" || agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
+			cb.c.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(cb.c.attributes.agentAttributes.Pos(), agt.Pos()))
+			titanFound = true
+			break
+		}
+	}
+	if !titanFound {
+		// Move randomly
+		var randPos pkg.Position
+		randPos.X = cb.c.attributes.agentAttributes.Pos().X + rand.Intn(10)
+		randPos.Y = cb.c.attributes.agentAttributes.Pos().Y + rand.Intn(10)
+
+		cb.c.attributes.agentAttributes.SetNextPos(randPos)
+	}
 }
 
 func (cb *CivilianBehavior) Act(e *pkg.Environment) {
-
+	// Move to the next position
+	cb.c.move(cb.c.attributes.agentAttributes.NextPos())
 }
