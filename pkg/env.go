@@ -160,7 +160,6 @@ func createHumans(objs []Object, tl_village Position, br_village Position) []Obj
 		}
 
 	}
-
 	return humans
 }
 
