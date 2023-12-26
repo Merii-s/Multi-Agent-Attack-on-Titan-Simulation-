@@ -112,41 +112,54 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 	}
 }
 
-func createHumans(objs []Object, tl_village Position, br_village Position) []Object {
+func createHuman(humans []Object, objs []Object, tl_village Position, br_village Position, objectType ObjectName, life int) []Object {
 	var human *Object
+	var w, h int
 
-	//A modifier quand le construteur d'humain sera pret
+	switch objectType {
+	case MaleVillager:
+		w, h = WMaleVillager, HMaleVillager
+	case FemaleVillager:
+		w, h = WFemaleVillager, HFemaleVillager
+	case MaleSoldier:
+		w, h = WSoldierM, HSoldierM
+	case FemaleSoldier:
+		w, h = WSoldierF, HSoldierF
+	case Eren:
+		w, h = WEren, HEren
+	case Mikasa:
+		w, h = WMikasa, HMikasa
+	}
+
+	x, y := GetRandomCoords(tl_village, Position{X: br_village.X - w, Y: br_village.Y - h})
+	human = NewObject(objectType, Position{x, y}, life)
+	humans = PlaceHuman(objs, humans, human, tl_village, Position{X: br_village.X - w, Y: br_village.Y - h})
+	return humans
+}
+
+func createHumans(objs []Object, tl_village Position, br_village Position) []Object {
 	humans := make([]Object, 0)
 
 	for i := 0; i < NB_HUMANS; i++ {
-		x, y := GetRandomCoords(tl_village, br_village)
 		if i < NB_VILLAGERS {
 			if i < NB_VILLAGERS/2 {
-				//A modifier quand le construteur d'humain sera pret
-				human = NewObject(MaleVillager, Position{x, y}, VILLAGER_LIFE)
+				humans = createHuman(humans, objs, tl_village, br_village, MaleVillager, VILLAGER_LIFE)
 			} else {
-				//A modifier quand le construteur d'humain sera pret
-				human = NewObject(FemaleVillager, Position{x, y}, VILLAGER_LIFE)
+				humans = createHuman(humans, objs, tl_village, br_village, FemaleVillager, VILLAGER_LIFE)
 			}
 		} else if i < NB_VILLAGERS+NB_SOLDIERS {
 			if i < NB_VILLAGERS+NB_SOLDIERS/2 {
-				//A modifier quand le construteur d'humain sera pret
-				human = NewObject(MaleSoldier, Position{x, y}, SOLDIER_LIFE)
+				humans = createHuman(humans, objs, tl_village, br_village, MaleSoldier, SOLDIER_LIFE)
 			} else {
-				//A modifier quand le construteur d'humain sera pret
-				human = NewObject(FemaleSoldier, Position{x, y}, SOLDIER_LIFE)
+				humans = createHuman(humans, objs, tl_village, br_village, FemaleSoldier, SOLDIER_LIFE)
 			}
 		} else if i < NB_VILLAGERS+NB_SOLDIERS+1 {
-			//A modifier quand le construteur d'humain sera pret
-			human = NewObject(Eren, Position{X: x, Y: y}, EREN_LIFE)
+			humans = createHuman(humans, objs, tl_village, br_village, Eren, EREN_LIFE)
 		} else {
-			//A modifier quand le construteur d'humain sera pret
-			human = NewObject(Mikasa, Position{X: x, Y: y}, MIKASA_LIFE)
+			humans = createHuman(humans, objs, tl_village, br_village, Mikasa, MIKASA_LIFE)
 		}
-
-		//Place l'humain dans des coordonnees aleatoires valides (i.e sans collisions) dans le village
-		humans = PlaceHuman(objs, humans, human, tl_village, br_village)
 	}
+
 	return humans
 }
 
@@ -164,13 +177,13 @@ func createTitans(H int, W int) []Object {
 		x, y := GetRandomCoords(tl_screen, br_screen)
 
 		if dir == 0 {
-			y = y - H
+			y = y - H - 100
 			dir = 1
 		} else if dir == 1 {
-			x = x - W
+			x = x - W - 50
 			dir = 2
 		} else {
-			x = x + W
+			x = x + W + 50
 			dir = 0
 		}
 
@@ -207,7 +220,7 @@ func createTitans(H int, W int) []Object {
 
 func NewEnvironement(H int, W int) *Environment {
 	objects := createStaticObjects(H, W)
-	humans := createHumans(objects, Position{X: int(0.2*float32(W)) + CWall, Y: int(0.2*float32(H)) + CWall}, Position{X: int(0.8 * float32(W)), Y: 700 - HMaleVillager})
+	humans := createHumans(objects, Position{X: int(0.2*float32(W)) + CWall, Y: int(0.2*float32(H)) + CWall}, Position{X: int(0.8 * float32(W)), Y: H})
 	titans := createTitans(H, W)
 	// for _, titan := range titans {
 	// 	fmt.Println(titan)
