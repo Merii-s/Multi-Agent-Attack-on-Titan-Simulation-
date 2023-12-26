@@ -449,6 +449,13 @@ func getObjectsBehindPositions(position Position, angle float64, topLeftVision P
 
 // Calculate the opposite direction of a position
 func OppositeDirection(currentPos, targetPos Position) Position {
-	// TO DO: Check if the position is valid
-	return Position{X: 2*currentPos.X - targetPos.X, Y: 2*currentPos.Y - targetPos.Y}
+	// Check if the position is valid
+	xToGo := 2*currentPos.X - targetPos.X
+	yToGo := 2*currentPos.Y - targetPos.Y
+	if xToGo < 0 || yToGo < 0 {
+		return currentPos
+	}
+	// TO DO: Add more checks if needed
+
+	return Position{X: xToGo, Y: yToGo}
 }

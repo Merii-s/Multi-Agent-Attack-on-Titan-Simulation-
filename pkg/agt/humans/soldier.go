@@ -163,7 +163,7 @@ func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
 
 	// Add the percepted agents to the list of percepted agents
 	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %s\n", obj.Name())
+		fmt.Printf("Percepted object: %s\n", obj.GetName())
 		sb.s.attributes.agentAttributes.AddPerceivedObject(obj)
 	}
 
@@ -180,39 +180,44 @@ func (sb *SoldierBehavior) Deliberate() {
 	// Initialize variables for counting titans
 	numTitans := 0
 	var firstTitanPos pkg.Position
-	idAgentToAttack := sb.s.Id()
+	var agentToAttack pkg.AgentI
 
 	// TO DO: randomize the choice
 
 	// Count the number of titans and store the position of the first titan
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
 		// if the agent is a special titan, the soldier moves away in the opposite direction
-		if agt.Object().Name() == "BeastTitan" || agt.Object().Name() == "ColossalTitan" || agt.Object().Name() == "ArmoredTitan" || agt.Object().Name() == "FemaleTitan" || agt.Object().Name() == "JawTitan" {
-			// TO DO: Move away from the titan
+		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" {
+			sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agt.Pos()))
 		}
-		if agt.Object().Name() == "BasicTitan1" || agt.Object().Name() == "BasicTitan2" {
+		if agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
 			numTitans++
 			if numTitans == 1 {
 				firstTitanPos = agt.Pos()
-				AgentToAttack := agt
+				agentToAttack = agt
 			}
 		}
 	}
 	// Decide action based on the number of titans
 	if numTitans < 2 {
-		sb.s.Attack(AgentToAttack.Agent())
+		sb.s.attributes.agentAttributes.SetAgentToAttack(agentToAttack)
+		sb.s.attributes.agentAttributes.SetAttack(true)
+		sb.s.attributes.agentAttributes.SetNextPos(firstTitanPos)
 	} else {
-		// TO DO: Move away
+		sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), firstTitanPos))
 	}
 }
 
 func (sb *SoldierBehavior) Act(e *pkg.Environment) {
 	// Perform the action based on the parameters
-	if attack {
-		sb.s.attributes.agentAttributes.SetPos(pos)
-		sb.s.attack(e.GetAgent(agtId))
+	if sb.s.attributes.agentAttributes.Attack() {
+		sb.s.attributes.agentAttributes.SetPos(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.Attack(sb.s.attributes.agentAttributes.AgentToAttack())
+		// Reset the parameters
+		sb.s.attributes.agentAttributes.SetAttack(false)
+		sb.s.attributes.agentAttributes.SetAgentToAttack(nil)
 	} else {
 		// Move towards the specified position
-		sb.s.move(pos)
+		sb.s.attributes.agentAttributes.SetPos(sb.s.attributes.agentAttributes.NextPos())
 	}
 }
