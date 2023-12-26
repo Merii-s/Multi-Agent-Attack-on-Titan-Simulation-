@@ -158,6 +158,7 @@ func createHumans(objs []Object, tl_village Position, br_village Position) []Obj
 		} else {
 			humans = createHuman(humans, objs, tl_village, br_village, Mikasa, MIKASA_LIFE)
 		}
+
 	}
 
 	return humans
