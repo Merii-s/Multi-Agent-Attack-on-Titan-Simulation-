@@ -228,6 +228,8 @@ func (eb *ErenBehavior) Act(e *pkg.Environment) {
 		// Reset the parameters
 		eb.eren.attributes.agentAttributes.SetAttack(false)
 		eb.eren.attributes.agentAttributes.SetAgentToAttack(nil)
+		eb.eren.transform = false
+		//TO DO: Eren transforms back to human
 	} else {
 		// Move towards the specified position
 		eb.eren.move(eb.eren.attributes.agentAttributes.NextPos())
