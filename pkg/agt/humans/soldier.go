@@ -18,6 +18,7 @@ type Soldier struct {
 	syncChan   chan string
 	mu         sync.Mutex
 	bahavior   pkg.BehaviorI
+	attack     bool
 }
 
 func NewSoldier(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Soldier {
@@ -69,6 +70,10 @@ func (s *Soldier) Id() pkg.Id {
 	return s.attributes.agentAttributes.Id()
 }
 
+func (s *Soldier) Agent() *pkg.Agent {
+	return &s.attributes.agentAttributes
+}
+
 func (s *Soldier) Start(e *pkg.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
@@ -111,17 +116,19 @@ func (*Soldier) attack_success(spd_atk int, reach_atk int, spd_def int) float64 
 	}
 }
 
-func (s *Soldier) attack(agt pkg.Agent) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Speed()) {
-		// If the attack is successful, the agent loses HP
-		agt.SetHp(agt.Hp() - s.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Hp())
-	} else {
-		fmt.Println("Attack unsuccessful.")
-		// If the attack is unsuccessful, nothing happens
+func (s *Soldier) Attack(agt pkg.AgentI) {
+	if agt.Id() != s.attributes.agentAttributes.Id() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		// If the percentage is less than the success rate, the attack is successful
+		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Speed()) {
+			// If the attack is successful, the agent loses HP
+			agt.SetHp(agt.Hp() - s.attributes.agentAttributes.Strength())
+			fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Hp())
+		} else {
+			fmt.Println("Attack unsuccessful.")
+			// If the attack is unsuccessful, nothing happens
+		}
 	}
 }
 
@@ -170,40 +177,50 @@ func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func (sb *SoldierBehavior) Deliberate(objects *[]pkg.Object, agents []pkg.AgentI) (pkg.Position, bool) {
+func (sb *SoldierBehavior) Deliberate() {
 	// Initialize variables for counting titans
 	numTitans := 0
 	var firstTitanPos pkg.Position
+	idAgentToAttack := sb.s.Id()
 
 	// TO DO: randomize the choice
 
 	// Count the number of titans and store the position of the first titan
-	for _, agt := range agents {
+	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
 		// if the agent is a special titan, the soldier moves away in the opposite direction
 		if agt.Object().Name() == "BeastTitan" || agt.Object().Name() == "ColossalTitan" || agt.Object().Name() == "ArmoredTitan" || agt.Object().Name() == "FemaleTitan" || agt.Object().Name() == "JawTitan" {
-			return oppositeDirection(sb.s.attributes.agentAttributes.Pos(), agt.Pos()), false
+			// TO DO: Move away from the titan
 		}
 		if agt.Object().Name() == "BasicTitan1" || agt.Object().Name() == "BasicTitan2" {
 			numTitans++
 			if numTitans == 1 {
 				firstTitanPos = agt.Pos()
+				AgentToAttack = agt.
 			}
 		}
 	}
 	// Decide action based on the number of titans
 	if numTitans < 2 {
-		// Attack the first titan if there are fewer than two titans
-		return firstTitanPos, true
+		sb.s.attack(AgentToAttack.Agent())
 	} else {
-		return oppositeDirection(sb.s.attributes.agentAttributes.Pos(), firstTitanPos), false
+		// TO DO: Move away
 	}
 }
 
-func (sb *SoldierBehavior) Act(e *pkg.Environment) {
-
+func (sb *SoldierBehavior) Act(e *pkg.Environment, pos pkg.Position, attack bool, agtId pkg.Id) {
+	// Perform the action based on the parameters
+	if attack {
+		sb.s.attributes.agentAttributes.SetPos(pos)
+		sb.s.attack(e.GetAgent(agtId))
+	} else {
+		// Move towards the specified position
+		sb.s.move(pos)
+	}
 }
 
+
 // Calculate the opposite direction of a position
-func oppositeDirection(currentPos, targetPos pkg.Position) pkg.Position {
+// A mettre dans utilitaries
+func OppositeDirection(currentPos, targetPos pkg.Position) pkg.Position {
 	return pkg.Position{X: 2*currentPos.X - targetPos.X, Y: 2*currentPos.Y - targetPos.Y}
 }

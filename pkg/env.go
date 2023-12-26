@@ -253,3 +253,13 @@ func (e *Environment) PerceivedAgents(topLeft Position, bottomRight Position, ag
 func (e *Environment) Add(a AgentI) {
 	e.agents = append(e.agents, a)
 }
+
+// function that gets the Agent with the specified selected id
+// func (e *pkg.Environment) GetAgent(id pkg.Id) pkg.Agent {
+// 	// For example, if you have a map of agents in the environment:
+// 	agent, exists := e.agents[id]
+// 	if !exists {
+// 		fmt.Println("Agent not found in the environment")
+// 	}
+// 	return agent
+// }
