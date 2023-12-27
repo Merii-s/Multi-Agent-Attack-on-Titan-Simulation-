@@ -10,14 +10,9 @@ type HumanI interface {
 }
 
 type Human struct {
-	Id       pkg.Id
-	Pos      pkg.Position
-	Hp       int
-	Reach    int
-	Strength int
-	Speed    int
+	agentAttributes pkg.Agent
 }
 
-func NewHuman(id pkg.Id, p pkg.Position, hp int, r int, s int, spd int) *Human {
-	return &Human{Id: id, Pos: p, Hp: hp, Reach: r, Strength: s, Speed: spd}
+func NewHuman(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, object pkg.ObjectName) *Human {
+	return &Human{agentAttributes: *pkg.NewAgent(id, tl, life, reach, strength, speed, vision, object)}
 }

@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"AOT/pkg"
 	"sync"
 )
 
@@ -25,14 +26,21 @@ type AgentI interface {
 	Percept(*Environment)
 	Deliberate()
 	Act(*Environment)
-	Start()
-	Id()
+	Start(*Environment)
+	Id() Id
 
-	move(Position)
-	eat()
-	sleep()
-	attack_success(spd_atk int, reach_atk int, spd_def int) float64
-	Pos()
+	Move(pos Position)
+	Eat()
+	Sleep()
+	AttackSuccess(spdAtk int, spdDef int) float64
+	Attack(pkg.AgentI)
+
+	Pos() Position
+	Vision() int
+	PerceivedObjects() []Object
+	PerceivedAgents() []AgentI
+	Object() Object
+	Agent() *Agent
 }
 
 type Id string
@@ -41,16 +49,6 @@ type Position struct {
 	X int
 	Y int
 }
-
-type Type string
-
-const (
-	Civilian     Type = "Civilian"
-	Soldier      Type = "Soldier"
-	Titan        Type = "Titan"
-	SpecialTitan Type = "SpecialTitan"
-	ErenTitan    Type = "ErenTitan"
-)
 
 type ObjectName string
 

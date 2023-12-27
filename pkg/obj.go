@@ -1,7 +1,6 @@
 package pkg
 
 const (
-
 	//Screen Dimensions
 	Height = 700
 	Width  = 1000
@@ -99,6 +98,10 @@ func (o *Object) Name() ObjectName {
 	return o.name
 }
 
+func (o Object) GetName() ObjectName {
+	return o.name
+}
+
 func (o *Object) TL() Position {
 	return o.tl
 }
@@ -119,7 +122,7 @@ func NewField(tl Position, life int, reserve int) *FieldObject {
 	}
 }
 
-func (f *Object) hitbox() []Position {
+func (f *Object) Hitbox() (hb []Position) {
 	var w, h int
 	switch f.name {
 
@@ -187,10 +190,49 @@ func (f *Object) hitbox() []Position {
 		h = HField
 		w = WField
 	}
-
-	hb := make([]Position, 2)
-	hb[0] = f.TL()
-	hb[1] = Position{X: f.tl.X + w, Y: f.tl.Y + h}
-
+	hb = make([]Position, 0)
+	hb = append(hb, f.TL())
+	hb = append(hb, Position{X: f.tl.X + w, Y: f.tl.Y + h})
 	return hb
+}
+
+// return the center position of the object
+func (o *Object) Center() Position {
+	var w, h int
+	switch o.name {
+	case Wall:
+		h = CWall
+		w = CWall
+	case Grass:
+		h = CGrass
+		w = CGrass
+	case BigHouse1:
+		h = HBHouse1
+		w = WBHouse1
+	case SmallHouse:
+		h = HSHouse
+		w = WSHouse
+	case Dungeon:
+		h = HDungeon
+		w = WDungeon
+	case BigHouse2:
+		h = HBHouse2
+		w = WBHouse2
+	case Eren:
+		h = HEren
+		w = WEren
+	case Mikasa:
+		h = HMikasa
+		w = WMikasa
+	case MaleVillager:
+		h = HMaleVillager
+		w = WMaleVillager
+	case FemaleVillager:
+		h = HFemaleVillager
+		w = WFemaleVillager
+	default:
+		h = HField
+		w = WField
+	}
+	return Position{X: o.tl.X + w/2, Y: o.tl.Y + h}
 }

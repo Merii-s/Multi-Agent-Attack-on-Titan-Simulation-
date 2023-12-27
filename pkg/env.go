@@ -239,3 +239,40 @@ func (p *Environment) Objects() []Object {
 func (p *Environment) Agents() []Object {
 	return p.agents
 }
+
+func (e *Environment) PerceivedObjects(topLeft Position, bottomRight Position) []Object {
+	positions := make([]Object, 0)
+	for _, obj := range e.objects {
+		tl, br := obj.Hitbox()[0], obj.Hitbox()[1]
+		if IntersectSquare(tl, br, topLeft, bottomRight) {
+			positions = append(positions, obj)
+		}
+	}
+	return positions
+}
+
+func (e *Environment) PerceivedAgents(topLeft Position, bottomRight Position, agtId Id) []AgentI {
+	positions := make([]AgentI, 0)
+	for _, agt := range e.Agents() {
+		object := agt.Object()
+		tl, br := object.Hitbox()[0], object.Hitbox()[1]
+		if IntersectSquare(tl, br, topLeft, bottomRight) && agt.Id() != agtId {
+			positions = append(positions, agt)
+		}
+	}
+	return positions
+}
+
+func (e *Environment) Add(a AgentI) {
+	e.agents = append(e.agents, a)
+}
+
+// function that gets the Agent with the specified selected id
+// func (e *pkg.Environment) GetAgent(id pkg.Id) pkg.Agent {
+// 	// For example, if you have a map of agents in the environment:
+// 	agent, exists := e.agents[id]
+// 	if !exists {
+// 		fmt.Println("Agent not found in the environment")
+// 	}
+// 	return agent
+// }
