@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"AOT/pkg"
 	"sync"
 )
 
@@ -9,7 +8,7 @@ type Environment struct {
 	sync.RWMutex
 
 	//A modifier quand le constructeur d'agent sera pret, C'est un tableau d'agents
-	agents []Object
+	agents []AgentI
 
 	objects []Object
 
@@ -33,7 +32,7 @@ type AgentI interface {
 	Eat()
 	Sleep()
 	AttackSuccess(spdAtk int, spdDef int) float64
-	Attack(pkg.AgentI)
+	Attack(AgentI)
 
 	Pos() Position
 	Vision() int

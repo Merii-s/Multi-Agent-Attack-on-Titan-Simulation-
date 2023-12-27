@@ -28,7 +28,29 @@ func GetImagePath(imgName string) string {
 }
 
 // DetectCollision checks if there is a collision between two objects using AABB collision detection
-func DetectCollision(obj1, obj2 Object) bool {
+// func DetectCollision(obj1, obj2 Object) bool {
+
+// 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
+// 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
+
+// 	// Check for collision on the X-axis
+// 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
+// 		return false // No collision on X-axis
+// 	}
+
+// 	// Filter out positions to avoid
+// 	filteredNeighbors := []Position{}
+// 	for _, neighbor := range neighbors {
+// 		if !contains(toAvoid, neighbor) {
+// 			filteredNeighbors = append(filteredNeighbors, neighbor)
+// 		}
+// 	}
+
+// 	return filteredNeighbors
+// }
+
+// DetectCollision checks if there is a collision between two objects using AABB collision detection
+func DetectCollision2(obj1, obj2 Object) bool {
 
 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
@@ -38,53 +60,64 @@ func DetectCollision(obj1, obj2 Object) bool {
 		return false // No collision on X-axis
 	}
 
-	// Filter out positions to avoid
-	filteredNeighbors := []Position{}
-	for _, neighbor := range neighbors {
-		if !contains(toAvoid, neighbor) {
-			filteredNeighbors = append(filteredNeighbors, neighbor)
-		}
+	// Check for collision on the Y-axis
+	if obj1BottomRight.Y < obj2TopLeft.Y || obj1TopLeft.Y > obj2BottomRight.Y {
+		return false // No collision on Y-axis
 	}
 
-	return filteredNeighbors
+	return true // Collided on both axes
 }
 
 // A modifier quand les constructeurs seront pret
-func PlaceHuman(objs []Object, humans []Object, human *Object, tl_village Position, br_village Position) []Object {
+func PlaceHuman(objs []Object, humans []AgentI, human *AgentI, tl_village Position, br_village Position) []AgentI {
 	end := false
-	for !end {
-		counter := 0
-		nb_grass := 0
-		for _, obj := range objs {
-			if obj.name != Grass {
-				if DetectCollision(*human, obj) {
+	var ok bool
+	switch val := (*human).(type) {
+	case *Soldier:
+		human, ok = (*human).(*Soldier)
+	case *Civilian:
+		human, ok = (*human).(*Civilian)
+	case *Mikasa:
+		human, ok = (*human).(*Mikasa)
+	default:
+		human, ok = (*human).(*Eren)
+	}
+	if ok {
+		for !end {
+			counter := 0
+			nb_grass := 0
+			for _, obj := range objs {
+				if obj.name != Grass {
+					if DetectCollision2(*human.Object(), obj) {
+						x, y := GetRandomCoords(tl_village, br_village)
+						human.SetPosition(Position{x, y})
+						break
+					} else {
+						counter++
+					}
+				} else {
+					nb_grass++
+				}
+			}
+
+			for _, hu := range humans {
+				if DetectCollision2(*human, hu) {
 					x, y := GetRandomCoords(tl_village, br_village)
 					human.SetPosition(Position{x, y})
 					break
 				} else {
 					counter++
 				}
-			} else {
-				nb_grass++
+			}
+
+			if counter == len(objs)+len(humans)-nb_grass {
+				end = true
 			}
 		}
 
-		for _, hu := range humans {
-			if DetectCollision(*human, hu) {
-				x, y := GetRandomCoords(tl_village, br_village)
-				human.SetPosition(Position{x, y})
-				break
-			} else {
-				counter++
-			}
-		}
-
-		if counter == len(objs)+len(humans)-nb_grass {
-			end = true
-		}
+		humans = append(humans, *human)
 	}
 
-	humans = append(humans, *human)
 	return humans
 }
 
@@ -95,7 +128,7 @@ func PlaceTitan(titan *Object, titans []Object, W int, H int, dir int) []Object 
 	end := false
 	for !end {
 		for _, ti := range titans {
-			if DetectCollision(*titan, ti) {
+			if DetectCollision2(*titan, ti) {
 				x, y := GetRandomCoords(tl_screen, br_screen)
 				if dir == 0 {
 					y = y - H

@@ -112,8 +112,8 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 	}
 }
 
-func createHuman(humans []Object, objs []Object, tl_village Position, br_village Position, objectType ObjectName, life int) []Object {
-	var human *Object
+func createHuman(humans []AgentI, objs []Object, tl_village Position, br_village Position, objectType ObjectName, life int) []AgentI {
+	var human *AgentI
 	var w, h int
 
 	switch objectType {
@@ -132,13 +132,22 @@ func createHuman(humans []Object, objs []Object, tl_village Position, br_village
 	}
 
 	x, y := GetRandomCoords(tl_village, Position{X: br_village.X - w, Y: br_village.Y - h})
-	human = NewObject(objectType, Position{x, y}, life)
+	if objectType == FemaleVillager || objectType == MaleSoldier {
+		human = NewCivilian("", Position{x, y}, VILLAGER_LIFE, 0, 0, 0, 0, objectType)
+	} else if objectType == FemaleSoldier || objectType == MaleSoldier {
+		human = NewSoldier("", Position{x, y}, SOLDIER_LIFE, 0, 0, 0, 0, objectType)
+	} else if objectType == Eren {
+		human = NewEren("", Position{x, y}, EREN_LIFE, 0, 0, 0, 0, objectType)
+	} else if objectType == Mikasa {
+		human = NewMikasa("", Position{x, y}, MIKASA_LIFE, 0, 0, 0, 0, objectType)
+	}
+
 	humans = PlaceHuman(objs, humans, human, tl_village, Position{X: br_village.X - w, Y: br_village.Y - h})
 	return humans
 }
 
-func createHumans(objs []Object, tl_village Position, br_village Position) []Object {
-	humans := make([]Object, 0)
+func createHumans(objs []Object, tl_village Position, br_village Position) []AgentI {
+	humans := make([]AgentI, 0)
 
 	for i := 0; i < NB_HUMANS; i++ {
 		if i < NB_VILLAGERS {
@@ -225,7 +234,7 @@ func NewEnvironement(H int, W int) *Environment {
 	// for _, titan := range titans {
 	// 	fmt.Println(titan)
 	// }
-	merged_agents := make([]Object, len(titans)+len(humans))
+	merged_agents := make([]AgentI, len(titans)+len(humans))
 	merged_agents = append(merged_agents, humans...)
 	merged_agents = append(merged_agents, titans...)
 	return &Environment{agents: merged_agents, objects: objects}
@@ -236,7 +245,7 @@ func (p *Environment) Objects() []Object {
 }
 
 // A modifier quand le construteur d'agent sera pret
-func (p *Environment) Agents() []Object {
+func (p *Environment) Agents() []AgentI {
 	return p.agents
 }
 
