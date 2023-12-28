@@ -105,8 +105,8 @@ func (t *Agent) GetName() types.ObjectName { return t.object.Name() }
 // the vision is a square centered on the agent position
 func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 	// Get the top left and bottom right positions of the vision square
-	topLeft := types.Position{X: t.Pos().X - t.Vision(), Y: t.Pos().Y + t.Vision()}
-	bottomRight := types.Position{X: t.Pos().X + t.Vision(), Y: t.Pos().Y - t.Vision()}
+	topLeft := types.Position{X: t.Pos().X - t.Vision(), Y: t.Pos().Y - t.Vision()}
+	bottomRight := types.Position{X: t.Pos().X + t.Vision(), Y: t.Pos().Y + t.Vision()}
 
 	// Get the positions inside the vision square from the environment
 	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
