@@ -102,7 +102,7 @@ func CreateHuman(humans []env.AgentI, objs []obj.Object, tl_village types.Positi
 		w, h = params.WMikasa, params.HMikasa
 	}
 
-	//x, y := utils.GetRandomCoords(tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
+	x, y := utils.GetRandomCoords(tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
 
 	//Condition impossible pour eviter d'entrer dans la boucle
 	if objectType == types.FemaleVillager || objectType == types.MaleSoldier {
