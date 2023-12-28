@@ -2,7 +2,8 @@ package agtutils
 
 import (
 	env "AOT/agt/env"
-	tagt "AOT/pkg/agt/titans"
+	hagt "AOT/agt/humans"
+	tagt "AOT/agt/titans"
 	obj "AOT/pkg/obj"
 	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
@@ -105,13 +106,13 @@ func CreateHuman(humans []env.AgentI, objs []obj.Object, tl_village types.Positi
 
 	//Condition impossible pour eviter d'entrer dans la boucle
 	if objectType == types.FemaleVillager || objectType == types.MaleSoldier {
-		//human = hagt.NewCivilian("", types.Position{X: x, Y: y}, params.VILLAGER_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewCivilian("", types.Position{X: x, Y: y}, params.VILLAGER_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
-		//human = hagt.NewSoldier("", types.Position{X: x, Y: y}, params.SOLDIER_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewSoldier("", types.Position{X: x, Y: y}, params.SOLDIER_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.Eren {
-		//human = hagt.NewEren("", types.Position{X: x, Y: y}, params.EREN_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewEren("", types.Position{X: x, Y: y}, params.EREN_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.Mikasa {
-		//human = hagt.NewMikasa("", types.Position{X: x, Y: y}, params.MIKASA_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewMikasa("", types.Position{X: x, Y: y}, params.MIKASA_LIFE, 0, 0, 0, 0, objectType)
 	}
 
 	humans = PlaceHuman(objs, humans, human, tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
