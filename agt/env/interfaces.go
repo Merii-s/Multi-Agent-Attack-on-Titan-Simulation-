@@ -1,4 +1,4 @@
-package agt
+package env
 
 import (
 	obj "AOT/pkg/obj"
@@ -30,4 +30,5 @@ type AgentI interface {
 	PerceivedAgents() []AgentI
 	Object() obj.Object
 	Agent() *Agent
+	SetPos(types.Position)
 }

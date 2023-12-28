@@ -1,7 +1,7 @@
 package gui
 
 import (
-	obj "AOT/pkg/object"
+	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
 

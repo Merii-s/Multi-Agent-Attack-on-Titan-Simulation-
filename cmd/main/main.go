@@ -1,10 +1,12 @@
 package main
 
 import (
+	agt_utils "AOT/agt/agt_utils"
 	env "AOT/agt/env"
 	gui "AOT/gui"
 	obj "AOT/pkg/obj"
 	params "AOT/pkg/parameters"
+	types "AOT/pkg/types"
 
 	"log"
 	"sync"
@@ -68,29 +70,25 @@ func (g *Game) ListenToSimu() {
 	}
 }
 
-func NewEnvironement(H int, W int) *Environment {
-	objects := createStaticObjects(H, W)
-	humans := createHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
-	titans := createTitans(H, W)
-	// for _, titan := range titans {
-	// 	fmt.Println(titan)
-	// }
-	merged_agents := make([]AgentI, len(titans)+len(humans))
+func NewEnvironement(H int, W int) *env.Environment {
+	objects := env.CreateStaticObjects(H, W)
+	humans := agt_utils.CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
+	titans := agt_utils.CreateTitans(H, W)
+	merged_agents := make([]env.AgentI, len(titans)+len(humans))
 	merged_agents = append(merged_agents, humans...)
 	merged_agents = append(merged_agents, titans...)
-	return &Environment{agents: merged_agents, objects: objects}
+	return &env.Environment{Agts: merged_agents, Objs: objects}
 }
 
 var wg1 sync.WaitGroup //Simulation waitgroup
 
 func main() {
-	g := Game{c: make(chan *pkg.Environment)}
-	e := pkg.NewEnvironement(700, 1000)
+	g := Game{c: make(chan *env.Environment)}
+	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
 
-	go pkg.MoveColossal(e, g.c, &wg1)
+	go env.MoveColossal(e, g.c, &wg1)
 	go g.ListenToSimu()
-
-	ebiten.SetWindowSize(1000, 700)
+	ebiten.SetWindowSize(params.ScreenWidth, params.ScreenHeight)
 	ebiten.SetWindowTitle("AOT Simulation")
 
 	if err := ebiten.RunGame(&g); err != nil {

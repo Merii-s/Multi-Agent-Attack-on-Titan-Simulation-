@@ -1,4 +1,4 @@
-package agt
+package titans
 
 type SpecialTitanI interface {
 	TitanI

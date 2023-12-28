@@ -29,7 +29,7 @@ func GetImagePath(imgName string) string {
 	return path
 }
 
-// //DetectCollision checks if there is a collision between two objects using AABB collision detection
+//DetectCollision checks if there is a collision between two objects using AABB collision detection
 // func DetectCollision(obj1, obj2 Object) bool {
 
 // 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]

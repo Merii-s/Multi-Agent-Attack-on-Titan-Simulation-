@@ -1,10 +1,14 @@
-package pkg
+package types
 
 type Id string
 
 type Position struct {
 	X int
 	Y int
+}
+
+func (p *Position) Equals(p2 Position) bool {
+	return p.X == p2.X && p.Y == p2.Y
 }
 
 type ObjectName string

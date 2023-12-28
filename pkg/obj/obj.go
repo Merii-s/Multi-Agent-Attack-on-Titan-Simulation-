@@ -1,7 +1,7 @@
 package obj
 
 import (
-	gui "AOT/pkg/gui"
+	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 )
 
@@ -64,68 +64,68 @@ func (f *Object) Hitbox() (hb []types.Position) {
 	switch f.name {
 
 	case types.Wall:
-		h = gui.CWall
-		w = gui.CWall
+		h = params.CWall
+		w = params.CWall
 	case types.Grass:
-		h = gui.CGrass
-		w = gui.CGrass
+		h = params.CGrass
+		w = params.CGrass
 	case types.BigHouse1:
-		h = gui.HBHouse1
-		w = gui.WBHouse1
+		h = params.HBHouse1
+		w = params.WBHouse1
 	case types.SmallHouse:
-		h = gui.HSHouse
-		w = gui.WSHouse
+		h = params.HSHouse
+		w = params.WSHouse
 	case types.Dungeon:
-		h = gui.HDungeon
-		w = gui.WDungeon
+		h = params.HDungeon
+		w = params.WDungeon
 	case types.BigHouse2:
-		h = gui.HBHouse2
-		w = gui.WBHouse2
+		h = params.HBHouse2
+		w = params.WBHouse2
 	case types.Eren:
-		h = gui.HEren
-		w = gui.WEren
+		h = params.HEren
+		w = params.WEren
 	case types.Mikasa:
-		h = gui.HMikasa
-		w = gui.WMikasa
+		h = params.HMikasa
+		w = params.WMikasa
 	case types.MaleVillager:
-		h = gui.HMaleVillager
-		w = gui.WMaleVillager
+		h = params.HMaleVillager
+		w = params.WMaleVillager
 	case types.FemaleVillager:
-		h = gui.HFemaleVillager
-		w = gui.WFemaleVillager
+		h = params.HFemaleVillager
+		w = params.WFemaleVillager
 	case types.BasicTitan1:
-		h = gui.HBasicTitanF
-		w = gui.WBasicTitanF
+		h = params.HBasicTitanF
+		w = params.WBasicTitanF
 	case types.BasicTitan2:
-		h = gui.HBasicTitanM
-		w = gui.WBasicTitanM
+		h = params.HBasicTitanM
+		w = params.WBasicTitanM
 	case types.ArmoredTitan:
-		h = gui.HArmoredTitan
-		w = gui.WArmoredTitan
+		h = params.HArmoredTitan
+		w = params.WArmoredTitan
 	case types.BeastTitan:
-		h = gui.HBeastTitan
-		w = gui.WBeastTitan
+		h = params.HBeastTitan
+		w = params.WBeastTitan
 	case types.ColossalTitan:
-		h = gui.HColossalTitan
-		w = gui.WColossalTitan
+		h = params.HColossalTitan
+		w = params.WColossalTitan
 	case types.ErenTitanS:
-		h = gui.HErenTitan
-		w = gui.WErenTitan
+		h = params.HErenTitan
+		w = params.WErenTitan
 	case types.FemaleTitan:
-		h = gui.HFemaleTitan
-		w = gui.WFemaleTitan
+		h = params.HFemaleTitan
+		w = params.WFemaleTitan
 	case types.JawTitan:
-		h = gui.HJawTitan
-		w = gui.WJawTitan
+		h = params.HJawTitan
+		w = params.WJawTitan
 	case types.FemaleSoldier:
-		h = gui.HSoldierF
-		w = gui.WSoldierF
+		h = params.HSoldierF
+		w = params.WSoldierF
 	case types.MaleSoldier:
-		h = gui.HSoldierM
-		w = gui.WSoldierM
+		h = params.HSoldierM
+		w = params.WSoldierM
 	default:
-		h = gui.HField
-		w = gui.WField
+		h = params.HField
+		w = params.WField
 	}
 	hb = make([]types.Position, 0)
 	hb = append(hb, f.TL())
@@ -138,38 +138,38 @@ func (o *Object) Center() types.Position {
 	var w, h int
 	switch o.name {
 	case types.Wall:
-		h = gui.CWall
-		w = gui.CWall
+		h = params.CWall
+		w = params.CWall
 	case types.Grass:
-		h = gui.CGrass
-		w = gui.CGrass
+		h = params.CGrass
+		w = params.CGrass
 	case types.BigHouse1:
-		h = gui.HBHouse1
-		w = gui.WBHouse1
+		h = params.HBHouse1
+		w = params.WBHouse1
 	case types.SmallHouse:
-		h = gui.HSHouse
-		w = gui.WSHouse
+		h = params.HSHouse
+		w = params.WSHouse
 	case types.Dungeon:
-		h = gui.HDungeon
-		w = gui.WDungeon
+		h = params.HDungeon
+		w = params.WDungeon
 	case types.BigHouse2:
-		h = gui.HBHouse2
-		w = gui.WBHouse2
+		h = params.HBHouse2
+		w = params.WBHouse2
 	case types.Eren:
-		h = gui.HEren
-		w = gui.WEren
+		h = params.HEren
+		w = params.WEren
 	case types.Mikasa:
-		h = gui.HMikasa
-		w = gui.WMikasa
+		h = params.HMikasa
+		w = params.WMikasa
 	case types.MaleVillager:
-		h = gui.HMaleVillager
-		w = gui.WMaleVillager
+		h = params.HMaleVillager
+		w = params.WMaleVillager
 	case types.FemaleVillager:
-		h = gui.HFemaleVillager
-		w = gui.WFemaleVillager
+		h = params.HFemaleVillager
+		w = params.WFemaleVillager
 	default:
-		h = gui.HField
-		w = gui.WField
+		h = params.HField
+		w = params.WField
 	}
 	return types.Position{X: o.tl.X + w/2, Y: o.tl.Y + h}
 }
