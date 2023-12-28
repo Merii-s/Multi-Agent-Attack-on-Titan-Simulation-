@@ -145,7 +145,7 @@ func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 	}
 
 	// Checks if the perceivedObjects are in a positionsBehindObjects position and remove them if they are
-	perceivedObjects = utils.RemovepositionsBehindObjects(perceivedObjects, positionsBehindObjects)
+	perceivedObjects = utils.PositionsBehindObjects(perceivedObjects, positionsBehindObjects)
 	perceivedAgents = removeAgentsBehindPositions(perceivedAgents, positionsBehindObjects)
 
 	return perceivedObjects, perceivedAgents

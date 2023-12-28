@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"AOT/agt/env"
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	"container/heap"
@@ -236,11 +237,11 @@ func min(a, b int) int {
 	return b
 }
 
-func RemoveObjectsBehindPositions(perceivedObjects []obj.Object, objectsBehindPositions []types.Position) []obj.Object {
-	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
+func PositionsBehindObjects(perceivedObjects []obj.Object, positionsBehindObjects []types.Position) []obj.Object {
+	// Filter out positions behind an obstacle if the center of the object is in the positionsBehindObjects list
 	objectsToRemove := []obj.Object{}
 	for _, object := range perceivedObjects {
-		if Contains(objectsBehindPositions, object.Center()) || object.Name() == types.Grass {
+		if Contains(positionsBehindObjects, object.Center()) || object.Name() == types.Grass {
 			objectsToRemove = append(objectsToRemove, object)
 		}
 	}
@@ -297,16 +298,15 @@ func IntersectSquare(topLeft1 types.Position, bottomRight1 types.Position, topLe
 	return true
 }
 
-// TODO : Maybe use angle parameters instead of forced values
-func GetObjectsBehindPositions(position types.Position, angle float64, topLeftVision types.Position, bottomRightVision types.Position) []types.Position {
-	objectsBehindPositions := []types.Position{}
+func GetPositionsBehindObject(position types.Position, angle float64, topLeftVision types.Position, bottomRightVision types.Position) []types.Position {
+	positionsBehindObjects := []types.Position{}
 	// the angle order follows the counter-clockwise order
 
 	// if the position to avoid is in the straight right of the agent position
 	// the agent can't see the positions behind it from 315 to 45 degrees following the perspective logic
 	if angle > 345 && angle < 15 {
 		for i := 0; i < bottomRightVision.X; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X + i, Y: position.Y})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X + i, Y: position.Y})
 		}
 
 		// if the position to avoid is in the bottom right quarter of the vision square
@@ -314,53 +314,53 @@ func GetObjectsBehindPositions(position types.Position, angle float64, topLeftVi
 	} else if angle >= 15 && angle < 75 {
 		for x := position.X; x <= bottomRightVision.X; x++ {
 			for y := position.Y; y <= topLeftVision.Y; y++ {
-				objectsBehindPositions = append(objectsBehindPositions, types.Position{X: x, Y: y})
+				positionsBehindObjects = append(positionsBehindObjects, types.Position{X: x, Y: y})
 			}
 		}
 		// if the position to avoid is in the straight bottom of the agent position
 		// the agent can't see the positions behind it from 45 to 135 degrees following the perspective logic
 	} else if angle > 75 && angle < 105 {
 		for i := 0; i < bottomRightVision.Y; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X, Y: position.Y - i})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X, Y: position.Y - i})
 		}
 
 		// if the position to avoid is in the bottom left of the agent position
 		// the agent can't see the positions behind it from 90 to 180 degrees following the perspective logic
 	} else if angle >= 105 && angle <= 165 {
 		for i := 0; i < 8; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X - i, Y: position.Y - i})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X - i, Y: position.Y - i})
 		}
 
 		// if the position to avoid is in the straight left of the agent position
 		// the agent can't see the positions behind it from 135 to 225 degrees following the perspective logic
 	} else if angle > 165 && angle < 195 {
 		for i := 0; i < topLeftVision.X; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X - i, Y: position.Y})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X - i, Y: position.Y})
 		}
 
 		// if the position to avoid is in the top left of the agent position
 		// the agent can't see the positions behind it from 180 to 270 degrees following the perspective logic
 	} else if angle >= 195 && angle <= 255 {
 		for i := 0; i < 8; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X - i, Y: position.Y + i})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X - i, Y: position.Y + i})
 		}
 
 		// if the position to avoid is in the straight top of the agent position
 		// the agent can't see the positions behind it from 225 to 315 degrees following the perspective logic
 	} else if angle > 255 && angle < 285 {
 		for i := 0; i < topLeftVision.Y; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X, Y: position.Y + i})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X, Y: position.Y + i})
 		}
 
 		// if the position to avoid is in the top right of the agent position
 		// the agent can't see the positions behind it from 270 to 360 degrees and from 0 to 90 degrees following the perspective logic
 	} else if angle >= 285 && angle <= 345 || angle >= 0 && angle <= 90 {
 		for i := 0; i < 8; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X + i, Y: position.Y + i})
+			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: position.X + i, Y: position.Y + i})
 		}
 
 	}
-	return objectsBehindPositions
+	return positionsBehindObjects
 }
 
 // Calculate the opposite direction of a position
