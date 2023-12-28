@@ -201,8 +201,7 @@ type BasicTitanBehavior struct {
 
 func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 	// If the titan is out of the screen, it goes towards the closest wall
-	// TODO : Add Env screen size in parameters
-	if pkg.IsOutOfScreen(btb.bt.attributes.agentAttributes.Pos(), 700, 1000) {
+	if pkg.IsOutOfScreen(btb.bt.attributes.agentAttributes.Pos(), params.ScreenWidth, params.ScreenHeight) {
 		wallPositions := []types.Position{}
 		for _, obj := range e.Objects() {
 			if obj.Name() == types.Wall {
