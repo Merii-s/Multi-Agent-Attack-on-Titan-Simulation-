@@ -90,15 +90,15 @@ func (eren *Eren) Start(e *env.Environment) {
 	}()
 }
 
-func (eren *Eren) move(pos types.Position) {
+func (eren *Eren) Move(pos types.Position) {
 	eren.attributes.agentAttributes.SetPos(pos)
 }
 
-func (eren *Eren) eat() {
+func (eren *Eren) Eat() {
 
 }
 
-func (eren *Eren) sleep() {
+func (eren *Eren) Sleep() {
 
 }
 
@@ -106,14 +106,14 @@ func (*Eren) Guard() {
 
 }
 
-func (*Eren) attack_success(spd_atk int, reachAtk int, spd_def int) float64 {
+func (*Eren) AttackSuccess(spdAtk int, spdDef int) float64 {
 	// If the speed of the attacker is greater than the speed of the defender, the attack is successful
-	if spd_atk > spd_def {
+	if spdAtk > spdDef {
 		return 1
 	} else {
 		// If the speed of the attacker is less than the speed of the defender, the attack is successful with a probability of
 		// (speed of the attacker)/(speed of the defender)
-		return float64(spd_atk) / float64(spd_def)
+		return float64(spdAtk) / float64(spdDef)
 	}
 }
 
@@ -121,7 +121,7 @@ func (eren *Eren) Attack(agt env.AgentI) {
 	eren.mu.Lock()
 	defer eren.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < eren.attack_success(eren.attributes.agentAttributes.Speed(), eren.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
+	if rand.Float64() < eren.AttackSuccess(eren.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
 		agt.Agent().SetHp(agt.Agent().Hp() - eren.attributes.agentAttributes.Strength())
 		fmt.Printf("Attack successful from %sren : %sren lost  %d HP \n", eren.Id(), agt.Id(), agt.Agent().Hp())
@@ -150,6 +150,8 @@ func (eren *Eren) PerceivedObjects() []obj.Object {
 func (eren *Eren) PerceivedAgents() []env.AgentI {
 	return eren.attributes.agentAttributes.PerceivedAgents()
 }
+
+func (eren *Eren) SetPos(pos types.Position) { eren.attributes.agentAttributes.SetPos(pos) }
 
 // Define the behavior struct of Eren
 type ErenBehavior struct {
@@ -225,7 +227,7 @@ func (eb *ErenBehavior) Act(e *env.Environment) {
 	}
 
 	if eb.eren.attributes.agentAttributes.Attack() {
-		eb.eren.move(eb.eren.attributes.agentAttributes.NextPos())
+		eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
 		eb.eren.Attack(eb.eren.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		eb.eren.attributes.agentAttributes.SetAttack(false)
@@ -236,6 +238,6 @@ func (eb *ErenBehavior) Act(e *env.Environment) {
 		}
 	} else {
 		// Move towards the specified position
-		eb.eren.move(eb.eren.attributes.agentAttributes.NextPos())
+		eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
 	}
 }

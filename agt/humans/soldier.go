@@ -89,16 +89,16 @@ func (s *Soldier) Start(e *env.Environment) {
 	}()
 }
 
-func (s *Soldier) move(pos types.Position) {
+func (s *Soldier) Move(pos types.Position) {
 	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
 	s.attributes.agentAttributes.SetPos(pos)
 }
 
-func (s *Soldier) eat() {
+func (s *Soldier) Eat() {
 
 }
 
-func (s *Soldier) sleep() {
+func (s *Soldier) Sleep() {
 	//time.Sleep(?)
 }
 
@@ -107,14 +107,14 @@ func (*Soldier) Gard() {
 }
 
 // Return a value between 0 and 1 representing success of an attack
-func (*Soldier) attack_success(spd_atk int, reach_atk int, spd_def int) float64 {
+func (*Soldier) AttackSuccess(spdAtk int, spdDef int) float64 {
 	// If the speed of the attacker is greater than the speed of the defender, the attack is successful
-	if spd_atk > spd_def {
+	if spdAtk > spdDef {
 		return 1
 	} else {
 		// If the speed of the attacker is less than the speed of the defender, the attack is successful with a probability of
 		// (speed of the attacker)/(speed of the defender)
-		return float64(spd_atk) / float64(spd_def)
+		return float64(spdAtk) / float64(spdDef)
 	}
 }
 
@@ -124,7 +124,7 @@ func (s *Soldier) Attack(agt env.AgentI) {
 		defer s.mu.Unlock()
 		// TO DO: consider the reach of the agent
 		// If the percentage is less than the success rate, the attack is successful
-		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
+		if rand.Float64() < s.AttackSuccess(s.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 			// If the attack is successful, the agent loses HP
 			agt.Agent().SetHp(agt.Agent().Hp() - s.attributes.agentAttributes.Strength())
 			fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Agent().Hp())
@@ -134,6 +134,8 @@ func (s *Soldier) Attack(agt env.AgentI) {
 		}
 	}
 }
+
+func (s *Soldier) SetPos(pos types.Position) { s.attributes.agentAttributes.SetPos(pos) }
 
 func (s *Soldier) Pos() types.Position {
 	return s.attributes.agentAttributes.Pos()
@@ -212,13 +214,13 @@ func (sb *SoldierBehavior) Deliberate() {
 func (sb *SoldierBehavior) Act(e *env.Environment) {
 	// Perform the action based on the parameters
 	if sb.s.attributes.agentAttributes.Attack() {
-		sb.s.move(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
 		sb.s.Attack(sb.s.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		sb.s.attributes.agentAttributes.SetAttack(false)
 		sb.s.attributes.agentAttributes.SetAgentToAttack(nil)
 	} else {
 		// Move towards the specified position
-		sb.s.move(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
 	}
 }

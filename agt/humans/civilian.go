@@ -92,18 +92,23 @@ func (c *Civilian) Start(e *env.Environment) {
 	}()
 }
 
-func (c *Civilian) move(pos types.Position) {
-	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
-	c.attributes.agentAttributes.SetPos(pos)
-}
+func (c *Civilian) Move(pos types.Position) { c.attributes.agentAttributes.SetPos(pos) }
 
-func (c *Civilian) eat() {
+func (c *Civilian) Eat() {
 
 }
 
-func (*Civilian) sleep() {
+func (*Civilian) Sleep() {
 	//time.Sleep(?)
 }
+
+func (c *Civilian) AttackSuccess(spdAtk int, spdDef int) float64 {
+	return 0
+}
+
+func (c *Civilian) Attack(agt env.AgentI) { return }
+
+func (c *Civilian) SetPos(pos types.Position) { c.attributes.agentAttributes.SetPos(pos) }
 
 func (c *Civilian) build() {
 
@@ -181,5 +186,5 @@ func (cb *CivilianBehavior) Deliberate() {
 
 func (cb *CivilianBehavior) Act(e *env.Environment) {
 	// Move to the next position
-	cb.c.move(cb.c.attributes.agentAttributes.NextPos())
+	cb.c.Move(cb.c.attributes.agentAttributes.NextPos())
 }

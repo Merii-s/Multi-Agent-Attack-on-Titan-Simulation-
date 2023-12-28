@@ -104,14 +104,14 @@ func (m *Mikasa) Guard() {
 
 }
 
-func (m *Mikasa) attack_success(spd_atk int, reachAtk int, spd_def int) float64 {
+func (m *Mikasa) AttackSuccess(spdAtk int, spdDef int) float64 {
 	// If the speed of the attacker is greater than the speed of the defender, the attack is successful
-	if spd_atk > spd_def {
+	if spdAtk > spdDef {
 		return 1
 	} else {
 		// If the speed of the attacker is less than the speed of the defender, the attack is successful with a probability of
 		// (speed of the attacker)/(speed of the defender)
-		return float64(spd_atk) / float64(spd_def)
+		return float64(spdAtk) / float64(spdDef)
 	}
 }
 
@@ -119,7 +119,7 @@ func (m *Mikasa) Attack(agt env.AgentI) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < m.attack_success(m.attributes.agentAttributes.Speed(), m.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
+	if rand.Float64() < m.AttackSuccess(m.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
 		agt.Agent().SetHp(agt.Agent().Hp() - m.attributes.agentAttributes.Strength())
 		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", m.Id(), agt.Id(), agt.Agent().Hp())
@@ -148,6 +148,8 @@ func (m *Mikasa) PerceivedObjects() []obj.Object {
 func (m *Mikasa) PerceivedAgents() []env.AgentI {
 	return m.attributes.agentAttributes.PerceivedAgents()
 }
+
+func (m *Mikasa) SetPos(pos types.Position) { m.attributes.agentAttributes.SetPos(pos) }
 
 // Define the behavior struct of Mikasa
 type MikasaBehavior struct {

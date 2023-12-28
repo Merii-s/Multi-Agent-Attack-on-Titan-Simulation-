@@ -115,14 +115,14 @@ func (bt *BasicTitan) AttackSuccess(spdAtk int, spdDef int) float64 {
 	}
 }
 
-func (bt *BasicTitan) attack(agt env.Agent) {
+func (bt *BasicTitan) Attack(agt env.AgentI) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Speed()) {
+	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.SetHp(agt.Hp() - bt.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Hp())
+		agt.Agent().SetHp(agt.Agent().Hp() - bt.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
@@ -148,6 +148,10 @@ func (bt *BasicTitan) PerceivedObjects() []obj.Object {
 func (bt *BasicTitan) PerceivedAgents() []env.AgentI {
 	return bt.attributes.agentAttributes.PerceivedAgents()
 }
+
+func (bt *BasicTitan) Agent() *env.Agent { return &bt.attributes.agentAttributes }
+
+func (bt *BasicTitan) SetPos(pos types.Position) { bt.attributes.agentAttributes.SetPos(pos) }
 
 // Regenerate method for BasicTitan
 func (bt *BasicTitan) Regenerate() {
