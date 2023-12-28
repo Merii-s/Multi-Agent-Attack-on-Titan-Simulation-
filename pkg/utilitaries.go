@@ -38,15 +38,12 @@ func DetectCollision(obj1, obj2 Object) bool {
 		return false // No collision on X-axis
 	}
 
-	// Filter out positions to avoid
-	filteredNeighbors := []Position{}
-	for _, neighbor := range neighbors {
-		if !contains(toAvoid, neighbor) {
-			filteredNeighbors = append(filteredNeighbors, neighbor)
-		}
+	// Check for collision on the Y-axis
+	if obj1BottomRight.Y < obj2TopLeft.Y || obj1TopLeft.Y > obj2BottomRight.Y {
+		return false // No collision on Y-axis
 	}
 
-	return filteredNeighbors
+	return true // Collided on both axes
 }
 
 // A modifier quand les constructeurs seront pret
@@ -458,4 +455,26 @@ func OppositeDirection(currentPos, targetPos Position) Position {
 	// TO DO: Add more checks if needed
 
 	return Position{X: xToGo, Y: yToGo}
+}
+
+func IsOutOfScreen(pos Position, W int, H int) bool {
+	if pos.X < 0 || pos.X > W || pos.Y < 0 || pos.Y > H {
+		return true
+	}
+	return false
+}
+
+func ClosestPosition(position Position, positions []Position) Position {
+	// Get the closest position from the list
+	closestPosition := positions[0]
+	for _, pos := range positions {
+		if position.Distance(pos) < position.Distance(closestPosition) {
+			closestPosition = pos
+		}
+	}
+	return closestPosition
+}
+
+func (Position) Distance(pos Position) float64 {
+	return math.Sqrt(math.Pow(float64(pos.X), 2) + math.Pow(float64(pos.Y), 2))
 }

@@ -87,6 +87,14 @@ func (t *Agent) AddPerceivedObject(obj Object) { t.perceivedObjects = append(t.p
 
 func (t *Agent) AddPerceivedAgent(agt AgentI) { t.perceivedAgents = append(t.perceivedAgents, agt) }
 
+func (t *Agent) SetNextPosition(pos Position) { t.nextPosition = pos }
+
+func (t *Agent) NextPosition() Position { return t.nextPosition }
+
+func (t *Agent) AttackValue() bool { return t.attack }
+
+func (t *Agent) GetName() ObjectName { return t.object.name }
+
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
 func (t *Agent) GetVision(e *Environment) ([]Object, []AgentI) {

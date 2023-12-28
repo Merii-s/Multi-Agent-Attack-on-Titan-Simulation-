@@ -113,14 +113,14 @@ func (bt *BasicTitan) AttackSuccess(spdAtk int, spdDef int) float64 {
 	}
 }
 
-func (bt *BasicTitan) attack(agt pkg.Agent) {
+func (bt *BasicTitan) Attack(agt pkg.AgentI) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Speed()) {
+	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.SetHp(agt.Hp() - bt.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Hp())
+		agt.Agent().SetHp(agt.Agent().Hp() - bt.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
@@ -137,6 +137,10 @@ func (bt *BasicTitan) Vision() int {
 
 func (bt *BasicTitan) Object() pkg.Object {
 	return bt.attributes.agentAttributes.Object()
+}
+
+func (bt *BasicTitan) Agent() *pkg.Agent {
+	return &bt.attributes.agentAttributes
 }
 
 func (bt *BasicTitan) PerceivedObjects() []pkg.Object {
@@ -193,26 +197,61 @@ type BasicTitanBehavior struct {
 }
 
 func (btb *BasicTitanBehavior) Percept(e *pkg.Environment) {
-	println("BasicTitan Percept")
-	// Get the perceived objects and agents
-	perceivedObjects, perceivedAgents := btb.bt.attributes.agentAttributes.GetVision(e)
+	// If the titan is out of the screen, it goes towards the closest wall
+	// TODO : Add Env screen size in parameters
+	if pkg.IsOutOfScreen(btb.bt.attributes.agentAttributes.Pos(), 700, 1000) {
+		wallPositions := []pkg.Position{}
+		for _, obj := range e.Objects() {
+			if obj.Name() == pkg.Wall {
+				wallPositions = append(wallPositions, obj.TL())
+			}
+		}
 
-	// Add the percepted agents to the list of percepted agents
-	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %s\n", obj.Name())
-		btb.bt.attributes.agentAttributes.AddPerceivedObject(obj)
+		wallToGo := pkg.ClosestPosition(btb.bt.attributes.agentAttributes.Pos(), wallPositions)
+		nextPos := pkg.GetShortestPath(wallToGo, btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed(), []pkg.Position{})
+		btb.bt.attributes.agentAttributes.SetNextPosition(nextPos)
+
+	} else {
+		// Get the perceived objects and agents
+		perceivedObjects, perceivedAgents := btb.bt.attributes.agentAttributes.GetVision(e)
+
+		// Add the perceived agents to the list of perceived agents
+		for _, obj := range perceivedObjects {
+			fmt.Printf("Percepted object: %s\n", obj.Name())
+			btb.bt.attributes.agentAttributes.AddPerceivedObject(obj)
+		}
+
+		// Add the perceived agents to the list of perceived agents
+		for _, agt := range perceivedAgents {
+			fmt.Printf("Percepted agent: %s\n", agt.Id())
+			btb.bt.attributes.agentAttributes.AddPerceivedAgent(agt)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
-
-	// Add the percepted agents to the list of percepted agents
-	for _, agt := range perceivedAgents {
-		fmt.Printf("Percepted agent: %s\n", agt.Id())
-		btb.bt.attributes.agentAttributes.AddPerceivedAgent(agt)
-	}
-
-	time.Sleep(100 * time.Millisecond)
 }
 
-func (btb *BasicTitanBehavior) Deliberate() {}
+func (btb *BasicTitanBehavior) Deliberate() {
+	interestingObjects := []pkg.Object{}
+	interestingAgents := []pkg.AgentI{}
+
+	for _, obj := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
+		if obj.Name() == pkg.Wall || obj.Name() == pkg.Field {
+			interestingObjects = append(interestingObjects, obj)
+		}
+	}
+
+	for _, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
+		if agt.Agent().GetName() == pkg.MaleVillager ||
+			agt.Agent().GetName() == pkg.FemaleVillager ||
+			agt.Agent().GetName() == pkg.Eren ||
+			agt.Agent().GetName() == pkg.Mikasa ||
+			agt.Agent().GetName() == pkg.MaleSoldier ||
+			agt.Agent().GetName() == pkg.FemaleSoldier {
+			interestingAgents = append(interestingAgents, agt)
+		}
+	}
+
+}
 
 func (btb *BasicTitanBehavior) Act(e *pkg.Environment) {
 }
