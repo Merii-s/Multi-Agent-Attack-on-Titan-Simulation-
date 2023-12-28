@@ -9,6 +9,7 @@ type Agent struct {
 	vision           int
 	attack           bool
 	nextPosition     Position
+	agentToAttack    AgentI
 	perceivedObjects []Object
 	perceivedAgents  []AgentI
 	cantSeeBehind    []ObjectName
@@ -24,6 +25,7 @@ func NewAgent(id Id, tl Position, life int, reach int, strength int, speed int, 
 		vision:           vision,
 		attack:           false,
 		nextPosition:     tl,
+		agentToAttack:    nil,
 		perceivedObjects: []Object{},
 		perceivedAgents:  []AgentI{},
 		cantSeeBehind:    []ObjectName{},
@@ -57,9 +59,21 @@ func (t *Agent) Hp() int { return t.object.life }
 
 func (t *Agent) SetPos(pos Position) { t.object.tl = pos }
 
+func (t *Agent) SetAttack(b bool) { t.attack = b }
+
+func (t *Agent) SetNextPos(nextPos Position) { t.nextPosition = nextPos }
+
+func (t *Agent) SetAgentToAttack(agt AgentI) { t.agentToAttack = agt }
+
 func (t *Agent) SetHp(hp int) { t.object.life = hp }
 
 func (t *Agent) Vision() int { return t.vision }
+
+func (t *Agent) NextPos() Position { return t.nextPosition }
+
+func (t *Agent) Attack() bool { return t.attack }
+
+func (t *Agent) AgentToAttack() AgentI { return t.agentToAttack }
 
 func (t *Agent) PerceivedObjects() []Object { return t.perceivedObjects }
 

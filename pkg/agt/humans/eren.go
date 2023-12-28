@@ -18,6 +18,7 @@ type Eren struct {
 	syncChan   chan string
 	mu         sync.Mutex
 	behavior   pkg.BehaviorI
+	transform  bool
 }
 
 func NewEren(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Eren {
@@ -27,6 +28,7 @@ func NewEren(id pkg.Id, tl pkg.Position, life int, reach int, strength int, spee
 		stopCh:     make(chan struct{}),
 		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
+		transform:  false,
 	}
 	behavior := &ErenBehavior{eren: eren}
 	eren.SetBehavior(behavior)
@@ -113,14 +115,14 @@ func (*Eren) attack_success(spd_atk int, reachAtk int, spd_def int) float64 {
 	}
 }
 
-func (eren *Eren) attack(agt pkg.Agent) {
+func (eren *Eren) Attack(agt pkg.AgentI) {
 	eren.mu.Lock()
 	defer eren.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < eren.attack_success(eren.attributes.agentAttributes.Speed(), eren.attributes.agentAttributes.Reach(), agt.Speed()) {
+	if rand.Float64() < eren.attack_success(eren.attributes.agentAttributes.Speed(), eren.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.SetHp(agt.Hp() - eren.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %eren : %eren lost  %d HP \n", eren.Id(), agt.Id(), agt.Hp())
+		agt.Agent().SetHp(agt.Agent().Hp() - eren.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %eren : %eren lost  %d HP \n", eren.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
@@ -173,9 +175,65 @@ func (eb *ErenBehavior) Percept(e *pkg.Environment) {
 }
 
 func (eb *ErenBehavior) Deliberate() {
-	// TODO: Implement deliberation logic for Eren
+	// Initialize variables for counting titans
+	numTitans := 0
+	var agentToAttack pkg.AgentI
+
+	// Count the number of titans and store the position of the titan to attack
+	for _, agt := range eb.eren.attributes.agentAttributes.PerceivedAgents() {
+		//if the agent is a special titan, Eren decides to transform to titan and attacks
+		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" {
+			agentToAttack = agt
+			eb.eren.attributes.agentAttributes.SetAttack(true)
+			//Eren decides to transform to titan
+			eb.eren.transform = true
+			break
+		}
+		if agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
+			numTitans++
+			if numTitans == 1 {
+				agentToAttack = agt
+				eb.eren.attributes.agentAttributes.SetAttack(true)
+			}
+		}
+	}
+
+	// Decide action based on the number of titans
+	if numTitans > 1 {
+		//Eren decides to transform to titan
+		eb.eren.transform = true
+	}
+
+	if eb.eren.attributes.agentAttributes.Attack() {
+		eb.eren.attributes.agentAttributes.SetAgentToAttack(agentToAttack)
+		eb.eren.attributes.agentAttributes.SetNextPos(agentToAttack.Pos())
+	} else {
+		// Move randomly
+		var randPos pkg.Position
+		randPos.X = eb.eren.attributes.agentAttributes.Pos().X + rand.Intn(10)
+		randPos.Y = eb.eren.attributes.agentAttributes.Pos().Y + rand.Intn(10)
+
+		eb.eren.attributes.agentAttributes.SetNextPos(randPos)
+	}
 }
 
 func (eb *ErenBehavior) Act(e *pkg.Environment) {
-	// TODO: Implement action logic for Eren
+	if eb.eren.transform {
+		//TO DO: Eren transforms to titan
+	}
+
+	if eb.eren.attributes.agentAttributes.Attack() {
+		eb.eren.move(eb.eren.attributes.agentAttributes.NextPos())
+		eb.eren.Attack(eb.eren.attributes.agentAttributes.AgentToAttack())
+		// Reset the parameters
+		eb.eren.attributes.agentAttributes.SetAttack(false)
+		eb.eren.attributes.agentAttributes.SetAgentToAttack(nil)
+		if eb.eren.transform {
+			eb.eren.transform = false
+			//TO DO: Eren transforms back to human
+		}
+	} else {
+		// Move towards the specified position
+		eb.eren.move(eb.eren.attributes.agentAttributes.NextPos())
+	}
 }

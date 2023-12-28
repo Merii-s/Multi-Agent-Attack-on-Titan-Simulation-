@@ -98,6 +98,10 @@ func (o *Object) Name() ObjectName {
 	return o.name
 }
 
+func (o Object) GetName() ObjectName {
+	return o.name
+}
+
 func (o *Object) TL() Position {
 	return o.tl
 }
