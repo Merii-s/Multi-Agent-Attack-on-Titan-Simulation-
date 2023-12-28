@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
 	"container/heap"
 	"math"
 	"math/rand"
@@ -9,7 +11,7 @@ import (
 	"time"
 )
 
-func GetRandomCoords(topLeft Position, bottomRight Position) (int, int) {
+func GetRandomCoords(topLeft types.Position, bottomRight types.Position) (int, int) {
 	// Nouvelle seed pour le generateur
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
@@ -27,8 +29,30 @@ func GetImagePath(imgName string) string {
 	return path
 }
 
+//DetectCollision checks if there is a collision between two objects using AABB collision detection
+// func DetectCollision(obj1, obj2 Object) bool {
+
+// 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
+// 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
+
+// 	// Check for collision on the X-axis
+// 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
+// 		return false // No collision on X-axis
+// 	}
+
+// 	// Filter out positions to avoid
+// 	filteredNeighbors := []types.Position{}
+// 	for _, neighbor := range neighbors {
+// 		if !Contains(toAvoid, neighbor) {
+// 			filteredNeighbors = append(filteredNeighbors, neighbor)
+// 		}
+// 	}
+
+// 	return filteredNeighbors
+//  }
+
 // DetectCollision checks if there is a collision between two objects using AABB collision detection
-func DetectCollision(obj1, obj2 Object) bool {
+func DetectCollision2(obj1, obj2 obj.Object) bool {
 
 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
@@ -38,93 +62,19 @@ func DetectCollision(obj1, obj2 Object) bool {
 		return false // No collision on X-axis
 	}
 
-	// Filter out positions to avoid
-	filteredNeighbors := []Position{}
-	for _, neighbor := range neighbors {
-		if !contains(toAvoid, neighbor) {
-			filteredNeighbors = append(filteredNeighbors, neighbor)
-		}
+	// Check for collision on the Y-axis
+	if obj1BottomRight.Y < obj2TopLeft.Y || obj1TopLeft.Y > obj2BottomRight.Y {
+		return false // No collision on Y-axis
 	}
 
-	return filteredNeighbors
-}
-
-// A modifier quand les constructeurs seront pret
-func PlaceHuman(objs []Object, humans []Object, human *Object, tl_village Position, br_village Position) []Object {
-	end := false
-	for !end {
-		counter := 0
-		nb_grass := 0
-		for _, obj := range objs {
-			if obj.name != Grass {
-				if DetectCollision(*human, obj) {
-					x, y := GetRandomCoords(tl_village, br_village)
-					human.SetPosition(Position{x, y})
-					break
-				} else {
-					counter++
-				}
-			} else {
-				nb_grass++
-			}
-		}
-
-		for _, hu := range humans {
-			if DetectCollision(*human, hu) {
-				x, y := GetRandomCoords(tl_village, br_village)
-				human.SetPosition(Position{x, y})
-				break
-			} else {
-				counter++
-			}
-		}
-
-		if counter == len(objs)+len(humans)-nb_grass {
-			end = true
-		}
-	}
-
-	humans = append(humans, *human)
-	return humans
-}
-
-func PlaceTitan(titan *Object, titans []Object, W int, H int, dir int) []Object {
-	tl_screen := Position{X: 0, Y: 0}
-	br_screen := Position{X: W, Y: H}
-	counter := 0
-	end := false
-	for !end {
-		for _, ti := range titans {
-			if DetectCollision(*titan, ti) {
-				x, y := GetRandomCoords(tl_screen, br_screen)
-				if dir == 0 {
-					y = y - H
-				} else if dir == 1 {
-					x = x - W
-				} else {
-					x = x + W
-				}
-				titan.SetPosition(Position{x, y})
-				break
-			} else {
-				counter++
-			}
-		}
-
-		if counter == len(titans) {
-			end = true
-		}
-	}
-
-	titans = append(titans, *titan)
-	return titans
+	return true // Collided on both axes
 }
 
 // define a function that takes a position in argument and an agent position
 // and returns the shortest path to reach the position from the agent position
 
 type Node struct {
-	position Position
+	position types.Position
 	parent   *Node
 	g        int
 	h        int
@@ -149,28 +99,28 @@ func (h *NodeHeap) Pop() interface{} {
 	return node
 }
 
-func calculateHeuristic(start Position, target Position) int {
+func calculateHeuristic(start types.Position, target types.Position) int {
 	dx := abs(target.X - start.X)
 	dy := abs(target.Y - start.Y)
 	return dx + dy + min(dx, dy)
 }
 
-func getNeighbors(position Position, toAvoid []Position) []Position {
-	neighbors := []Position{
-		{position.X, position.Y - 1},     // above
-		{position.X, position.Y + 1},     // below
-		{position.X - 1, position.Y},     // left
-		{position.X + 1, position.Y},     // right
-		{position.X - 1, position.Y - 1}, // top left
-		{position.X + 1, position.Y - 1}, // top right
-		{position.X - 1, position.Y + 1}, // bottom left
-		{position.X + 1, position.Y + 1}, // bottom right
+func GetNeighbors(position types.Position, toAvoid []types.Position) []types.Position {
+	neighbors := []types.Position{
+		{X: position.X, Y: position.Y - 1},     // above
+		{X: position.X, Y: position.Y + 1},     // below
+		{X: position.X - 1, Y: position.Y},     // left
+		{X: position.X + 1, Y: position.Y},     // right
+		{X: position.X - 1, Y: position.Y - 1}, // top left
+		{X: position.X + 1, Y: position.Y - 1}, // top right
+		{X: position.X - 1, Y: position.Y + 1}, // bottom left
+		{X: position.X + 1, Y: position.Y + 1}, // bottom right
 	}
 
 	// Filter out positions to avoid
-	filteredNeighbors := []Position{}
+	filteredNeighbors := []types.Position{}
 	for _, neighbor := range neighbors {
-		if !contains(toAvoid, neighbor) {
+		if !Contains(toAvoid, neighbor) {
 			filteredNeighbors = append(filteredNeighbors, neighbor)
 		}
 	}
@@ -179,7 +129,7 @@ func getNeighbors(position Position, toAvoid []Position) []Position {
 }
 
 // contains checks if the given list contains the specified object.
-func contains[T any](list []T, target T) bool {
+func Contains[T any](list []T, target T) bool {
 	for _, item := range list {
 		if reflect.DeepEqual(item, target) {
 			return true
@@ -188,7 +138,7 @@ func contains[T any](list []T, target T) bool {
 	return false
 }
 
-func GetShortestPath(pos Position, agentPos Position, agentSpeed int, toAvoid []Position) Position {
+func getShortestPath(pos types.Position, agentPos types.Position, agentSpeed int, toAvoid []types.Position) types.Position {
 	openSet := make(NodeHeap, 0)
 	closedSet := make(NodeHeap, 0)
 
@@ -207,7 +157,7 @@ func GetShortestPath(pos Position, agentPos Position, agentSpeed int, toAvoid []
 
 		// If the current node is the target node, reconstruct the path
 		if currentNode.position == pos {
-			path := []Position{}
+			path := []types.Position{}
 			current := currentNode
 			for current != nil {
 				path = append(path, current.position)
@@ -221,7 +171,7 @@ func GetShortestPath(pos Position, agentPos Position, agentSpeed int, toAvoid []
 		heap.Push(&closedSet, currentNode)
 
 		// Get the neighboring positions of the current node
-		neighbors := getNeighbors(currentNode.position, toAvoid)
+		neighbors := GetNeighbors(currentNode.position, toAvoid)
 
 		for _, neighbor := range neighbors {
 			// Skip if the neighbor is in the closed set
@@ -254,7 +204,7 @@ func GetShortestPath(pos Position, agentPos Position, agentSpeed int, toAvoid []
 	return agentPos
 }
 
-func containsNode(nodes *NodeHeap, position Position) bool {
+func containsNode(nodes *NodeHeap, position types.Position) bool {
 	for _, node := range *nodes {
 		if node.position.Equals(position) {
 			return true
@@ -263,7 +213,7 @@ func containsNode(nodes *NodeHeap, position Position) bool {
 	return false
 }
 
-func getNode(nodes *NodeHeap, position Position) *Node {
+func getNode(nodes *NodeHeap, position types.Position) *Node {
 	for _, node := range *nodes {
 		if node.position.Equals(position) {
 			return node
@@ -286,43 +236,22 @@ func min(a, b int) int {
 	return b
 }
 
-func (p Position) Equals(other Position) bool {
-	return p.X == other.X && p.Y == other.Y
-}
-
-func removeObjectsBehindPositions(perceivedObjects []Object, objectsBehindPositions []Position) []Object {
+func RemoveObjectsBehindPositions(perceivedObjects []obj.Object, objectsBehindPositions []types.Position) []obj.Object {
 	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
-	objectsToRemove := []Object{}
+	objectsToRemove := []obj.Object{}
 	for _, object := range perceivedObjects {
-		if contains(objectsBehindPositions, object.Center()) || object.Name() == Grass {
+		if Contains(objectsBehindPositions, object.Center()) || object.Name() == types.Grass {
 			objectsToRemove = append(objectsToRemove, object)
 		}
 	}
 
 	// Remove the objects in the objectsToRemove list from the perceivedObjects list
-	perceivedObjects = removeObjects(perceivedObjects, objectsToRemove)
+	perceivedObjects = RemoveObjects(perceivedObjects, objectsToRemove)
 
 	return perceivedObjects
 }
 
-// generalize removeObjectsBehindPositions with any type
-
-func removeAgentsBehindPositions(perceptedAgents []AgentI, objectsBehindPositions []Position) []AgentI {
-	// Filter out positions behind an obstacle if the center of the object is in the objectsBehindPositions list
-	objectsToRemove := []AgentI{}
-	for _, object := range perceptedAgents {
-		if contains(objectsBehindPositions, object.Pos()) {
-			objectsToRemove = append(objectsToRemove, object)
-		}
-	}
-
-	// Remove the objects in the objectsToRemove list from the perceivedObjects list
-	perceptedAgents = removeAgents(perceptedAgents, objectsToRemove)
-
-	return perceptedAgents
-}
-
-func removeObjects(perceivedObjects []Object, objectsToRemove []Object) []Object {
+func RemoveObjects(perceivedObjects []obj.Object, objectsToRemove []obj.Object) []obj.Object {
 	// Remove the objects in the objectsToRemove list from the perceivedObjects list
 	for _, object := range objectsToRemove {
 		for i, perceptedObject := range perceivedObjects {
@@ -335,21 +264,8 @@ func removeObjects(perceivedObjects []Object, objectsToRemove []Object) []Object
 	return perceivedObjects
 }
 
-func removeAgents(perceptedAgents []AgentI, objectsToRemove []AgentI) []AgentI {
-	// Remove the objects in the objectsToRemove list from the perceptedObjects list
-	for _, object := range objectsToRemove {
-		for i, perceptedObject := range perceptedAgents {
-			if perceptedObject == object {
-				perceptedAgents = append(perceptedAgents[:i], perceptedAgents[i+1:]...)
-			}
-		}
-	}
-
-	return perceptedAgents
-}
-
 // define a function to get the angle between two positions
-func getAngle(agentPos Position, position Position) float64 {
+func GetAngle(agentPos types.Position, position types.Position) float64 {
 	// Calculate the vector from agentPos to position
 	deltaX := position.X - agentPos.X
 	deltaY := position.Y - agentPos.Y
@@ -369,7 +285,7 @@ func getAngle(agentPos Position, position Position) float64 {
 }
 
 // define a function that takes two squares in parameters defined by top left and bottom right positions and returns true if they intersect
-func IntersectSquare(topLeft1 Position, bottomRight1 Position, topLeft2 Position, bottomRight2 Position) bool {
+func IntersectSquare(topLeft1 types.Position, bottomRight1 types.Position, topLeft2 types.Position, bottomRight2 types.Position) bool {
 	// Check if the two squares intersect
 	if topLeft1.X > bottomRight2.X || topLeft2.X > bottomRight1.X {
 		return false
@@ -382,15 +298,15 @@ func IntersectSquare(topLeft1 Position, bottomRight1 Position, topLeft2 Position
 }
 
 // TODO : Maybe use angle parameters instead of forced values
-func getObjectsBehindPositions(position Position, angle float64, topLeftVision Position, bottomRightVision Position) []Position {
-	objectsBehindPositions := []Position{}
+func GetObjectsBehindPositions(position types.Position, angle float64, topLeftVision types.Position, bottomRightVision types.Position) []types.Position {
+	objectsBehindPositions := []types.Position{}
 	// the angle order follows the counter-clockwise order
 
 	// if the position to avoid is in the straight right of the agent position
 	// the agent can't see the positions behind it from 315 to 45 degrees following the perspective logic
 	if angle > 345 && angle < 15 {
 		for i := 0; i < bottomRightVision.X; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X + i, position.Y})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X + i, Y: position.Y})
 		}
 
 		// if the position to avoid is in the bottom right quarter of the vision square
@@ -398,49 +314,49 @@ func getObjectsBehindPositions(position Position, angle float64, topLeftVision P
 	} else if angle >= 15 && angle < 75 {
 		for x := position.X; x <= bottomRightVision.X; x++ {
 			for y := position.Y; y <= topLeftVision.Y; y++ {
-				objectsBehindPositions = append(objectsBehindPositions, Position{x, y})
+				objectsBehindPositions = append(objectsBehindPositions, types.Position{X: x, Y: y})
 			}
 		}
 		// if the position to avoid is in the straight bottom of the agent position
 		// the agent can't see the positions behind it from 45 to 135 degrees following the perspective logic
 	} else if angle > 75 && angle < 105 {
 		for i := 0; i < bottomRightVision.Y; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X, position.Y - i})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X, Y: position.Y - i})
 		}
 
 		// if the position to avoid is in the bottom left of the agent position
 		// the agent can't see the positions behind it from 90 to 180 degrees following the perspective logic
 	} else if angle >= 105 && angle <= 165 {
 		for i := 0; i < 8; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X - i, position.Y - i})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X - i, Y: position.Y - i})
 		}
 
 		// if the position to avoid is in the straight left of the agent position
 		// the agent can't see the positions behind it from 135 to 225 degrees following the perspective logic
 	} else if angle > 165 && angle < 195 {
 		for i := 0; i < topLeftVision.X; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X - i, position.Y})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X - i, Y: position.Y})
 		}
 
 		// if the position to avoid is in the top left of the agent position
 		// the agent can't see the positions behind it from 180 to 270 degrees following the perspective logic
 	} else if angle >= 195 && angle <= 255 {
 		for i := 0; i < 8; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X - i, position.Y + i})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X - i, Y: position.Y + i})
 		}
 
 		// if the position to avoid is in the straight top of the agent position
 		// the agent can't see the positions behind it from 225 to 315 degrees following the perspective logic
 	} else if angle > 255 && angle < 285 {
 		for i := 0; i < topLeftVision.Y; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X, position.Y + i})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X, Y: position.Y + i})
 		}
 
 		// if the position to avoid is in the top right of the agent position
 		// the agent can't see the positions behind it from 270 to 360 degrees and from 0 to 90 degrees following the perspective logic
 	} else if angle >= 285 && angle <= 345 || angle >= 0 && angle <= 90 {
 		for i := 0; i < 8; i++ {
-			objectsBehindPositions = append(objectsBehindPositions, Position{position.X + i, position.Y + i})
+			objectsBehindPositions = append(objectsBehindPositions, types.Position{X: position.X + i, Y: position.Y + i})
 		}
 
 	}
@@ -448,7 +364,7 @@ func getObjectsBehindPositions(position Position, angle float64, topLeftVision P
 }
 
 // Calculate the opposite direction of a position
-func OppositeDirection(currentPos, targetPos Position) Position {
+func OppositeDirection(currentPos, targetPos types.Position) types.Position {
 	// Check if the position is valid
 	xToGo := 2*currentPos.X - targetPos.X
 	yToGo := 2*currentPos.Y - targetPos.Y
@@ -457,5 +373,5 @@ func OppositeDirection(currentPos, targetPos Position) Position {
 	}
 	// TODO: Add more checks if needed
 
-	return Position{X: xToGo, Y: yToGo}
+	return types.Position{X: xToGo, Y: yToGo}
 }

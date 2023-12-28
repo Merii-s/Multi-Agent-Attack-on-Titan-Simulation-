@@ -1,8 +1,13 @@
 package main
 
 import (
-	pkg "AOT/pkg"
-	gui "AOT/pkg/gui"
+	agt_utils "AOT/agt/agt_utils"
+	env "AOT/agt/env"
+	gui "AOT/gui"
+	obj "AOT/pkg/obj"
+	params "AOT/pkg/parameters"
+	types "AOT/pkg/types"
+
 	"log"
 	"sync"
 	"time"
@@ -12,8 +17,8 @@ import (
 
 type Game struct {
 	sync.Mutex
-	c        chan *pkg.Environment
-	elements []pkg.Object
+	c        chan *env.Environment
+	elements []obj.Object
 }
 
 var (
@@ -53,26 +58,37 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) ListenToSimu() {
-	var e *pkg.Environment
+	var e *env.Environment
 	for {
 		e = <-g.c
 		g.Lock()
-		g.elements = make([]pkg.Object, len(e.Objects())+len(e.Agents()))
-		mergedSlice := append(e.Objects(), e.Agents()...)
-		copy(g.elements, mergedSlice)
+		g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
+		g.elements = append(g.elements, e.Objects()...)
+		for _, agent := range e.Agents() {
+			g.elements = append(g.elements, agent.Object())
+		}
 	}
+}
+
+func NewEnvironement(H int, W int) *env.Environment {
+	objects := env.CreateStaticObjects(H, W)
+	humans := agt_utils.CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
+	titans := agt_utils.CreateTitans(H, W)
+	merged_agents := make([]env.AgentI, len(titans)+len(humans))
+	merged_agents = append(merged_agents, humans...)
+	merged_agents = append(merged_agents, titans...)
+	return &env.Environment{Agts: merged_agents, Objs: objects}
 }
 
 var wg1 sync.WaitGroup //Simulation waitgroup
 
 func main() {
-	g := Game{c: make(chan *pkg.Environment)}
-	e := pkg.NewEnvironement(700, 1000)
+	g := Game{c: make(chan *env.Environment)}
+	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
 
-	go pkg.MoveColossal(e, g.c, &wg1)
+	go env.MoveColossal(e, g.c, &wg1)
 	go g.ListenToSimu()
-
-	ebiten.SetWindowSize(1000, 700)
+	ebiten.SetWindowSize(params.ScreenWidth, params.ScreenHeight)
 	ebiten.SetWindowTitle("AOT Simulation")
 
 	if err := ebiten.RunGame(&g); err != nil {

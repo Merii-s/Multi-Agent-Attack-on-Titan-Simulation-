@@ -1,53 +1,14 @@
-package pkg
-
-import (
-	"AOT/pkg"
-	"sync"
-)
-
-type Environment struct {
-	sync.RWMutex
-
-	//A modifier quand le constructeur d'agent sera pret, C'est un tableau d'agents
-	agents []Object
-
-	objects []Object
-
-	screenH int
-	screenW int
-
-	agentCount int
-
-	// Day/Night cycle
-	day bool
-}
-
-type AgentI interface {
-	Percept(*Environment)
-	Deliberate()
-	Act(*Environment)
-	Start(*Environment)
-	Id() Id
-
-	Move(pos Position)
-	Eat()
-	Sleep()
-	AttackSuccess(spdAtk int, spdDef int) float64
-	Attack(pkg.AgentI)
-
-	Pos() Position
-	Vision() int
-	PerceivedObjects() []Object
-	PerceivedAgents() []AgentI
-	Object() Object
-	Agent() *Agent
-}
+package types
 
 type Id string
 
 type Position struct {
 	X int
 	Y int
+}
+
+func (p *Position) Equals(p2 Position) bool {
+	return p.X == p2.X && p.Y == p2.Y
 }
 
 type ObjectName string
@@ -75,9 +36,3 @@ const (
 	MaleSoldier    ObjectName = "MaleSoldier"
 	FemaleSoldier  ObjectName = "FemaleSoldier"
 )
-
-type BehaviorI interface {
-	Percept(*Environment)
-	Deliberate()
-	Act(*Environment)
-}

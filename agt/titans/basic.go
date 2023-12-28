@@ -1,7 +1,9 @@
-package agt
+package titans
 
 import (
-	"AOT/pkg"
+	env "AOT/agt/env"
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -17,11 +19,11 @@ type BasicTitan struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	behavior   pkg.BehaviorI
+	behavior   env.BehaviorI
 }
 
-func NewBasicTitan(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName, regen int) *BasicTitan {
-	if obj != pkg.BasicTitan1 && obj != pkg.BasicTitan2 {
+func NewBasicTitan(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, obj types.ObjectName, regen int) *BasicTitan {
+	if obj != types.BasicTitan1 && obj != types.BasicTitan2 {
 		return nil
 	}
 	atts := NewTitan(id, tl, life, reach, strength, speed, vision, obj, regen)
@@ -45,16 +47,16 @@ func (bt *BasicTitan) StopCh() chan struct{} {
 	return bt.stopCh
 }
 
-func (bt *BasicTitan) Behavior() *pkg.BehaviorI {
+func (bt *BasicTitan) Behavior() *env.BehaviorI {
 	return &bt.behavior
 }
 
-func (bt *BasicTitan) SetBehavior(b pkg.BehaviorI) {
+func (bt *BasicTitan) SetBehavior(b env.BehaviorI) {
 	bt.behavior = b
 }
 
 // Methods for BasicTitan
-func (bt *BasicTitan) Percept(e *pkg.Environment) {
+func (bt *BasicTitan) Percept(e *env.Environment) {
 	bt.behavior.Percept(e)
 }
 
@@ -63,13 +65,13 @@ func (bt *BasicTitan) Deliberate() {
 
 }
 
-func (bt *BasicTitan) Act(e *pkg.Environment) {
+func (bt *BasicTitan) Act(e *env.Environment) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 	bt.behavior.Act(e)
 }
 
-func (bt *BasicTitan) Start(e *pkg.Environment) {
+func (bt *BasicTitan) Start(e *env.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
 		for {
@@ -83,11 +85,11 @@ func (bt *BasicTitan) Start(e *pkg.Environment) {
 
 }
 
-func (bt *BasicTitan) Id() pkg.Id {
+func (bt *BasicTitan) Id() types.Id {
 	return bt.attributes.agentAttributes.Id()
 }
 
-func (bt *BasicTitan) Move(pos pkg.Position) {
+func (bt *BasicTitan) Move(pos types.Position) {
 	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
 	bt.attributes.agentAttributes.SetPos(pos)
 }
@@ -113,21 +115,21 @@ func (bt *BasicTitan) AttackSuccess(spdAtk int, spdDef int) float64 {
 	}
 }
 
-func (bt *BasicTitan) attack(agt pkg.Agent) {
+func (bt *BasicTitan) Attack(agt env.AgentI) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Speed()) {
+	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.SetHp(agt.Hp() - bt.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Hp())
+		agt.Agent().SetHp(agt.Agent().Hp() - bt.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
 	}
 }
 
-func (bt *BasicTitan) Pos() pkg.Position {
+func (bt *BasicTitan) Pos() types.Position {
 	return bt.attributes.agentAttributes.Pos()
 }
 
@@ -135,17 +137,21 @@ func (bt *BasicTitan) Vision() int {
 	return bt.attributes.agentAttributes.Vision()
 }
 
-func (bt *BasicTitan) Object() pkg.Object {
+func (bt *BasicTitan) Object() obj.Object {
 	return bt.attributes.agentAttributes.Object()
 }
 
-func (bt *BasicTitan) PerceivedObjects() []pkg.Object {
+func (bt *BasicTitan) PerceivedObjects() []obj.Object {
 	return bt.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (bt *BasicTitan) PerceivedAgents() []pkg.AgentI {
+func (bt *BasicTitan) PerceivedAgents() []env.AgentI {
 	return bt.attributes.agentAttributes.PerceivedAgents()
 }
+
+func (bt *BasicTitan) Agent() *env.Agent { return &bt.attributes.agentAttributes }
+
+func (bt *BasicTitan) SetPos(pos types.Position) { bt.attributes.agentAttributes.SetPos(pos) }
 
 // Regenerate method for BasicTitan
 func (bt *BasicTitan) Regenerate() {
@@ -192,7 +198,7 @@ type BasicTitanBehavior struct {
 	bt *BasicTitan
 }
 
-func (btb *BasicTitanBehavior) Percept(e *pkg.Environment) {
+func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 	println("BasicTitan Percept")
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := btb.bt.attributes.agentAttributes.GetVision(e)
@@ -214,5 +220,5 @@ func (btb *BasicTitanBehavior) Percept(e *pkg.Environment) {
 
 func (btb *BasicTitanBehavior) Deliberate() {}
 
-func (btb *BasicTitanBehavior) Act(e *pkg.Environment) {
+func (btb *BasicTitanBehavior) Act(e *env.Environment) {
 }

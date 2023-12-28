@@ -1,22 +1,28 @@
-package pkg
+package env
+
+import (
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
+	utils "AOT/pkg/utilitaries"
+)
 
 type Agent struct {
-	id               Id
+	id               types.Id
 	reach            int
 	strength         int
 	speed            int
 	maxHP            int
 	vision           int
 	attack           bool
-	nextPosition     Position
+	nextPosition     types.Position
 	agentToAttack    AgentI
-	perceivedObjects []Object
+	perceivedObjects []obj.Object
 	perceivedAgents  []AgentI
-	cantSeeBehind    []ObjectName
-	object           *Object
+	cantSeeBehind    []types.ObjectName
+	object           *obj.Object
 }
 
-func NewAgent(id Id, tl Position, life int, reach int, strength int, speed int, vision int, name ObjectName) *Agent {
+func NewAgent(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, name types.ObjectName) *Agent {
 	return &Agent{
 		id:               id,
 		reach:            reach,
@@ -26,18 +32,18 @@ func NewAgent(id Id, tl Position, life int, reach int, strength int, speed int, 
 		attack:           false,
 		nextPosition:     tl,
 		agentToAttack:    nil,
-		perceivedObjects: []Object{},
+		perceivedObjects: []obj.Object{},
 		perceivedAgents:  []AgentI{},
-		cantSeeBehind:    []ObjectName{},
-		object:           NewObject(name, tl, life),
+		cantSeeBehind:    []types.ObjectName{},
+		object:           obj.NewObject(name, tl, life),
 	}
 }
 
-func (t *Agent) Id() Id {
+func (t *Agent) Id() types.Id {
 	return t.id
 }
 
-func (t *Agent) Pos() Position { return t.object.TL() }
+func (t *Agent) Pos() types.Position { return t.object.TL() }
 
 func (t *Agent) Reach() int {
 	return t.reach
@@ -55,53 +61,55 @@ func (t *Agent) MaxHP() int {
 	return t.maxHP
 }
 
-func (t *Agent) Hp() int { return t.object.life }
+func (t *Agent) Hp() int { return t.object.Life() }
 
-func (t *Agent) SetPos(pos Position) { t.object.tl = pos }
+func (t *Agent) SetPos(pos types.Position) { t.object.SetPosition(pos) }
 
 func (t *Agent) SetAttack(b bool) { t.attack = b }
 
-func (t *Agent) SetNextPos(nextPos Position) { t.nextPosition = nextPos }
+func (t *Agent) SetNextPos(nextPos types.Position) { t.nextPosition = nextPos }
 
 func (t *Agent) SetAgentToAttack(agt AgentI) { t.agentToAttack = agt }
 
-func (t *Agent) SetHp(hp int) { t.object.life = hp }
+func (t *Agent) SetHp(hp int) { t.object.SetLife(hp) }
 
 func (t *Agent) Vision() int { return t.vision }
 
-func (t *Agent) NextPos() Position { return t.nextPosition }
+func (t *Agent) NextPos() types.Position { return t.nextPosition }
 
 func (t *Agent) Attack() bool { return t.attack }
 
 func (t *Agent) AgentToAttack() AgentI { return t.agentToAttack }
 
-func (t *Agent) PerceivedObjects() []Object { return t.perceivedObjects }
+func (t *Agent) PerceivedObjects() []obj.Object { return t.perceivedObjects }
 
 func (t *Agent) PerceivedAgents() []AgentI { return t.perceivedAgents }
 
-func (t *Agent) CantSeeBehind() []ObjectName { return t.cantSeeBehind }
+func (t *Agent) CantSeeBehind() []types.ObjectName { return t.cantSeeBehind }
 
-func (t *Agent) Object() Object { return *t.object }
+func (t *Agent) Object() obj.Object { return *t.object }
 
-func (t *Agent) AddPerceivedObject(obj Object) { t.perceivedObjects = append(t.perceivedObjects, obj) }
+func (t *Agent) AddPerceivedObject(obj obj.Object) {
+	t.perceivedObjects = append(t.perceivedObjects, obj)
+}
 
 func (t *Agent) AddPerceivedAgent(agt AgentI) { t.perceivedAgents = append(t.perceivedAgents, agt) }
 
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
-func (t *Agent) GetVision(e *Environment) ([]Object, []AgentI) {
+func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 	// Get the top left and bottom right positions of the vision square
-	topLeft := Position{t.Pos().X - t.Vision(), t.Pos().Y + t.Vision()}
-	bottomRight := Position{t.Pos().X + t.Vision(), t.Pos().Y - t.Vision()}
+	topLeft := types.Position{X: t.Pos().X - t.Vision(), Y: t.Pos().Y + t.Vision()}
+	bottomRight := types.Position{X: t.Pos().X + t.Vision(), Y: t.Pos().Y - t.Vision()}
 
 	// Get the positions inside the vision square from the environment
 	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
 	perceivedAgents := e.PerceivedAgents(topLeft, bottomRight, t.id)
 
 	// Get the objects not seen by the agent
-	CantSeeBehindObjects := []Object{}
+	CantSeeBehindObjects := []obj.Object{}
 	for _, obj := range perceivedObjects {
-		if contains(t.CantSeeBehind(), obj.Name()) {
+		if utils.Contains(t.CantSeeBehind(), obj.Name()) {
 			CantSeeBehindObjects = append(CantSeeBehindObjects, obj)
 		}
 	}
@@ -110,19 +118,19 @@ func (t *Agent) GetVision(e *Environment) ([]Object, []AgentI) {
 	// depending on the angle between the agent and the position to avoid, the agent can't see every positions behind it following the perspective logic
 
 	// Get the positions behind the CantSeeBehindObjects objects
-	objectsBehindPositions := []Position{}
+	objectsBehindPositions := []types.Position{}
 
 	for _, object := range perceivedObjects {
-		if !contains(CantSeeBehindObjects, object) {
+		if !utils.Contains(CantSeeBehindObjects, object) {
 			continue
 		} else {
 			// If a objCantSeeBehindObject is in the vision square, the agent can't see behind it
 			// Get the angle between the agent and the position to avoid
 			objectCenter := object.Center()
-			angle := getAngle(t.Pos(), objectCenter)
+			angle := utils.GetAngle(t.Pos(), objectCenter)
 
 			// Get the perceivedObjects behind the current position to avoid
-			objectsBehindCurrentObject := getObjectsBehindPositions(t.Pos(), angle, topLeft, bottomRight)
+			objectsBehindCurrentObject := utils.GetObjectsBehindPositions(t.Pos(), angle, topLeft, bottomRight)
 
 			for _, position := range objectsBehindCurrentObject {
 				objectsBehindPositions = append(objectsBehindPositions, position)
@@ -131,7 +139,7 @@ func (t *Agent) GetVision(e *Environment) ([]Object, []AgentI) {
 	}
 
 	// Checks if the perceivedObjects are in a objectsBehindPositions position and remove them if they are
-	perceivedObjects = removeObjectsBehindPositions(perceivedObjects, objectsBehindPositions)
+	perceivedObjects = utils.RemoveObjectsBehindPositions(perceivedObjects, objectsBehindPositions)
 	perceivedAgents = removeAgentsBehindPositions(perceivedAgents, objectsBehindPositions)
 
 	return perceivedObjects, perceivedAgents
