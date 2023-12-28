@@ -103,6 +103,7 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 			y = wall_Tl_Y + params.CWall + int(hWall/10) + params.HField*2
 		}
 		object = obj.NewObject(types.Field, types.Position{X: x, Y: y}, params.FIELD_LIFE)
+		object.SetReserve(params.FIELD_RESERVE)
 		objects = append(objects, *object)
 		nb_objects = nb_objects + 1
 	}

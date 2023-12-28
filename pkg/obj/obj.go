@@ -6,9 +6,10 @@ import (
 )
 
 type Object struct {
-	name types.ObjectName
-	tl   types.Position
-	life int
+	name    types.ObjectName
+	tl      types.Position
+	life    int
+	reserve int
 }
 
 func NewObject(name types.ObjectName, tl types.Position, life int) *Object {
@@ -27,9 +28,7 @@ func (o *Object) Life() int {
 	return o.life
 }
 
-func (o *Object) SetPosition(p types.Position) {
-	o.tl = p
-}
+func (o *Object) SetPosition(p types.Position) { o.tl = p }
 
 func (o *Object) Name() types.ObjectName {
 	return o.name
@@ -43,21 +42,11 @@ func (o *Object) TL() types.Position {
 	return o.tl
 }
 
-type FieldObject struct {
-	attr    Object
-	reserve int
-}
+func (o *Object) Reserve() int { return o.reserve }
 
-func NewField(tl types.Position, life int, reserve int) *FieldObject {
-	return &FieldObject{
-		attr: Object{
-			name: types.Field,
-			tl:   tl,
-			life: life,
-		},
-		reserve: reserve,
-	}
-}
+func (o *Object) SetReserve(r int) { o.reserve = r }
+
+// TODO : fonction qui remplie la reserve de la field tous les x pas de temps
 
 func (f *Object) Hitbox() (hb []types.Position) {
 	var w, h int
