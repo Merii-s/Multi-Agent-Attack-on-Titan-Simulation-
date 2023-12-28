@@ -1,7 +1,9 @@
-package agt
+package humans
 
 import (
-	pkg "AOT/pkg"
+	env "AOT/agt/env"
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -17,10 +19,10 @@ type Mikasa struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	behavior   pkg.BehaviorI
+	behavior   env.BehaviorI
 }
 
-func NewMikasa(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Mikasa {
+func NewMikasa(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, obj types.ObjectName) *Mikasa {
 	atts := NewHuman(id, tl, life, reach, strength, speed, vision, obj)
 	m := &Mikasa{
 		attributes: *atts,
@@ -42,16 +44,16 @@ func (m *Mikasa) StopCh() chan struct{} {
 	return m.stopCh
 }
 
-func (m *Mikasa) Behavior() *pkg.BehaviorI {
+func (m *Mikasa) Behavior() *env.BehaviorI {
 	return &m.behavior
 }
 
-func (m *Mikasa) SetBehavior(b pkg.BehaviorI) {
+func (m *Mikasa) SetBehavior(b env.BehaviorI) {
 	m.behavior = b
 }
 
 // Methods for Mikasa
-func (m *Mikasa) Percept(e *pkg.Environment) {
+func (m *Mikasa) Percept(e *env.Environment) {
 	m.behavior.Percept(e)
 }
 
@@ -59,21 +61,21 @@ func (m *Mikasa) Deliberate() {
 	m.behavior.Deliberate()
 }
 
-func (m *Mikasa) Act(e *pkg.Environment) {
+func (m *Mikasa) Act(e *env.Environment) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.behavior.Act(e)
 }
 
-func (m *Mikasa) Id() pkg.Id {
+func (m *Mikasa) Id() types.Id {
 	return m.attributes.agentAttributes.Id()
 }
 
-func (m *Mikasa) Agent() *pkg.Agent {
+func (m *Mikasa) Agent() *env.Agent {
 	return &m.attributes.agentAttributes
 }
 
-func (m *Mikasa) Start(e *pkg.Environment) {
+func (m *Mikasa) Start(e *env.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
 		for {
@@ -86,7 +88,7 @@ func (m *Mikasa) Start(e *pkg.Environment) {
 	}()
 }
 
-func (m *Mikasa) Move(pos pkg.Position) {
+func (m *Mikasa) Move(pos types.Position) {
 	m.attributes.agentAttributes.SetPos(pos)
 }
 
@@ -113,21 +115,21 @@ func (m *Mikasa) attack_success(spd_atk int, reachAtk int, spd_def int) float64 
 	}
 }
 
-func (m *Mikasa) Attack(agt pkg.AgentI) {
+func (m *Mikasa) Attack(agt env.AgentI) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
 	if rand.Float64() < m.attack_success(m.attributes.agentAttributes.Speed(), m.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
 		agt.Agent().SetHp(agt.Agent().Hp() - m.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %m : %m lost  %d HP \n", m.Id(), agt.Id(), agt.Agent().Hp())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", m.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
 	}
 }
 
-func (m *Mikasa) Pos() pkg.Position {
+func (m *Mikasa) Pos() types.Position {
 	return m.attributes.agentAttributes.Pos()
 }
 
@@ -135,15 +137,15 @@ func (m *Mikasa) Vision() int {
 	return m.attributes.agentAttributes.Vision()
 }
 
-func (m *Mikasa) Object() pkg.Object {
+func (m *Mikasa) Object() obj.Object {
 	return m.attributes.agentAttributes.Object()
 }
 
-func (m *Mikasa) PerceivedObjects() []pkg.Object {
+func (m *Mikasa) PerceivedObjects() []obj.Object {
 	return m.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (m *Mikasa) PerceivedAgents() []pkg.AgentI {
+func (m *Mikasa) PerceivedAgents() []env.AgentI {
 	return m.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -152,20 +154,20 @@ type MikasaBehavior struct {
 	m *Mikasa
 }
 
-func (mb *MikasaBehavior) Percept(e *pkg.Environment) {
+func (mb *MikasaBehavior) Percept(e *env.Environment) {
 	println("Mikasa Percept")
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := mb.m.attributes.agentAttributes.GetVision(e)
 
 	// Add the percepted agents to the list of percepted agents
 	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %m\n", obj.Name())
+		fmt.Printf("Percepted object: %s\n", obj.Name())
 		mb.m.attributes.agentAttributes.AddPerceivedObject(obj)
 	}
 
 	// Add the percepted agents to the list of percepted agents
 	for _, agt := range perceivedAgents {
-		fmt.Printf("Percepted agent: %m\n", agt.Id())
+		fmt.Printf("Percepted agent: %s\n", agt.Id())
 		mb.m.attributes.agentAttributes.AddPerceivedAgent(agt)
 	}
 
@@ -176,6 +178,6 @@ func (mb *MikasaBehavior) Deliberate() {
 
 }
 
-func (mb *MikasaBehavior) Act(e *pkg.Environment) {
+func (mb *MikasaBehavior) Act(e *env.Environment) {
 
 }

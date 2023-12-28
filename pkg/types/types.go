@@ -1,47 +1,5 @@
 package pkg
 
-import (
-	"sync"
-)
-
-type Environment struct {
-	sync.RWMutex
-
-	//A modifier quand le constructeur d'agent sera pret, C'est un tableau d'agents
-	agents []AgentI
-
-	objects []Object
-
-	screenH int
-	screenW int
-
-	agentCount int
-
-	// Day/Night cycle
-	day bool
-}
-
-type AgentI interface {
-	Percept(*Environment)
-	Deliberate()
-	Act(*Environment)
-	Start(*Environment)
-	Id() Id
-
-	Move(pos Position)
-	Eat()
-	Sleep()
-	AttackSuccess(spdAtk int, spdDef int) float64
-	Attack(AgentI)
-
-	Pos() Position
-	Vision() int
-	PerceivedObjects() []Object
-	PerceivedAgents() []AgentI
-	Object() Object
-	Agent() *Agent
-}
-
 type Id string
 
 type Position struct {
@@ -74,9 +32,3 @@ const (
 	MaleSoldier    ObjectName = "MaleSoldier"
 	FemaleSoldier  ObjectName = "FemaleSoldier"
 )
-
-type BehaviorI interface {
-	Percept(*Environment)
-	Deliberate()
-	Act(*Environment)
-}

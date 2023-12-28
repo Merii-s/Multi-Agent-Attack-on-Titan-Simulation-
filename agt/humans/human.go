@@ -1,18 +1,19 @@
-package agt
+package humans
 
 import (
-	pkg "AOT/pkg"
+	env "AOT/agt/env"
+	types "AOT/pkg/types"
 )
 
 type HumanI interface {
-	pkg.AgentI
+	env.AgentI
 	escape()
 }
 
 type Human struct {
-	agentAttributes pkg.Agent
+	agentAttributes env.Agent
 }
 
-func NewHuman(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, object pkg.ObjectName) *Human {
-	return &Human{agentAttributes: *pkg.NewAgent(id, tl, life, reach, strength, speed, vision, object)}
+func NewHuman(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, object types.ObjectName) *Human {
+	return &Human{agentAttributes: *env.NewAgent(id, tl, life, reach, strength, speed, vision, object)}
 }

@@ -1,23 +1,24 @@
-package agt
+package titans
 
 import (
-	pkg "AOT/pkg"
+	env "AOT/agt/env"
+	types "AOT/pkg/types"
 )
 
 type TitanI interface {
-	pkg.AgentI
+	env.AgentI
 	attack()
 	regenerate()
 }
 
 type Titan struct {
-	agentAttributes pkg.Agent
+	agentAttributes env.Agent
 	regenRate       int
 }
 
-func NewTitan(id pkg.Id, tl pkg.Position, life int, r int, s int, spd int, v int, o pkg.ObjectName, regen int) *Titan {
+func NewTitan(id types.Id, tl types.Position, life int, r int, s int, spd int, v int, o types.ObjectName, regen int) *Titan {
 	return &Titan{
-		agentAttributes: *pkg.NewAgent(id, tl, life, r, s, spd, v, o),
+		agentAttributes: *env.NewAgent(id, tl, life, r, s, spd, v, o),
 		regenRate:       regen}
 }
 

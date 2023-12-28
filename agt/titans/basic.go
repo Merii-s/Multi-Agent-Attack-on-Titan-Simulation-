@@ -1,7 +1,8 @@
-package agt
+package titans
 
 import (
-	"AOT/pkg"
+	env "AOT/agt/env"
+	types "AOT/pkg/types"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -17,10 +18,10 @@ type BasicTitan struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	behavior   pkg.BehaviorI
+	behavior   env.BehaviorI
 }
 
-func NewBasicTitan(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName, regen int) *BasicTitan {
+func NewBasicTitan(id types.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName, regen int) *BasicTitan {
 	if obj != pkg.BasicTitan1 && obj != pkg.BasicTitan2 {
 		return nil
 	}
