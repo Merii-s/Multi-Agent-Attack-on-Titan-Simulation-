@@ -219,7 +219,7 @@ func (eb *ErenBehavior) Deliberate() {
 
 func (eb *ErenBehavior) Act(e *pkg.Environment) {
 	if eb.eren.transform {
-		//TO DO: Eren transforms to titan
+		//TODO: Eren transforms to titan
 	}
 
 	if eb.eren.attributes.agentAttributes.Attack() {
@@ -230,7 +230,7 @@ func (eb *ErenBehavior) Act(e *pkg.Environment) {
 		eb.eren.attributes.agentAttributes.SetAgentToAttack(nil)
 		if eb.eren.transform {
 			eb.eren.transform = false
-			//TO DO: Eren transforms back to human
+			//TODO: Eren transforms back to human
 		}
 	} else {
 		// Move towards the specified position

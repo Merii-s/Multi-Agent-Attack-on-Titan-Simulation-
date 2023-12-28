@@ -119,7 +119,7 @@ func (s *Soldier) Attack(agt pkg.AgentI) {
 	if agt.Id() != s.attributes.agentAttributes.Id() {
 		s.mu.Lock()
 		defer s.mu.Unlock()
-		// TO DO: consider the reach of the agent
+		// TODO: consider the reach of the agent
 		// If the percentage is less than the success rate, the attack is successful
 		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
 			// If the attack is successful, the agent loses HP

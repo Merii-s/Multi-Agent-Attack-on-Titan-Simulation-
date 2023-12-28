@@ -455,7 +455,7 @@ func OppositeDirection(currentPos, targetPos Position) Position {
 	if xToGo < 0 || yToGo < 0 {
 		return currentPos
 	}
-	// TO DO: Add more checks if needed
+	// TODO: Add more checks if needed
 
 	return Position{X: xToGo, Y: yToGo}
 }
