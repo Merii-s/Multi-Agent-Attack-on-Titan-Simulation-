@@ -1,7 +1,9 @@
 package gui
 
 import (
-	pkg "AOT/pkg"
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
+	utils "AOT/pkg/utilitaries"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -25,7 +27,7 @@ func Load_Sprites() ([]error, map[string]**ebiten.Image) {
 
 	//Lecture des images et stockage dans imageVariables
 	for _, file := range imgFiles {
-		img, _, err := ebitenutil.NewImageFromFile(pkg.GetImagePath(file))
+		img, _, err := ebitenutil.NewImageFromFile(utils.GetImagePath(file))
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -35,7 +37,7 @@ func Load_Sprites() ([]error, map[string]**ebiten.Image) {
 	return errs, imageVariables
 }
 
-func DrawSprite(screen *ebiten.Image, o pkg.Object, imageVariables map[string]**ebiten.Image) {
+func DrawSprite(screen *ebiten.Image, o obj.Object, imageVariables map[string]**ebiten.Image) {
 	var (
 		img *ebiten.Image
 		op  ebiten.DrawImageOptions
@@ -45,45 +47,45 @@ func DrawSprite(screen *ebiten.Image, o pkg.Object, imageVariables map[string]**
 	op.GeoM.Translate(float64(o.TL().X), float64(o.TL().Y))
 
 	switch o.Name() {
-	case pkg.Field:
+	case types.Field:
 		img = *imageVariables["wheat_V2"]
-	case pkg.BigHouse1:
+	case types.BigHouse1:
 		img = *imageVariables["big_house_sprite"]
-	case pkg.BigHouse2:
+	case types.BigHouse2:
 		img = *imageVariables["big_house_spriteV2"]
-	case pkg.Dungeon:
+	case types.Dungeon:
 		img = *imageVariables["dungeon_sprite"]
-	case pkg.Grass:
+	case types.Grass:
 		img = *imageVariables["grass_spriteV4"]
-	case pkg.Wall:
+	case types.Wall:
 		img = *imageVariables["wall_sprite"]
-	case pkg.Eren:
+	case types.Eren:
 		img = *imageVariables["eren_small_sprite"]
-	case pkg.Mikasa:
+	case types.Mikasa:
 		img = *imageVariables["mikasa_sprite"]
-	case pkg.MaleVillager:
+	case types.MaleVillager:
 		img = *imageVariables["male_villager_sprite"]
-	case pkg.FemaleVillager:
+	case types.FemaleVillager:
 		img = *imageVariables["female_villager_sprite"]
-	case pkg.BasicTitan1:
+	case types.BasicTitan1:
 		img = *imageVariables["basic_titan1_sprite"]
-	case pkg.BasicTitan2:
+	case types.BasicTitan2:
 		img = *imageVariables["basic_titan2_sprite"]
-	case pkg.BeastTitan:
+	case types.BeastTitan:
 		img = *imageVariables["beast_titan_sprite_V2"]
-	case pkg.ArmoredTitan:
+	case types.ArmoredTitan:
 		img = *imageVariables["armored_titan_sprite"]
-	case pkg.FemaleTitan:
+	case types.FemaleTitan:
 		img = *imageVariables["female_titan_sprite"]
-	case pkg.ColossalTitan:
+	case types.ColossalTitan:
 		img = *imageVariables["colossal_titan_sprite"]
-	case pkg.ErenTitanS:
+	case types.ErenTitanS:
 		img = *imageVariables["eren_titan_sprite"]
-	case pkg.JawTitan:
+	case types.JawTitan:
 		img = *imageVariables["jaw_titan_sprite"]
-	case pkg.MaleSoldier:
+	case types.MaleSoldier:
 		img = *imageVariables["male_soldier_sprite"]
-	case pkg.FemaleSoldier:
+	case types.FemaleSoldier:
 		img = *imageVariables["female_soldier_sprite"]
 	default:
 		img = *imageVariables["small_house_sprite"]

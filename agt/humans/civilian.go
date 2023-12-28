@@ -1,7 +1,10 @@
-package agt
+package humans
 
 import (
-	pkg "AOT/pkg"
+	env "AOT/agt/env"
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
+	utils "AOT/pkg/utilitaries"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -19,10 +22,10 @@ type Civilian struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	behavior   pkg.BehaviorI
+	behavior   env.BehaviorI
 }
 
-func NewCivilian(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Civilian {
+func NewCivilian(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, obj types.ObjectName) *Civilian {
 	atts := NewHuman(id, tl, life, reach, strength, speed, vision, obj)
 	c := &Civilian{
 		attributes: *atts,
@@ -44,16 +47,16 @@ func (c *Civilian) StopCh() chan struct{} {
 	return c.stopCh
 }
 
-func (c *Civilian) Behavior() *pkg.BehaviorI {
+func (c *Civilian) Behavior() *env.BehaviorI {
 	return &c.behavior
 }
 
-func (c *Civilian) SetBehavior(b pkg.BehaviorI) {
+func (c *Civilian) SetBehavior(b env.BehaviorI) {
 	c.behavior = b
 }
 
 // methods for civilian
-func (c *Civilian) Percept(e *pkg.Environment) {
+func (c *Civilian) Percept(e *env.Environment) {
 	c.behavior.Percept(e)
 }
 
@@ -62,21 +65,21 @@ func (c *Civilian) Deliberate() {
 
 }
 
-func (c *Civilian) Act(e *pkg.Environment) {
+func (c *Civilian) Act(e *env.Environment) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.behavior.Act(e)
 }
 
-func (c *Civilian) Id() pkg.Id {
+func (c *Civilian) Id() types.Id {
 	return c.attributes.agentAttributes.Id()
 }
 
-func (c *Civilian) Agent() *pkg.Agent {
+func (c *Civilian) Agent() *env.Agent {
 	return &c.attributes.agentAttributes
 }
 
-func (c *Civilian) Start(e *pkg.Environment) {
+func (c *Civilian) Start(e *env.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
 		for {
@@ -89,18 +92,23 @@ func (c *Civilian) Start(e *pkg.Environment) {
 	}()
 }
 
-func (c *Civilian) move(pos pkg.Position) {
-	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
-	c.attributes.agentAttributes.SetPos(pos)
-}
+func (c *Civilian) Move(pos types.Position) { c.attributes.agentAttributes.SetPos(pos) }
 
-func (c *Civilian) eat() {
+func (c *Civilian) Eat() {
 
 }
 
-func (*Civilian) sleep() {
+func (*Civilian) Sleep() {
 	//time.Sleep(?)
 }
+
+func (c *Civilian) AttackSuccess(spdAtk int, spdDef int) float64 {
+	return 0
+}
+
+func (c *Civilian) Attack(agt env.AgentI) { return }
+
+func (c *Civilian) SetPos(pos types.Position) { c.attributes.agentAttributes.SetPos(pos) }
 
 func (c *Civilian) build() {
 
@@ -110,7 +118,7 @@ func (c *Civilian) getFood() {
 
 }
 
-func (c *Civilian) Pos() pkg.Position {
+func (c *Civilian) Pos() types.Position {
 	return c.attributes.agentAttributes.Pos()
 }
 
@@ -118,15 +126,15 @@ func (c *Civilian) Vision() int {
 	return c.attributes.agentAttributes.Vision()
 }
 
-func (c *Civilian) Object() pkg.Object {
+func (c *Civilian) Object() obj.Object {
 	return c.attributes.agentAttributes.Object()
 }
 
-func (c *Civilian) PerceivedObjects() []pkg.Object {
+func (c *Civilian) PerceivedObjects() []obj.Object {
 	return c.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (c *Civilian) PerceivedAgents() []pkg.AgentI {
+func (c *Civilian) PerceivedAgents() []env.AgentI {
 	return c.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -135,20 +143,20 @@ type CivilianBehavior struct {
 	c *Civilian
 }
 
-func (cb *CivilianBehavior) Percept(e *pkg.Environment) {
+func (cb *CivilianBehavior) Percept(e *env.Environment) {
 	println("Civilian Percept")
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := cb.c.attributes.agentAttributes.GetVision(e)
 
 	// Add the percepted agents to the list of percepted agents
-	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %c\n", obj.Name())
-		cb.c.attributes.agentAttributes.AddPerceivedObject(obj)
+	for _, object := range perceivedObjects {
+		fmt.Printf("Percepted object: %s\n", object.Name())
+		cb.c.attributes.agentAttributes.AddPerceivedObject(object)
 	}
 
 	// Add the percepted agents to the list of percepted agents
 	for _, agt := range perceivedAgents {
-		fmt.Printf("Percepted agent: %c\n", agt.Id())
+		fmt.Printf("Percepted agent: %s\n", agt.Id())
 		cb.c.attributes.agentAttributes.AddPerceivedAgent(agt)
 	}
 
@@ -161,14 +169,14 @@ func (cb *CivilianBehavior) Deliberate() {
 	for _, agt := range cb.c.attributes.agentAttributes.PerceivedAgents() {
 		// if the agent is a titan, the civilian escapes
 		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" || agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
-			cb.c.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(cb.c.attributes.agentAttributes.Pos(), agt.Pos()))
+			cb.c.attributes.agentAttributes.SetNextPos(utils.OppositeDirection(cb.c.attributes.agentAttributes.Pos(), agt.Pos()))
 			titanFound = true
 			break
 		}
 	}
 	if !titanFound {
 		// Move randomly
-		var randPos pkg.Position
+		var randPos types.Position
 		randPos.X = cb.c.attributes.agentAttributes.Pos().X + rand.Intn(10)
 		randPos.Y = cb.c.attributes.agentAttributes.Pos().Y + rand.Intn(10)
 
@@ -176,7 +184,7 @@ func (cb *CivilianBehavior) Deliberate() {
 	}
 }
 
-func (cb *CivilianBehavior) Act(e *pkg.Environment) {
+func (cb *CivilianBehavior) Act(e *env.Environment) {
 	// Move to the next position
-	cb.c.move(cb.c.attributes.agentAttributes.NextPos())
+	cb.c.Move(cb.c.attributes.agentAttributes.NextPos())
 }

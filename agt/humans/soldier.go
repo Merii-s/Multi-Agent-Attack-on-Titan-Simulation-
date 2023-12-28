@@ -1,7 +1,10 @@
-package agt
+package humans
 
 import (
-	pkg "AOT/pkg"
+	env "AOT/agt/env"
+	obj "AOT/pkg/obj"
+	types "AOT/pkg/types"
+	utils "AOT/pkg/utilitaries"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -17,10 +20,10 @@ type Soldier struct {
 	stopCh     chan struct{}
 	syncChan   chan string
 	mu         sync.Mutex
-	bahavior   pkg.BehaviorI
+	behavior   env.BehaviorI
 }
 
-func NewSoldier(id pkg.Id, tl pkg.Position, life int, reach int, strength int, speed int, vision int, obj pkg.ObjectName) *Soldier {
+func NewSoldier(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, obj types.ObjectName) *Soldier {
 	atts := NewHuman(id, tl, life, reach, strength, speed, vision, obj)
 	s := &Soldier{
 		attributes: *atts,
@@ -42,60 +45,60 @@ func (s *Soldier) StopCh() chan struct{} {
 	return s.stopCh
 }
 
-func (s *Soldier) Behavior() *pkg.BehaviorI {
-	return &s.bahavior
+func (s *Soldier) Behavior() *env.BehaviorI {
+	return &s.behavior
 }
 
-func (s *Soldier) SetBehavior(b pkg.BehaviorI) {
-	s.bahavior = b
+func (s *Soldier) SetBehavior(b env.BehaviorI) {
+	s.behavior = b
 }
 
 // Methods for Soldier
-func (s *Soldier) Percept(e *pkg.Environment) {
-	s.bahavior.Percept(e)
+func (s *Soldier) Percept(e *env.Environment) {
+	s.behavior.Percept(e)
 }
 
 func (s *Soldier) Deliberate() {
-	s.bahavior.Deliberate()
+	s.behavior.Deliberate()
 }
 
-func (s *Soldier) Act(e *pkg.Environment) {
+func (s *Soldier) Act(e *env.Environment) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.bahavior.Act(e)
+	s.behavior.Act(e)
 }
 
-func (s *Soldier) Id() pkg.Id {
+func (s *Soldier) Id() types.Id {
 	return s.attributes.agentAttributes.Id()
 }
 
-func (s *Soldier) Agent() *pkg.Agent {
+func (s *Soldier) Agent() *env.Agent {
 	return &s.attributes.agentAttributes
 }
 
-func (s *Soldier) Start(e *pkg.Environment) {
+func (s *Soldier) Start(e *env.Environment) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
 		for {
 			println("Soldier Start")
-			s.bahavior.Percept(e)
+			s.behavior.Percept(e)
 			time.Sleep(100 * time.Millisecond)
-			s.bahavior.Deliberate()
-			s.bahavior.Act(e)
+			s.behavior.Deliberate()
+			s.behavior.Act(e)
 		}
 	}()
 }
 
-func (s *Soldier) move(pos pkg.Position) {
+func (s *Soldier) Move(pos types.Position) {
 	// TODO : Move randomly or towards a target --> not only in a straight line (top right here)
 	s.attributes.agentAttributes.SetPos(pos)
 }
 
-func (s *Soldier) eat() {
+func (s *Soldier) Eat() {
 
 }
 
-func (s *Soldier) sleep() {
+func (s *Soldier) Sleep() {
 	//time.Sleep(?)
 }
 
@@ -104,24 +107,24 @@ func (*Soldier) Gard() {
 }
 
 // Return a value between 0 and 1 representing success of an attack
-func (*Soldier) attack_success(spd_atk int, reach_atk int, spd_def int) float64 {
+func (*Soldier) AttackSuccess(spdAtk int, spdDef int) float64 {
 	// If the speed of the attacker is greater than the speed of the defender, the attack is successful
-	if spd_atk > spd_def {
+	if spdAtk > spdDef {
 		return 1
 	} else {
 		// If the speed of the attacker is less than the speed of the defender, the attack is successful with a probability of
 		// (speed of the attacker)/(speed of the defender)
-		return float64(spd_atk) / float64(spd_def)
+		return float64(spdAtk) / float64(spdDef)
 	}
 }
 
-func (s *Soldier) Attack(agt pkg.AgentI) {
+func (s *Soldier) Attack(agt env.AgentI) {
 	if agt.Id() != s.attributes.agentAttributes.Id() {
 		s.mu.Lock()
 		defer s.mu.Unlock()
-		// TO DO: consider the reach of the agent
+		// TODO: consider the reach of the agent
 		// If the percentage is less than the success rate, the attack is successful
-		if rand.Float64() < s.attack_success(s.attributes.agentAttributes.Speed(), s.attributes.agentAttributes.Reach(), agt.Agent().Speed()) {
+		if rand.Float64() < s.AttackSuccess(s.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 			// If the attack is successful, the agent loses HP
 			agt.Agent().SetHp(agt.Agent().Hp() - s.attributes.agentAttributes.Strength())
 			fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Agent().Hp())
@@ -132,7 +135,9 @@ func (s *Soldier) Attack(agt pkg.AgentI) {
 	}
 }
 
-func (s *Soldier) Pos() pkg.Position {
+func (s *Soldier) SetPos(pos types.Position) { s.attributes.agentAttributes.SetPos(pos) }
+
+func (s *Soldier) Pos() types.Position {
 	return s.attributes.agentAttributes.Pos()
 }
 
@@ -140,15 +145,15 @@ func (s *Soldier) Vision() int {
 	return s.attributes.agentAttributes.Vision()
 }
 
-func (s *Soldier) Object() pkg.Object {
+func (s *Soldier) Object() obj.Object {
 	return s.attributes.agentAttributes.Object()
 }
 
-func (s *Soldier) PerceivedObjects() []pkg.Object {
+func (s *Soldier) PerceivedObjects() []obj.Object {
 	return s.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (s *Soldier) PerceivedAgents() []pkg.AgentI {
+func (s *Soldier) PerceivedAgents() []env.AgentI {
 	return s.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -157,7 +162,7 @@ type SoldierBehavior struct {
 	s *Soldier
 }
 
-func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
+func (sb *SoldierBehavior) Percept(e *env.Environment) {
 	println("Soldier Percept")
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := sb.s.attributes.agentAttributes.GetVision(e)
@@ -180,13 +185,13 @@ func (sb *SoldierBehavior) Percept(e *pkg.Environment) {
 func (sb *SoldierBehavior) Deliberate() {
 	// Initialize variables for counting titans
 	numTitans := 0
-	var agentToAttack pkg.AgentI
+	var agentToAttack env.AgentI
 
 	// Count the number of titans and store the position of the titan to attack
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
 		// if the agent is a special titan, the soldier moves away in the opposite direction
 		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" {
-			sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agt.Pos()))
+			sb.s.attributes.agentAttributes.SetNextPos(utils.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agt.Pos()))
 			break
 		}
 		if agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
@@ -202,20 +207,20 @@ func (sb *SoldierBehavior) Deliberate() {
 		sb.s.attributes.agentAttributes.SetAttack(true)
 		sb.s.attributes.agentAttributes.SetNextPos(agentToAttack.Pos())
 	} else {
-		sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agentToAttack.Pos()))
+		sb.s.attributes.agentAttributes.SetNextPos(utils.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), agentToAttack.Pos()))
 	}
 }
 
-func (sb *SoldierBehavior) Act(e *pkg.Environment) {
+func (sb *SoldierBehavior) Act(e *env.Environment) {
 	// Perform the action based on the parameters
 	if sb.s.attributes.agentAttributes.Attack() {
-		sb.s.move(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
 		sb.s.Attack(sb.s.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		sb.s.attributes.agentAttributes.SetAttack(false)
 		sb.s.attributes.agentAttributes.SetAgentToAttack(nil)
 	} else {
 		// Move towards the specified position
-		sb.s.move(sb.s.attributes.agentAttributes.NextPos())
+		sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
 	}
 }
