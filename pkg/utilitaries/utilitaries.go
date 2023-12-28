@@ -138,7 +138,7 @@ func Contains[T any](list []T, target T) bool {
 	return false
 }
 
-func getShortestPath(pos types.Position, agentPos types.Position, agentSpeed int, toAvoid []types.Position) types.Position {
+func GetShortestPath(pos types.Position, agentPos types.Position, agentSpeed int, toAvoid []types.Position) types.Position {
 	openSet := make(NodeHeap, 0)
 	closedSet := make(NodeHeap, 0)
 
@@ -376,24 +376,9 @@ func OppositeDirection(currentPos, targetPos types.Position) types.Position {
 	return types.Position{X: xToGo, Y: yToGo}
 }
 
-func IsOutOfScreen(pos Position, W int, H int) bool {
+func IsOutOfScreen(pos types.Position, W int, H int) bool {
 	if pos.X < 0 || pos.X > W || pos.Y < 0 || pos.Y > H {
 		return true
 	}
 	return false
-}
-
-func ClosestPosition(position Position, positions []Position) Position {
-	// Get the closest position from the list
-	closestPosition := positions[0]
-	for _, pos := range positions {
-		if position.Distance(pos) < position.Distance(closestPosition) {
-			closestPosition = pos
-		}
-	}
-	return closestPosition
-}
-
-func (Position) Distance(pos Position) float64 {
-	return math.Sqrt(math.Pow(float64(pos.X), 2) + math.Pow(float64(pos.Y), 2))
 }

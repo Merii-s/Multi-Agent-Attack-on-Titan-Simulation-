@@ -4,6 +4,7 @@ import (
 	env "AOT/agt/env"
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
+	pkg "AOT/pkg/utilitaries"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -199,26 +200,65 @@ type BasicTitanBehavior struct {
 }
 
 func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
-	println("BasicTitan Percept")
-	// Get the perceived objects and agents
-	perceivedObjects, perceivedAgents := btb.bt.attributes.agentAttributes.GetVision(e)
+	// If the titan is out of the screen, it goes towards the closest wall
+	// TODO : Add Env screen size in parameters
+	if pkg.IsOutOfScreen(btb.bt.attributes.agentAttributes.Pos(), 700, 1000) {
+		wallPositions := []types.Position{}
+		for _, obj := range e.Objects() {
+			if obj.Name() == types.Wall {
+				wallPositions = append(wallPositions, obj.TL())
+			}
+		}
 
-	// Add the percepted agents to the list of percepted agents
-	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %s\n", obj.Name())
-		btb.bt.attributes.agentAttributes.AddPerceivedObject(obj)
+		wallToGo := btb.bt.attributes.agentAttributes.Pos().ClosestPosition(wallPositions)
+		nextPos := pkg.GetShortestPath(wallToGo, btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed(), []types.Position{})
+		btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
+
+	} else {
+		// Get the perceived objects and agents
+		perceivedObjects, perceivedAgents := btb.bt.attributes.agentAttributes.GetVision(e)
+
+		// Add the perceived agents to the list of perceived agents
+		for _, obj := range perceivedObjects {
+			fmt.Printf("Percepted object: %s\n", obj.Name())
+			btb.bt.attributes.agentAttributes.AddPerceivedObject(obj)
+		}
+
+		// Add the perceived agents to the list of perceived agents
+		for _, agt := range perceivedAgents {
+			fmt.Printf("Percepted agent: %s\n", agt.Id())
+			btb.bt.attributes.agentAttributes.AddPerceivedAgent(agt)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 
-	// Add the percepted agents to the list of percepted agents
-	for _, agt := range perceivedAgents {
-		fmt.Printf("Percepted agent: %s\n", agt.Id())
-		btb.bt.attributes.agentAttributes.AddPerceivedAgent(agt)
-	}
-
-	time.Sleep(100 * time.Millisecond)
 }
 
-func (btb *BasicTitanBehavior) Deliberate() {}
+func (btb *BasicTitanBehavior) Deliberate() {
+	interestingObjects := []obj.Object{}
+	interestingAgents := []env.AgentI{}
+
+	for _, obj := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
+		if obj.Name() == types.Wall || obj.Name() == types.Field {
+			interestingObjects = append(interestingObjects, obj)
+		}
+	}
+
+	for _, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
+		if agt.Agent().GetName() == types.MaleVillager ||
+			agt.Agent().GetName() == types.FemaleVillager ||
+			agt.Agent().GetName() == types.Eren ||
+			agt.Agent().GetName() == types.Mikasa ||
+			agt.Agent().GetName() == types.MaleSoldier ||
+			agt.Agent().GetName() == types.FemaleSoldier {
+			interestingAgents = append(interestingAgents, agt)
+			{
+
+			}
+		}
+	}
+
+}
 
 func (btb *BasicTitanBehavior) Act(e *env.Environment) {
 }
