@@ -120,7 +120,7 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	//Grandes maisons 1 et 2
 	coefsCoords = [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.60, 0.7}}
 	for _, coords := range coefsCoords {
-		object = obj.NewObject(types.BigHouse1, types.Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, params.BIG_HOUSE_LIFE)
+		object = obj.NewObject(types.BigHouse, types.Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, params.BIG_HOUSE_LIFE)
 		objects = append(objects, *object)
 		nb_objects = nb_objects + 1
 	}

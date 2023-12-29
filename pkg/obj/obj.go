@@ -58,7 +58,7 @@ func (f *Object) Hitbox() (hb []types.Position) {
 	case types.Grass:
 		h = params.CGrass
 		w = params.CGrass
-	case types.BigHouse1:
+	case types.BigHouse:
 		h = params.HBHouse1
 		w = params.WBHouse1
 	case types.SmallHouse:
@@ -67,9 +67,6 @@ func (f *Object) Hitbox() (hb []types.Position) {
 	case types.Dungeon:
 		h = params.HDungeon
 		w = params.WDungeon
-	case types.BigHouse2:
-		h = params.HBHouse2
-		w = params.WBHouse2
 	case types.Eren:
 		h = params.HEren
 		w = params.WEren
@@ -132,7 +129,7 @@ func (o *Object) Center() types.Position {
 	case types.Grass:
 		h = params.CGrass
 		w = params.CGrass
-	case types.BigHouse1:
+	case types.BigHouse:
 		h = params.HBHouse1
 		w = params.WBHouse1
 	case types.SmallHouse:
@@ -141,9 +138,6 @@ func (o *Object) Center() types.Position {
 	case types.Dungeon:
 		h = params.HDungeon
 		w = params.WDungeon
-	case types.BigHouse2:
-		h = params.HBHouse2
-		w = params.WBHouse2
 	case types.Eren:
 		h = params.HEren
 		w = params.WEren

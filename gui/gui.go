@@ -12,8 +12,8 @@ import (
 var (
 	imgFiles = []string{
 		"wall_sprite", "wheat_V2", "grass_spriteV4", "small_house_sprite",
-		"big_house_sprite", "big_house_spriteV2", "dungeon_sprite", "dungeon_sprite",
-		"eren_small_sprite", "mikasa_sprite", "male_villager_sprite", "female_villager_sprite",
+		"big_house_sprite", "dungeon_sprite", "dungeon_sprite",
+		"eren_small_sprite", "mikasa_sprite", "male_civilian_sprite", "female_civilian_sprite",
 		"basic_titan1_sprite", "basic_titan2_sprite", "beast_titan_sprite_V2", "armored_titan_sprite",
 		"colossal_titan_sprite", "female_titan_sprite", "eren_titan_sprite", "jaw_titan_sprite",
 		"male_soldier_sprite", "female_soldier_sprite", "jaw_titan_human_sprite", "armored_titan_human_sprite",
@@ -50,10 +50,8 @@ func DrawSprite(screen *ebiten.Image, o obj.Object, imageVariables map[string]**
 	switch o.Name() {
 	case types.Field:
 		img = *imageVariables["wheat_V2"]
-	case types.BigHouse1:
+	case types.BigHouse:
 		img = *imageVariables["big_house_sprite"]
-	case types.BigHouse2:
-		img = *imageVariables["big_house_spriteV2"]
 	case types.Dungeon:
 		img = *imageVariables["dungeon_sprite"]
 	case types.Grass:
@@ -65,9 +63,9 @@ func DrawSprite(screen *ebiten.Image, o obj.Object, imageVariables map[string]**
 	case types.Mikasa:
 		img = *imageVariables["mikasa_sprite"]
 	case types.MaleCivilian:
-		img = *imageVariables["male_villager_sprite"]
+		img = *imageVariables["male_civilian_sprite"]
 	case types.FemaleCivilian:
-		img = *imageVariables["female_villager_sprite"]
+		img = *imageVariables["female_civilian_sprite"]
 	case types.BasicTitan1:
 		img = *imageVariables["basic_titan1_sprite"]
 	case types.BasicTitan2:
