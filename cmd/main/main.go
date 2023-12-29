@@ -6,7 +6,6 @@ import (
 	gui "AOT/gui"
 	obj "AOT/pkg/obj"
 	params "AOT/pkg/parameters"
-	types "AOT/pkg/types"
 	"fmt"
 	"log"
 	"sync"
@@ -59,8 +58,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func (g *Game) ListenToSimu() {
 	var e *env.Environment
+	fmt.Println("UI is listening to simu...")
 	for {
-		fmt.Println("Listening to simu")
 		e = <-g.c
 		g.Lock()
 		g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
@@ -74,17 +73,8 @@ func (g *Game) ListenToSimu() {
 
 func NewEnvironement(H int, W int) *env.Environment {
 	objects := env.CreateStaticObjects(H, W)
-
-	humans := agt_utils.CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
-
-	titans := agt_utils.CreateTitans(H, W)
-
-	merged_agents := make([]env.AgentI, 0)
-
-	merged_agents = append(merged_agents, humans...)
-	merged_agents = append(merged_agents, titans...)
-
-	return &env.Environment{Agts: merged_agents, Objs: objects}
+	agents := agt_utils.CreateAgents(H, W, objects)
+	return &env.Environment{Agts: agents, Objs: objects}
 }
 
 var wg1 sync.WaitGroup //Simulation waitgroup
