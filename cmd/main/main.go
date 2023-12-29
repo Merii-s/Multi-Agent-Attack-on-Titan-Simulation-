@@ -64,7 +64,6 @@ func (g *Game) ListenToSimu() {
 		g.Lock()
 		g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
 		g.elements = append(g.elements, e.Objects()...)
-
 		for _, agent := range e.Agents() {
 			g.elements = append(g.elements, agent.Object())
 		}

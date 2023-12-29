@@ -76,12 +76,12 @@ func (f *Object) Hitbox() (hb []types.Position) {
 	case types.Mikasa:
 		h = params.HMikasa
 		w = params.WMikasa
-	case types.MaleVillager:
-		h = params.HMaleVillager
-		w = params.WMaleVillager
-	case types.FemaleVillager:
-		h = params.HFemaleVillager
-		w = params.WFemaleVillager
+	case types.MaleCivilian:
+		h = params.HMaleCivilian
+		w = params.WMaleCivilian
+	case types.FemaleCivilian:
+		h = params.HFemaleCivilian
+		w = params.WFemaleCivilian
 	case types.BasicTitan1:
 		h = params.HBasicTitanF
 		w = params.WBasicTitanF
@@ -150,12 +150,12 @@ func (o *Object) Center() types.Position {
 	case types.Mikasa:
 		h = params.HMikasa
 		w = params.WMikasa
-	case types.MaleVillager:
-		h = params.HMaleVillager
-		w = params.WMaleVillager
-	case types.FemaleVillager:
-		h = params.HFemaleVillager
-		w = params.WFemaleVillager
+	case types.MaleCivilian:
+		h = params.HMaleCivilian
+		w = params.WMaleCivilian
+	case types.FemaleCivilian:
+		h = params.HFemaleCivilian
+		w = params.WFemaleCivilian
 	default:
 		h = params.HField
 		w = params.WField

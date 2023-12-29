@@ -86,10 +86,10 @@ func CreateHuman(agt_nb int, humans []env.AgentI, objs []obj.Object, tl_village 
 	var w, h int
 
 	switch objectType {
-	case types.MaleVillager:
-		w, h = params.WMaleVillager, params.HMaleVillager
-	case types.FemaleVillager:
-		w, h = params.WFemaleVillager, params.HFemaleVillager
+	case types.MaleCivilian:
+		w, h = params.WMaleCivilian, params.HMaleCivilian
+	case types.FemaleCivilian:
+		w, h = params.WFemaleCivilian, params.HFemaleCivilian
 	case types.MaleSoldier:
 		w, h = params.WSoldierM, params.HSoldierM
 	case types.FemaleSoldier:
@@ -102,8 +102,9 @@ func CreateHuman(agt_nb int, humans []env.AgentI, objs []obj.Object, tl_village 
 
 	x, y := utils.GetRandomCoords(tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
 	agtId := utils.CreateAgentID(agt_nb, objectType)
-	if objectType == types.FemaleVillager || objectType == types.MaleVillager {
-		human = hagt.NewCivilian(agtId, types.Position{X: x, Y: y}, params.VILLAGER_LIFE, 0, 0, 0, 0, objectType)
+	//, reach int, strength int, speed int, vision int,
+	if objectType == types.FemaleCivilian || objectType == types.MaleCivilian {
+		human = hagt.NewCivilian(agtId, types.Position{X: x, Y: y}, params.CIVILIAN_LIFE, params.CIVILIAN_REACH, params.CIVILIAN_STRENGTH, params.CIVILIAN_SPEED, params.CIVILIAN_VISION, objectType)
 	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
 		human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.Eren {
@@ -119,19 +120,19 @@ func CreateHumans(objs []obj.Object, tl_village types.Position, br_village types
 	humans := make([]env.AgentI, 0)
 
 	for i := 0; i < params.NB_HUMANS; i++ {
-		if i < params.NB_VILLAGERS {
-			if i < params.NB_VILLAGERS/2 {
-				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.MaleVillager, params.VILLAGER_LIFE)
+		if i < params.NB_CIVILIANS {
+			if i < params.NB_CIVILIANS/2 {
+				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.MaleCivilian, params.CIVILIAN_LIFE)
 			} else {
-				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleVillager, params.VILLAGER_LIFE)
+				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleCivilian, params.CIVILIAN_LIFE)
 			}
-		} else if i < params.NB_VILLAGERS+params.NB_SOLDIERS {
-			if i < params.NB_VILLAGERS+params.NB_SOLDIERS/2 {
+		} else if i < params.NB_CIVILIANS+params.NB_SOLDIERS {
+			if i < params.NB_CIVILIANS+params.NB_SOLDIERS/2 {
 				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.MaleSoldier, params.SOLDIER_LIFE)
 			} else {
 				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleSoldier, params.SOLDIER_LIFE)
 			}
-		} else if i < params.NB_VILLAGERS+params.NB_SOLDIERS+1 {
+		} else if i < params.NB_CIVILIANS+params.NB_SOLDIERS+1 {
 			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
 		} else {
 			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
