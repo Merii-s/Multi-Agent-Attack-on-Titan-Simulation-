@@ -4,6 +4,7 @@ import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	"container/heap"
+	"fmt"
 	"math"
 	"math/rand"
 	"os"
@@ -29,8 +30,12 @@ func GetImagePath(imgName string) string {
 	return path
 }
 
+func CreateAgentID(agentNb int, agentType types.ObjectName) types.Id {
+	return types.Id(fmt.Sprint("AGTID", fmt.Sprint(agentNb), "_", string(agentType)))
+}
+
 //DetectCollision checks if there is a collision between two objects using AABB collision detection
-// func DetectCollision(obj1, obj2 Object) bool {
+// func DetectCollision(obj1, obj2 obj.Object) bool {
 
 // 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
 // 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]

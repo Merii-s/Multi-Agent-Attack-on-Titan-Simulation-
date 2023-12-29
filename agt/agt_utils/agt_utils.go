@@ -81,7 +81,7 @@ func PlaceTitan(titan env.AgentI, titans []env.AgentI, W int, H int, dir int) []
 	return titans
 }
 
-func CreateHuman(humans []env.AgentI, objs []obj.Object, tl_village types.Position, br_village types.Position, objectType types.ObjectName, life int) []env.AgentI {
+func CreateHuman(agt_nb int, humans []env.AgentI, objs []obj.Object, tl_village types.Position, br_village types.Position, objectType types.ObjectName, life int) []env.AgentI {
 	var human env.AgentI
 	var w, h int
 
@@ -101,14 +101,15 @@ func CreateHuman(humans []env.AgentI, objs []obj.Object, tl_village types.Positi
 	}
 
 	x, y := utils.GetRandomCoords(tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
+	agtId := utils.CreateAgentID(agt_nb, objectType)
 	if objectType == types.FemaleVillager || objectType == types.MaleVillager {
-		human = hagt.NewCivilian("", types.Position{X: x, Y: y}, params.VILLAGER_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewCivilian(agtId, types.Position{X: x, Y: y}, params.VILLAGER_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
-		human = hagt.NewSoldier("", types.Position{X: x, Y: y}, params.SOLDIER_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.Eren {
-		human = hagt.NewEren("", types.Position{X: x, Y: y}, params.EREN_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewEren(agtId, types.Position{X: x, Y: y}, params.EREN_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.Mikasa {
-		human = hagt.NewMikasa("", types.Position{X: x, Y: y}, params.MIKASA_LIFE, 0, 0, 0, 0, objectType)
+		human = hagt.NewMikasa(agtId, types.Position{X: x, Y: y}, params.MIKASA_LIFE, 0, 0, 0, 0, objectType)
 	}
 	humans = PlaceHuman(objs, humans, human, tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
 	return humans
@@ -120,20 +121,20 @@ func CreateHumans(objs []obj.Object, tl_village types.Position, br_village types
 	for i := 0; i < params.NB_HUMANS; i++ {
 		if i < params.NB_VILLAGERS {
 			if i < params.NB_VILLAGERS/2 {
-				humans = CreateHuman(humans, objs, tl_village, br_village, types.MaleVillager, params.VILLAGER_LIFE)
+				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.MaleVillager, params.VILLAGER_LIFE)
 			} else {
-				humans = CreateHuman(humans, objs, tl_village, br_village, types.FemaleVillager, params.VILLAGER_LIFE)
+				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleVillager, params.VILLAGER_LIFE)
 			}
 		} else if i < params.NB_VILLAGERS+params.NB_SOLDIERS {
 			if i < params.NB_VILLAGERS+params.NB_SOLDIERS/2 {
-				humans = CreateHuman(humans, objs, tl_village, br_village, types.MaleSoldier, params.SOLDIER_LIFE)
+				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.MaleSoldier, params.SOLDIER_LIFE)
 			} else {
-				humans = CreateHuman(humans, objs, tl_village, br_village, types.FemaleSoldier, params.SOLDIER_LIFE)
+				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleSoldier, params.SOLDIER_LIFE)
 			}
 		} else if i < params.NB_VILLAGERS+params.NB_SOLDIERS+1 {
-			humans = CreateHuman(humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
+			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
 		} else {
-			humans = CreateHuman(humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
+			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
 		}
 	}
 	return humans
@@ -164,9 +165,9 @@ func CreateTitans(H int, W int) []env.AgentI {
 
 		if i < params.NB_BASIC_TITANS {
 			if i < params.NB_BASIC_TITANS/2 {
-				titan = tagt.NewBasicTitan("", types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan1, 0)
+				titan = tagt.NewBasicTitan(utils.CreateAgentID(i+params.NB_HUMANS, types.BasicTitan1), types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan1, 0)
 			} else {
-				titan = tagt.NewBasicTitan("", types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan2, 0)
+				titan = tagt.NewBasicTitan(utils.CreateAgentID(i+params.NB_HUMANS, types.BasicTitan2), types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan2, 0)
 			}
 		}
 		// } else if i < params.NB_BASIC_TITANS+params.NB_SPECIAL_TITANS {
@@ -189,4 +190,15 @@ func CreateTitans(H int, W int) []env.AgentI {
 		titans = PlaceTitan(titan, titans, H, W, dir)
 	}
 	return titans
+}
+
+func CreateAgents(H int, W int, objects []obj.Object) []env.AgentI {
+	humans := CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
+	titans := CreateTitans(H, W)
+
+	all_agents := make([]env.AgentI, 0)
+
+	all_agents = append(all_agents, humans...)
+	all_agents = append(all_agents, titans...)
+	return all_agents
 }
