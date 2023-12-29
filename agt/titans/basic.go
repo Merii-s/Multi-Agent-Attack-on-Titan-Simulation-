@@ -59,30 +59,43 @@ func (bt *BasicTitan) SetBehavior(b env.BehaviorI) {
 }
 
 // Methods for BasicTitan
-func (bt *BasicTitan) Percept(e *env.Environment) {
+func (bt *BasicTitan) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
+	defer wgPercept.Done()
 	bt.behavior.Percept(e)
 }
 
-func (bt *BasicTitan) Deliberate() {
+func (bt *BasicTitan) Deliberate(wgDeliberate *sync.WaitGroup) {
+	defer wgDeliberate.Done()
 	bt.behavior.Deliberate()
 
 }
 
-func (bt *BasicTitan) Act(e *env.Environment) {
+func (bt *BasicTitan) Act(e *env.Environment, wgAct *sync.WaitGroup) {
+	defer wgAct.Done()
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 	bt.behavior.Act(e)
 }
 
-func (bt *BasicTitan) Start(e *env.Environment) {
+func (bt *BasicTitan) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
+		println("BasicTitan Start")
 		for {
-			println("BasicTitan Start")
-			bt.behavior.Percept(e)
-			time.Sleep(100 * time.Millisecond)
-			bt.behavior.Deliberate()
-			bt.behavior.Act(e)
+			wgStart.Done()
+			wgStart.Wait()
+
+			wgPercept.Add(1)
+			bt.Percept(e, wgPercept)
+			wgPercept.Wait()
+
+			wgDeliberate.Add(1)
+			bt.Deliberate(wgDeliberate)
+			wgDeliberate.Wait()
+
+			wgAct.Add(1)
+			bt.Act(e, wgAct)
+			wgAct.Wait()
 		}
 	}()
 
@@ -118,6 +131,8 @@ func (bt *BasicTitan) AttackSuccess(spdAtk int, spdDef int) float64 {
 func (bt *BasicTitan) Attack(agt env.AgentI) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
+	// TO
+	// TODO : Verif reachable
 	// If the percentage is less than the success rate, the attack is successful
 	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
@@ -201,17 +216,18 @@ type BasicTitanBehavior struct {
 func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 	// If the titan is out of the screen, it goes towards the closest wall
 	if pkg.IsOutOfScreen(btb.bt.attributes.agentAttributes.Pos(), params.ScreenWidth, params.ScreenHeight) {
-		btb.bt.isOutOfScreen = true
-		wallPositions := []types.Position{}
-		for _, object := range e.Objects() {
-			if object.Name() == types.Wall {
-				wallPositions = append(wallPositions, object.TL())
-			}
-		}
+		//btb.bt.isOutOfScreen = true
+		//wallPositions := []types.Position{}
+		//for _, object := range e.Objects() {
+		//	if object.Name() == types.Wall {
+		//		wallPositions = append(wallPositions, object.TL())
+		//	}
+		//}
 
-		wallToGo := btb.bt.attributes.agentAttributes.Pos().ClosestPosition(wallPositions)
-		nextPos := pkg.GetShortestPath(wallToGo, btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed(), []types.Position{})
-		btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
+		//wallToGo := btb.bt.attributes.agentAttributes.Pos().ClosestPosition(wallPositions)
+		//nextPos :=
+		btb.bt.Move(types.Position{X: 0, Y: 0})
+		//btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
 
 	} else {
 		// Get the perceived objects and agents

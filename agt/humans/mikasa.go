@@ -53,15 +53,15 @@ func (m *Mikasa) SetBehavior(b env.BehaviorI) {
 }
 
 // Methods for Mikasa
-func (m *Mikasa) Percept(e *env.Environment) {
+func (m *Mikasa) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
 	m.behavior.Percept(e)
 }
 
-func (m *Mikasa) Deliberate() {
+func (m *Mikasa) Deliberate(wgDeliberate *sync.WaitGroup) {
 	m.behavior.Deliberate()
 }
 
-func (m *Mikasa) Act(e *env.Environment) {
+func (m *Mikasa) Act(e *env.Environment, wgAct *sync.WaitGroup) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.behavior.Act(e)
@@ -75,15 +75,25 @@ func (m *Mikasa) Agent() *env.Agent {
 	return &m.attributes.agentAttributes
 }
 
-func (m *Mikasa) Start(e *env.Environment) {
+func (m *Mikasa) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
+		println("Mikasa Start")
 		for {
-			println("Mikasa Start")
-			m.behavior.Percept(e)
-			time.Sleep(100 * time.Millisecond)
-			m.behavior.Deliberate()
-			m.behavior.Act(e)
+			wgStart.Done()
+			wgStart.Wait()
+
+			wgPercept.Add(1)
+			m.Percept(e, wgPercept)
+			wgPercept.Wait()
+
+			wgDeliberate.Add(1)
+			m.Deliberate(wgDeliberate)
+			wgDeliberate.Wait()
+
+			wgAct.Add(1)
+			m.Act(e, wgAct)
+			wgAct.Wait()
 		}
 	}()
 }

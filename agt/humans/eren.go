@@ -55,15 +55,18 @@ func (eren *Eren) SetBehavior(b env.BehaviorI) {
 }
 
 // Methods for Eren
-func (eren *Eren) Percept(e *env.Environment) {
+func (eren *Eren) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
+	defer wgPercept.Done()
 	eren.behavior.Percept(e)
 }
 
-func (eren *Eren) Deliberate() {
+func (eren *Eren) Deliberate(wgDeliberate *sync.WaitGroup) {
+	defer wgDeliberate.Done()
 	eren.behavior.Deliberate()
 }
 
-func (eren *Eren) Act(e *env.Environment) {
+func (eren *Eren) Act(e *env.Environment, wgAct *sync.WaitGroup) {
+	defer wgAct.Done()
 	eren.mu.Lock()
 	defer eren.mu.Unlock()
 	eren.behavior.Act(e)
@@ -77,15 +80,25 @@ func (eren *Eren) Agent() *env.Agent {
 	return &eren.attributes.agentAttributes
 }
 
-func (eren *Eren) Start(e *env.Environment) {
+func (eren *Eren) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
+		println("Eren Start")
 		for {
-			println("Eren Start")
-			eren.behavior.Percept(e)
-			time.Sleep(100 * time.Millisecond)
-			eren.behavior.Deliberate()
-			eren.behavior.Act(e)
+			wgStart.Done()
+			wgStart.Wait()
+
+			wgPercept.Add(1)
+			eren.Percept(e, wgPercept)
+			wgPercept.Wait()
+
+			wgDeliberate.Add(1)
+			eren.Deliberate(wgDeliberate)
+			wgDeliberate.Wait()
+
+			wgAct.Add(1)
+			eren.Act(e, wgAct)
+			wgAct.Wait()
 		}
 	}()
 }

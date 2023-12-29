@@ -54,15 +54,18 @@ func (s *Soldier) SetBehavior(b env.BehaviorI) {
 }
 
 // Methods for Soldier
-func (s *Soldier) Percept(e *env.Environment) {
+func (s *Soldier) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
+	defer wgPercept.Done()
 	s.behavior.Percept(e)
 }
 
-func (s *Soldier) Deliberate() {
+func (s *Soldier) Deliberate(wgDeliberate *sync.WaitGroup) {
+	defer wgDeliberate.Done()
 	s.behavior.Deliberate()
 }
 
-func (s *Soldier) Act(e *env.Environment) {
+func (s *Soldier) Act(e *env.Environment, wgAct *sync.WaitGroup) {
+	defer wgAct.Done()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.behavior.Act(e)
@@ -76,15 +79,25 @@ func (s *Soldier) Agent() *env.Agent {
 	return &s.attributes.agentAttributes
 }
 
-func (s *Soldier) Start(e *env.Environment) {
+func (s *Soldier) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
 	go func() {
+		println("Soldier Start")
 		for {
-			println("Soldier Start")
-			s.behavior.Percept(e)
-			time.Sleep(100 * time.Millisecond)
-			s.behavior.Deliberate()
-			s.behavior.Act(e)
+			wgStart.Done()
+			wgStart.Wait()
+
+			wgPercept.Add(1)
+			s.Percept(e, wgPercept)
+			wgPercept.Wait()
+
+			wgDeliberate.Add(1)
+			s.Deliberate(wgDeliberate)
+			wgDeliberate.Wait()
+
+			wgAct.Add(1)
+			s.Act(e, wgAct)
+			wgAct.Wait()
 		}
 	}()
 }

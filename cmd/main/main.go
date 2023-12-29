@@ -76,12 +76,14 @@ func NewEnvironement(H int, W int) *env.Environment {
 	return &env.Environment{Agts: agents, Objs: objects}
 }
 
-var wg1 sync.WaitGroup //Simulation waitgroup
+var wgPercept sync.WaitGroup
+var wgDeliberate sync.WaitGroup
+var wgAct sync.WaitGroup
 
 func main() {
 	g := Game{c: make(chan *env.Environment)}
 	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
-	go env.MoveColossal(e, g.c, &wg1)
+	go env.Simu(e, &wgPercept, &wgDeliberate, &wgAct, g.c)
 	go g.ListenToSimu()
 	ebiten.SetWindowSize(params.ScreenWidth, params.ScreenHeight)
 	ebiten.SetWindowTitle("AOT Simulation")

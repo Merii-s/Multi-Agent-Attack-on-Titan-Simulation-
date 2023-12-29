@@ -6,6 +6,7 @@ import (
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
 	"sync"
+	"time"
 )
 
 type Environment struct {
@@ -183,6 +184,22 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 			}(pos)
 			wg.Wait()
 		}
+	}
+}
+
+func Simu(e *Environment, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup, c chan *Environment) {
+	wgStart := new(sync.WaitGroup)
+	for _, agt := range e.Agts {
+		go func(agt AgentI) {
+			wgStart.Add(1)
+			agt.Start(e, wgStart, wgPercept, wgDeliberate, wgAct)
+		}(agt)
+	}
+	for {
+		go func() {
+			time.Sleep(100 * time.Millisecond)
+			c <- e
+		}()
 	}
 }
 

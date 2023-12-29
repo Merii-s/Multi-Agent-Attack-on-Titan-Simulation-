@@ -3,6 +3,7 @@ package env
 import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
+	"sync"
 )
 
 type BehaviorI interface {
@@ -12,10 +13,10 @@ type BehaviorI interface {
 }
 
 type AgentI interface {
-	Percept(*Environment)
-	Deliberate()
-	Act(*Environment)
-	Start(*Environment)
+	Percept(*Environment, *sync.WaitGroup)
+	Deliberate(*sync.WaitGroup)
+	Act(*Environment, *sync.WaitGroup)
+	Start(*Environment, *sync.WaitGroup, *sync.WaitGroup, *sync.WaitGroup, *sync.WaitGroup)
 	Id() types.Id
 
 	Move(pos types.Position)
