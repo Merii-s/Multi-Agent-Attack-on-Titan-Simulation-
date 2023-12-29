@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"AOT/agt/env"
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	"container/heap"
@@ -381,4 +380,17 @@ func IsOutOfScreen(pos types.Position, W int, H int) bool {
 		return true
 	}
 	return false
+}
+
+func IsReachable(targetPos types.Position, agtCenter types.Position, agtReach int) bool {
+	return targetPos.Distance(agtCenter) > float64(agtReach)
+}
+
+func GetPositionsInHitbox(tl types.Position, br types.Position) (inHitboxPositions []types.Position) {
+	for posX := tl.X; posX <= br.X; posX++ {
+		for posY := tl.Y; posY <= br.Y; posY++ {
+			inHitboxPositions = append(inHitboxPositions, types.Position{X: posX, Y: posY})
+		}
+	}
+	return
 }

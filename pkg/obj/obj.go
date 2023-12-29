@@ -162,3 +162,7 @@ func (o *Object) Center() types.Position {
 	}
 	return types.Position{X: o.tl.X + w/2, Y: o.tl.Y + h}
 }
+
+func (o *Object) TakeDamage(dmg int) {
+	o.life -= dmg
+}

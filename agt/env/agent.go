@@ -89,6 +89,8 @@ func (t *Agent) CantSeeBehind() []types.ObjectName { return t.cantSeeBehind }
 
 func (t *Agent) Object() obj.Object { return *t.object }
 
+func (t *Agent) ObjectP() *obj.Object { return t.object }
+
 func (t *Agent) AddPerceivedObject(obj obj.Object) {
 	t.perceivedObjects = append(t.perceivedObjects, obj)
 }
