@@ -247,8 +247,8 @@ func (btb *BasicTitanBehavior) Deliberate() {
 	}
 
 	for _, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
-		if agt.Agent().GetName() == types.MaleVillager ||
-			agt.Agent().GetName() == types.FemaleVillager ||
+		if agt.Agent().GetName() == types.MaleCivilian ||
+			agt.Agent().GetName() == types.FemaleCivilian ||
 			agt.Agent().GetName() == types.Eren ||
 			agt.Agent().GetName() == types.Mikasa ||
 			agt.Agent().GetName() == types.MaleSoldier ||
