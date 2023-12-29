@@ -273,7 +273,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 	// Checks first if there are interesting agents to attack and if not, the nearest agent to go to
 	if len(interestingAgents) != 0 {
-		closestAgent, closestAgentPosition := btb.bt.attributes.agentAttributes.Pos().ClosestAgent(interestingAgents)
+		closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, btb.bt.attributes.agentAttributes.Pos())
 
 		if pkg.IsReachable(closestAgentPosition, btb.bt.attributes.agentAttributes.ObjectP().Center(), btb.bt.attributes.agentAttributes.Reach()) {
 			btb.bt.attributes.agentAttributes.SetAttack(true)
@@ -288,7 +288,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 		// If there are no interesting agents, the titan goes towards the nearest interesting object (wall or field)
 	} else if len(interestingObjects) != 0 {
-		closestObject, closestObjectPosition := btb.bt.attributes.agentAttributes.Pos().ClosestObject(interestingObjects)
+		closestObject, closestObjectPosition := pkg.ClosestObject(interestingObjects, btb.bt.attributes.agentAttributes.Pos())
 
 		if pkg.IsReachable(closestObjectPosition, btb.bt.attributes.agentAttributes.ObjectP().Center(), btb.bt.attributes.agentAttributes.Reach()) {
 			btb.bt.attributes.agentAttributes.SetAttack(false)

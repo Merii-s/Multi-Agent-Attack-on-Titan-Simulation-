@@ -152,3 +152,18 @@ func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 
 	return perceivedObjects, perceivedAgents
 }
+
+func ClosestAgent(agents []AgentI, position types.Position) (AgentI, types.Position) {
+	// Get the closest position from the list
+	closestAgent := agents[0]
+	closestAgentPosition := agents[0].Agent().ObjectP().Hitbox()[0]
+	for _, agt := range agents {
+		for _, pos := range utils.GetPositionsInHitbox(agt.Agent().ObjectP().Hitbox()[0], agt.Agent().ObjectP().Hitbox()[1]) {
+			if position.Distance(pos) < position.Distance(closestAgentPosition) {
+				closestAgent = agt
+				closestAgentPosition = pos
+			}
+		}
+	}
+	return closestAgent, closestAgentPosition
+}

@@ -399,3 +399,18 @@ func GetPositionsInHitbox(tl types.Position, br types.Position) (inHitboxPositio
 	}
 	return
 }
+
+func ClosestObject(objects []obj.Object, position types.Position) (obj.Object, types.Position) {
+	// Get the closest position from the list
+	closestObject := objects[0]
+	closestObjectPosition := objects[0].Hitbox()[0]
+	for _, object := range objects {
+		for _, pos := range GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
+			if position.Distance(pos) < position.Distance(closestObjectPosition) {
+				closestObject = object
+				closestObjectPosition = pos
+			}
+		}
+	}
+	return closestObject, closestObjectPosition
+}

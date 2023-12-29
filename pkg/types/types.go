@@ -1,9 +1,6 @@
 package types
 
 import (
-	"AOT/agt/env"
-	"AOT/pkg/obj"
-	pkg "AOT/pkg/utilitaries"
 	"math"
 )
 
@@ -57,36 +54,6 @@ func (position Position) ClosestPosition(positions []Position) Position {
 		}
 	}
 	return closestPosition
-}
-
-func (position Position) ClosestAgent(agents []env.AgentI) (env.AgentI, Position) {
-	// Get the closest position from the list
-	closestAgent := agents[0]
-	closestAgentPosition := agents[0].Agent().ObjectP().Hitbox()[0]
-	for _, agt := range agents {
-		for _, pos := range pkg.GetPositionsInHitbox(agt.Agent().ObjectP().Hitbox()[0], agt.Agent().ObjectP().Hitbox()[1]) {
-			if position.Distance(pos) < position.Distance(closestAgentPosition) {
-				closestAgent = agt
-				closestAgentPosition = pos
-			}
-		}
-	}
-	return closestAgent, closestAgentPosition
-}
-
-func (position Position) ClosestObject(objects []obj.Object) (obj.Object, Position) {
-	// Get the closest position from the list
-	closestObject := objects[0]
-	closestObjectPosition := objects[0].Hitbox()[0]
-	for _, object := range objects {
-		for _, pos := range pkg.GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
-			if position.Distance(pos) < position.Distance(closestObjectPosition) {
-				closestObject = object
-				closestObjectPosition = pos
-			}
-		}
-	}
-	return closestObject, closestObjectPosition
 }
 
 func (Position) Distance(pos Position) float64 {
