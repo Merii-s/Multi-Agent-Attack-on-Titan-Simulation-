@@ -135,6 +135,31 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	objects = append(objects, *object)
 	nb_objects = nb_objects + 3
 
+	// Jaw Titan Human
+	object = obj.NewObject(types.JawTitanHuman, types.Position{X: 660, Y: 350}, params.JAW_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Armored Titan Human
+	object = obj.NewObject(types.ArmoredTitanHuman, types.Position{X: 680, Y: 350}, params.ARMORED_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Colossal Titan Human
+	object = obj.NewObject(types.ColossalTitanHuman, types.Position{X: 700, Y: 350}, params.COLOSSAL_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Female Titan Human
+	object = obj.NewObject(types.FemaleTitanHuman, types.Position{X: 720, Y: 350}, params.FEMALE_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Beast Titan Human
+	object = obj.NewObject(types.BeastTitanHuman, types.Position{X: 740, Y: 350}, params.BEAST_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
 	return objects
 }
 

@@ -16,7 +16,8 @@ var (
 		"eren_small_sprite", "mikasa_sprite", "male_villager_sprite", "female_villager_sprite",
 		"basic_titan1_sprite", "basic_titan2_sprite", "beast_titan_sprite_V2", "armored_titan_sprite",
 		"colossal_titan_sprite", "female_titan_sprite", "eren_titan_sprite", "jaw_titan_sprite",
-		"male_soldier_sprite", "female_soldier_sprite",
+		"male_soldier_sprite", "female_soldier_sprite", "jaw_titan_human_sprite", "armored_titan_human_sprite",
+		"colossal_titan_human_sprite", "female_titan_human_sprite", "beast_titan_human_sprite",
 	}
 )
 
@@ -73,16 +74,26 @@ func DrawSprite(screen *ebiten.Image, o obj.Object, imageVariables map[string]**
 		img = *imageVariables["basic_titan2_sprite"]
 	case types.BeastTitan:
 		img = *imageVariables["beast_titan_sprite_V2"]
+	case types.BeastTitanHuman:
+		img = *imageVariables["beast_titan_human_sprite"]
 	case types.ArmoredTitan:
 		img = *imageVariables["armored_titan_sprite"]
+	case types.ArmoredTitanHuman:
+		img = *imageVariables["armored_titan_human_sprite"]
 	case types.FemaleTitan:
 		img = *imageVariables["female_titan_sprite"]
+	case types.FemaleTitanHuman:
+		img = *imageVariables["female_titan_human_sprite"]
 	case types.ColossalTitan:
 		img = *imageVariables["colossal_titan_sprite"]
+	case types.ColossalTitanHuman:
+		img = *imageVariables["colossal_titan_human_sprite"]
 	case types.ErenTitanS:
 		img = *imageVariables["eren_titan_sprite"]
 	case types.JawTitan:
 		img = *imageVariables["jaw_titan_sprite"]
+	case types.JawTitanHuman:
+		img = *imageVariables["jaw_titan_human_sprite"]
 	case types.MaleSoldier:
 		img = *imageVariables["male_soldier_sprite"]
 	case types.FemaleSoldier:
