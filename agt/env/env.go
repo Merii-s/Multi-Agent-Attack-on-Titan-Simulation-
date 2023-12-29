@@ -141,8 +141,8 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 	var ind int
 	coords := [][]int{{250, 250}, {750, 250}, {750, 450}, {250, 450}}
-	for i, _ := range e.Objs {
-		if e.Objs[i].Name() == types.ColossalTitan {
+	for i, object := range e.Objs {
+		if object.Name() == types.ColossalTitan {
 			ind = i
 			break
 		}

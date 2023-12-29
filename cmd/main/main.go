@@ -7,7 +7,7 @@ import (
 	obj "AOT/pkg/obj"
 	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
-
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -54,16 +54,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 1000, 700
+	return params.ScreenWidth, params.ScreenHeight
 }
 
 func (g *Game) ListenToSimu() {
 	var e *env.Environment
 	for {
+		fmt.Println("Listening to simu")
 		e = <-g.c
 		g.Lock()
 		g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
 		g.elements = append(g.elements, e.Objects()...)
+
 		for _, agent := range e.Agents() {
 			g.elements = append(g.elements, agent.Object())
 		}
@@ -72,11 +74,16 @@ func (g *Game) ListenToSimu() {
 
 func NewEnvironement(H int, W int) *env.Environment {
 	objects := env.CreateStaticObjects(H, W)
+
 	humans := agt_utils.CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
+
 	titans := agt_utils.CreateTitans(H, W)
-	merged_agents := make([]env.AgentI, len(titans)+len(humans))
+
+	merged_agents := make([]env.AgentI, 0)
+
 	merged_agents = append(merged_agents, humans...)
 	merged_agents = append(merged_agents, titans...)
+
 	return &env.Environment{Agts: merged_agents, Objs: objects}
 }
 
@@ -85,7 +92,6 @@ var wg1 sync.WaitGroup //Simulation waitgroup
 func main() {
 	g := Game{c: make(chan *env.Environment)}
 	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
-
 	go env.MoveColossal(e, g.c, &wg1)
 	go g.ListenToSimu()
 	ebiten.SetWindowSize(params.ScreenWidth, params.ScreenHeight)

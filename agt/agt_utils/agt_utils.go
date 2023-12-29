@@ -10,16 +10,15 @@ import (
 	utils "AOT/pkg/utilitaries"
 )
 
-// A modifier quand les constructeurs seront pret
 func PlaceHuman(objs []obj.Object, humans []env.AgentI, human env.AgentI, tl_village types.Position, br_village types.Position) []env.AgentI {
 	end := false
 
 	for !end {
 		counter := 0
 		nb_grass := 0
-		for _, obj := range objs {
-			if obj.Name() != types.Grass {
-				if utils.DetectCollision2(human.Object(), obj) {
+		for _, object := range objs {
+			if object.Name() != types.Grass {
+				if utils.DetectCollision2(human.Object(), object) {
 					x, y := utils.GetRandomCoords(tl_village, br_village)
 					human.SetPos(types.Position{X: x, Y: y})
 					break
@@ -45,7 +44,6 @@ func PlaceHuman(objs []obj.Object, humans []env.AgentI, human env.AgentI, tl_vil
 			end = true
 		}
 	}
-
 	humans = append(humans, human)
 
 	return humans
@@ -103,9 +101,7 @@ func CreateHuman(humans []env.AgentI, objs []obj.Object, tl_village types.Positi
 	}
 
 	x, y := utils.GetRandomCoords(tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
-
-	//Condition impossible pour eviter d'entrer dans la boucle
-	if objectType == types.FemaleVillager || objectType == types.MaleSoldier {
+	if objectType == types.FemaleVillager || objectType == types.MaleVillager {
 		human = hagt.NewCivilian("", types.Position{X: x, Y: y}, params.VILLAGER_LIFE, 0, 0, 0, 0, objectType)
 	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
 		human = hagt.NewSoldier("", types.Position{X: x, Y: y}, params.SOLDIER_LIFE, 0, 0, 0, 0, objectType)
@@ -114,7 +110,6 @@ func CreateHuman(humans []env.AgentI, objs []obj.Object, tl_village types.Positi
 	} else if objectType == types.Mikasa {
 		human = hagt.NewMikasa("", types.Position{X: x, Y: y}, params.MIKASA_LIFE, 0, 0, 0, 0, objectType)
 	}
-
 	humans = PlaceHuman(objs, humans, human, tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
 	return humans
 }
@@ -126,7 +121,6 @@ func CreateHumans(objs []obj.Object, tl_village types.Position, br_village types
 		if i < params.NB_VILLAGERS {
 			if i < params.NB_VILLAGERS/2 {
 				humans = CreateHuman(humans, objs, tl_village, br_village, types.MaleVillager, params.VILLAGER_LIFE)
-				//titan = tagt.NewBasicTitan("", types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan1, 0)
 			} else {
 				humans = CreateHuman(humans, objs, tl_village, br_village, types.FemaleVillager, params.VILLAGER_LIFE)
 			}
@@ -141,7 +135,6 @@ func CreateHumans(objs []obj.Object, tl_village types.Position, br_village types
 		} else {
 			humans = CreateHuman(humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
 		}
-
 	}
 	return humans
 }
@@ -153,7 +146,6 @@ func CreateTitans(H int, W int) []env.AgentI {
 
 	dir := 0
 
-	//A modifier quand le construteur de titan sera pret
 	titans := make([]env.AgentI, 0)
 
 	for i := 0; i < params.NB_TITANS; i++ {
@@ -172,32 +164,29 @@ func CreateTitans(H int, W int) []env.AgentI {
 
 		if i < params.NB_BASIC_TITANS {
 			if i < params.NB_BASIC_TITANS/2 {
-				//A modifier quand le construteur d'humain sera pret
 				titan = tagt.NewBasicTitan("", types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan1, 0)
 			} else {
-				//A modifier quand le construteur d'humain sera pret
 				titan = tagt.NewBasicTitan("", types.Position{X: x, Y: y}, params.BASIC_TITAN_LIFE, 0, 0, 0, 0, types.BasicTitan2, 0)
 			}
-
-		} /*else if i < params.NB_BASIC_TITANS+params.NB_SPECIAL_TITANS {
-			if i < params.NB_BASIC_TITANS+1 {
-				//A modifier quand le construteur d'humain sera pret
-				titan = obj.NewObject(types.ColossalTitan, types.Position{X: x, Y: y}, params.COLOSSAL_TITAN_LIFE)
-			} else if i < params.NB_BASIC_TITANS+2 {
-				//A modifier quand le construteur d'humain sera pret
-				titan = obj.NewObject(types.BeastTitan, types.Position{X: x, Y: y}, params.BEAST_TITAN_LIFE)
-			} else if i < params.NB_BASIC_TITANS+3 {
-				titan = obj.NewObject(types.FemaleTitan, types.Position{X: x, Y: y}, params.FEMALE_TITAN_LIFE)
-			} else if i < params.NB_BASIC_TITANS+4 {
-				titan = obj.NewObject(types.JawTitan, types.Position{X: x, Y: y}, params.JAW_TITAN_LIFE)
-			} else if i < params.NB_BASIC_TITANS+5 {
-				titan = obj.NewObject(types.ArmoredTitan, types.Position{X: x, Y: y}, params.ARMORED_TITAN_LIFE)
-			}
-		}*/
+		}
+		// } else if i < params.NB_BASIC_TITANS+params.NB_SPECIAL_TITANS {
+		// 	if i < params.NB_BASIC_TITANS+1 {
+		// 		//A modifier quand le construteur d'humain sera pret
+		// 		titan = obj.NewObject(types.ColossalTitan, types.Position{X: x, Y: y}, params.COLOSSAL_TITAN_LIFE)
+		// 	} else if i < params.NB_BASIC_TITANS+2 {
+		// 		//A modifier quand le construteur d'humain sera pret
+		// 		titan = obj.NewObject(types.BeastTitan, types.Position{X: x, Y: y}, params.BEAST_TITAN_LIFE)
+		// 	} else if i < params.NB_BASIC_TITANS+3 {
+		// 		titan = obj.NewObject(types.FemaleTitan, types.Position{X: x, Y: y}, params.FEMALE_TITAN_LIFE)
+		// 	} else if i < params.NB_BASIC_TITANS+4 {
+		// 		titan = obj.NewObject(types.JawTitan, types.Position{X: x, Y: y}, params.JAW_TITAN_LIFE)
+		// 	} else if i < params.NB_BASIC_TITANS+5 {
+		// 		titan = obj.NewObject(types.ArmoredTitan, types.Position{X: x, Y: y}, params.ARMORED_TITAN_LIFE)
+		// 	}
+		// }
 
 		//Place l'humain dans des coordonnees aleatoires valides (i.e sans collisions) dans le village
 		titans = PlaceTitan(titan, titans, H, W, dir)
 	}
 	return titans
-
 }
