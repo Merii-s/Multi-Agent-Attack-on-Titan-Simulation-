@@ -120,7 +120,7 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	//Grandes maisons 1 et 2
 	coefsCoords = [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.60, 0.7}}
 	for _, coords := range coefsCoords {
-		object = obj.NewObject(types.BigHouse1, types.Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, params.BIG_HOUSE_LIFE)
+		object = obj.NewObject(types.BigHouse, types.Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, params.BIG_HOUSE_LIFE)
 		objects = append(objects, *object)
 		nb_objects = nb_objects + 1
 	}
@@ -135,14 +135,39 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	objects = append(objects, *object)
 	nb_objects = nb_objects + 3
 
+	// Jaw Titan Human
+	object = obj.NewObject(types.JawTitanHuman, types.Position{X: 660, Y: 350}, params.JAW_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Armored Titan Human
+	object = obj.NewObject(types.ArmoredTitanHuman, types.Position{X: 680, Y: 350}, params.ARMORED_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Colossal Titan Human
+	object = obj.NewObject(types.ColossalTitanHuman, types.Position{X: 700, Y: 350}, params.COLOSSAL_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Female Titan Human
+	object = obj.NewObject(types.FemaleTitanHuman, types.Position{X: 720, Y: 350}, params.FEMALE_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
+	// Beast Titan Human
+	object = obj.NewObject(types.BeastTitanHuman, types.Position{X: 740, Y: 350}, params.BEAST_TITAN_LIFE)
+	objects = append(objects, *object)
+	nb_objects = nb_objects + 1
+
 	return objects
 }
 
 func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 	var ind int
 	coords := [][]int{{250, 250}, {750, 250}, {750, 450}, {250, 450}}
-	for i, _ := range e.Objs {
-		if e.Objs[i].Name() == types.ColossalTitan {
+	for i, object := range e.Objs {
+		if object.Name() == types.ColossalTitan {
 			ind = i
 			break
 		}

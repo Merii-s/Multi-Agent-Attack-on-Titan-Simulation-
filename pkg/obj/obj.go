@@ -58,7 +58,7 @@ func (f *Object) Hitbox() (hb []types.Position) {
 	case types.Grass:
 		h = params.CGrass
 		w = params.CGrass
-	case types.BigHouse1:
+	case types.BigHouse:
 		h = params.HBHouse1
 		w = params.WBHouse1
 	case types.SmallHouse:
@@ -67,21 +67,18 @@ func (f *Object) Hitbox() (hb []types.Position) {
 	case types.Dungeon:
 		h = params.HDungeon
 		w = params.WDungeon
-	case types.BigHouse2:
-		h = params.HBHouse2
-		w = params.WBHouse2
 	case types.Eren:
 		h = params.HEren
 		w = params.WEren
 	case types.Mikasa:
 		h = params.HMikasa
 		w = params.WMikasa
-	case types.MaleVillager:
-		h = params.HMaleVillager
-		w = params.WMaleVillager
-	case types.FemaleVillager:
-		h = params.HFemaleVillager
-		w = params.WFemaleVillager
+	case types.MaleCivilian:
+		h = params.HMaleCivilian
+		w = params.WMaleCivilian
+	case types.FemaleCivilian:
+		h = params.HFemaleCivilian
+		w = params.WFemaleCivilian
 	case types.BasicTitan1:
 		h = params.HBasicTitanF
 		w = params.WBasicTitanF
@@ -132,7 +129,7 @@ func (o *Object) Center() types.Position {
 	case types.Grass:
 		h = params.CGrass
 		w = params.CGrass
-	case types.BigHouse1:
+	case types.BigHouse:
 		h = params.HBHouse1
 		w = params.WBHouse1
 	case types.SmallHouse:
@@ -141,21 +138,18 @@ func (o *Object) Center() types.Position {
 	case types.Dungeon:
 		h = params.HDungeon
 		w = params.WDungeon
-	case types.BigHouse2:
-		h = params.HBHouse2
-		w = params.WBHouse2
 	case types.Eren:
 		h = params.HEren
 		w = params.WEren
 	case types.Mikasa:
 		h = params.HMikasa
 		w = params.WMikasa
-	case types.MaleVillager:
-		h = params.HMaleVillager
-		w = params.WMaleVillager
-	case types.FemaleVillager:
-		h = params.HFemaleVillager
-		w = params.WFemaleVillager
+	case types.MaleCivilian:
+		h = params.HMaleCivilian
+		w = params.WMaleCivilian
+	case types.FemaleCivilian:
+		h = params.HFemaleCivilian
+		w = params.WFemaleCivilian
 	default:
 		h = params.HField
 		w = params.WField
