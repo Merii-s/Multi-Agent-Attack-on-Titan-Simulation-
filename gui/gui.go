@@ -64,9 +64,9 @@ func DrawSprite(screen *ebiten.Image, o obj.Object, imageVariables map[string]**
 		img = *imageVariables["eren_small_sprite"]
 	case types.Mikasa:
 		img = *imageVariables["mikasa_sprite"]
-	case types.MaleVillager:
+	case types.MaleCivilian:
 		img = *imageVariables["male_villager_sprite"]
-	case types.FemaleVillager:
+	case types.FemaleCivilian:
 		img = *imageVariables["female_villager_sprite"]
 	case types.BasicTitan1:
 		img = *imageVariables["basic_titan1_sprite"]
