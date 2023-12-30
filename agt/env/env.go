@@ -29,9 +29,12 @@ func (p *Environment) Agents() []AgentI {
 func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types.Position) []obj.Object {
 	positions := make([]obj.Object, 0)
 	for _, obj := range e.Objs {
-		tl, br := obj.Hitbox()[0], obj.Hitbox()[1]
-		if utils.IntersectSquare(tl, br, topLeft, bottomRight) {
-			positions = append(positions, obj)
+		if obj.Name() != types.Grass {
+			objectTL, objectBR := obj.Hitbox()[0], obj.Hitbox()[1]
+			//println("Object", obj.Name(), "TL", objectTL.X, objectTL.Y, " BR", objectBR.X, objectBR.Y)
+			if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) {
+				positions = append(positions, obj)
+			}
 		}
 	}
 	return positions
@@ -41,8 +44,8 @@ func (e *Environment) PerceivedAgents(topLeft types.Position, bottomRight types.
 	positions := make([]AgentI, 0)
 	for _, agt := range e.Agents() {
 		object := agt.Object()
-		tl, br := object.Hitbox()[0], object.Hitbox()[1]
-		if utils.IntersectSquare(tl, br, topLeft, bottomRight) && agt.Id() != agtId {
+		objectTL, objectBR := object.Hitbox()[0], object.Hitbox()[1]
+		if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) && agt.Id() != agtId {
 			positions = append(positions, agt)
 		}
 	}
@@ -195,12 +198,26 @@ func Simu(e *Environment, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGrou
 			agt.Start(e, wgStart, wgPercept, wgDeliberate, wgAct)
 		}(agt)
 	}
-	for {
-		go func() {
+	go func() {
+		for {
 			time.Sleep(100 * time.Millisecond)
 			c <- e
-		}()
+		}
+	}()
+}
+
+func GetWallPositions(e *Environment) []types.Position {
+	wallPositions := []types.Position{}
+
+	for _, object := range e.Objects() {
+		if object.Name() == types.Wall {
+			for _, pos := range utils.GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
+				wallPositions = append(wallPositions, pos)
+			}
+		}
 	}
+
+	return wallPositions
 }
 
 // function that gets the Agent with the specified selected id

@@ -18,7 +18,7 @@ func PlaceHuman(objs []obj.Object, humans []env.AgentI, human env.AgentI, tl_vil
 		nb_grass := 0
 		for _, object := range objs {
 			if object.Name() != types.Grass {
-				if utils.DetectCollision2(human.Object(), object) {
+				if utils.DetectCollision(human.Object(), object) {
 					x, y := utils.GetRandomCoords(tl_village, br_village)
 					human.SetPos(types.Position{X: x, Y: y})
 					break
@@ -31,7 +31,7 @@ func PlaceHuman(objs []obj.Object, humans []env.AgentI, human env.AgentI, tl_vil
 		}
 
 		for _, hu := range humans {
-			if utils.DetectCollision2(human.Object(), hu.Object()) {
+			if utils.DetectCollision(human.Object(), hu.Object()) {
 				x, y := utils.GetRandomCoords(tl_village, br_village)
 				human.SetPos(types.Position{X: x, Y: y})
 				break
@@ -56,7 +56,7 @@ func PlaceTitan(titan env.AgentI, titans []env.AgentI, W int, H int, dir int) []
 	end := false
 	for !end {
 		for _, ti := range titans {
-			if utils.DetectCollision2(titan.Object(), ti.Object()) {
+			if utils.DetectCollision(titan.Object(), ti.Object()) {
 				x, y := utils.GetRandomCoords(tl_screen, br_screen)
 				if dir == 0 {
 					y = y - H
@@ -132,10 +132,10 @@ func CreateHumans(objs []obj.Object, tl_village types.Position, br_village types
 			} else {
 				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleSoldier, params.SOLDIER_LIFE)
 			}
-		} else if i < params.NB_CIVILIANS+params.NB_SOLDIERS+1 {
-			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
-		} else {
-			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
+			//} else if i < params.NB_CIVILIANS+params.NB_SOLDIERS+1 {
+			//	humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
+			//} else {
+			//	humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
 		}
 	}
 	return humans
@@ -200,4 +200,24 @@ func CreateAgents(H int, W int, objects []obj.Object) []env.AgentI {
 	all_agents = append(all_agents, humans...)
 	all_agents = append(all_agents, titans...)
 	return all_agents
+}
+
+func GetAvoidancePositions(agentAttributes *env.Agent) []types.Position {
+	toAvoid := []types.Position{}
+
+	for _, object := range agentAttributes.PerceivedObjects() {
+		hitboxStart, hitboxEnd := object.TL(), object.Hitbox()[1]
+		for _, pos := range utils.GetPositionsInHitbox(hitboxStart, hitboxEnd) {
+			toAvoid = append(toAvoid, pos)
+		}
+	}
+
+	for _, agt := range agentAttributes.PerceivedAgents() {
+		hitboxStart, hitboxEnd := agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]
+		for _, pos := range utils.GetPositionsInHitbox(hitboxStart, hitboxEnd) {
+			toAvoid = append(toAvoid, pos)
+		}
+	}
+
+	return toAvoid
 }

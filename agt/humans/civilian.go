@@ -84,12 +84,11 @@ func (c *Civilian) Agent() *env.Agent {
 
 func (c *Civilian) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
+	wgStart.Done()
+	wgStart.Wait()
 	go func() {
 		println("Civilian Start")
 		for {
-			wgStart.Done()
-			wgStart.Wait()
-
 			wgPercept.Add(1)
 			c.Percept(e, wgPercept)
 			wgPercept.Wait()

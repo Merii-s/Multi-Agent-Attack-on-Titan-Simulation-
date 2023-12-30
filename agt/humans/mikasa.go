@@ -77,12 +77,11 @@ func (m *Mikasa) Agent() *env.Agent {
 
 func (m *Mikasa) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
+	wgStart.Done()
+	wgStart.Wait()
 	go func() {
 		println("Mikasa Start")
 		for {
-			wgStart.Done()
-			wgStart.Wait()
-
 			wgPercept.Add(1)
 			m.Percept(e, wgPercept)
 			wgPercept.Wait()
@@ -186,10 +185,6 @@ func (mb *MikasaBehavior) Percept(e *env.Environment) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func (mb *MikasaBehavior) Deliberate() {
+func (mb *MikasaBehavior) Deliberate() {}
 
-}
-
-func (mb *MikasaBehavior) Act(e *env.Environment) {
-
-}
+func (mb *MikasaBehavior) Act(e *env.Environment) {}

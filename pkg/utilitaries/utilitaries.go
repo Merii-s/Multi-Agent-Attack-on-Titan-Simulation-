@@ -3,7 +3,6 @@ package pkg
 import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
-	"container/heap"
 	"fmt"
 	"math"
 	"math/rand"
@@ -34,30 +33,8 @@ func CreateAgentID(agentNb int, agentType types.ObjectName) types.Id {
 	return types.Id(fmt.Sprint("AGTID", fmt.Sprint(agentNb), "_", string(agentType)))
 }
 
-//DetectCollision checks if there is a collision between two objects using AABB collision detection
-// func DetectCollision(obj1, obj2 obj.Object) bool {
-
-// 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
-// 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
-
-// 	// Check for collision on the X-axis
-// 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
-// 		return false // No collision on X-axis
-// 	}
-
-// 	// Filter out positions to avoid
-// 	filteredNeighbors := []types.Position{}
-// 	for _, neighbor := range neighbors {
-// 		if !Contains(toAvoid, neighbor) {
-// 			filteredNeighbors = append(filteredNeighbors, neighbor)
-// 		}
-// 	}
-
-// 	return filteredNeighbors
-//  }
-
 // DetectCollision checks if there is a collision between two objects using AABB collision detection
-func DetectCollision2(obj1, obj2 obj.Object) bool {
+func DetectCollision(obj1, obj2 obj.Object) bool {
 
 	obj1TopLeft, obj1BottomRight := obj1.Hitbox()[0], obj1.Hitbox()[1]
 	obj2TopLeft, obj2BottomRight := obj2.Hitbox()[0], obj2.Hitbox()[1]
@@ -75,51 +52,16 @@ func DetectCollision2(obj1, obj2 obj.Object) bool {
 	return true // Collided on both axes
 }
 
-// define a function that takes a position in argument and an agent position
-// and returns the shortest path to reach the position from the agent position
-
-type Node struct {
-	position types.Position
-	parent   *Node
-	g        int
-	h        int
-	f        int
-}
-
-type NodeHeap []*Node
-
-func (h NodeHeap) Len() int           { return len(h) }
-func (h NodeHeap) Less(i, j int) bool { return h[i].f < h[j].f }
-func (h NodeHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-
-func (h *NodeHeap) Push(x interface{}) {
-	*h = append(*h, x.(*Node))
-}
-
-func (h *NodeHeap) Pop() interface{} {
-	old := *h
-	n := len(old)
-	node := old[n-1]
-	*h = old[0 : n-1]
-	return node
-}
-
-func calculateHeuristic(start types.Position, target types.Position) int {
-	dx := abs(target.X - start.X)
-	dy := abs(target.Y - start.Y)
-	return dx + dy + min(dx, dy)
-}
-
-func GetNeighbors(position types.Position, toAvoid []types.Position) []types.Position {
+func GetNeighbors(position types.Position, speed int, toAvoid []types.Position) []types.Position {
 	neighbors := []types.Position{
-		{X: position.X, Y: position.Y - 1},     // above
-		{X: position.X, Y: position.Y + 1},     // below
-		{X: position.X - 1, Y: position.Y},     // left
-		{X: position.X + 1, Y: position.Y},     // right
-		{X: position.X - 1, Y: position.Y - 1}, // top left
-		{X: position.X + 1, Y: position.Y - 1}, // top right
-		{X: position.X - 1, Y: position.Y + 1}, // bottom left
-		{X: position.X + 1, Y: position.Y + 1}, // bottom right
+		{X: position.X, Y: position.Y - speed},         // above
+		{X: position.X, Y: position.Y + speed},         // below
+		{X: position.X - speed, Y: position.Y},         // left
+		{X: position.X + speed, Y: position.Y},         // right
+		{X: position.X - speed, Y: position.Y - speed}, // top left
+		{X: position.X + speed, Y: position.Y - speed}, // top right
+		{X: position.X - speed, Y: position.Y + speed}, // bottom left
+		{X: position.X + speed, Y: position.Y + speed}, // bottom right
 	}
 
 	// Filter out positions to avoid
@@ -141,104 +83,6 @@ func Contains[T any](list []T, target T) bool {
 		}
 	}
 	return false
-}
-
-func GetShortestPath(pos types.Position, agentPos types.Position, agentSpeed int, toAvoid []types.Position) types.Position {
-	openSet := make(NodeHeap, 0)
-	closedSet := make(NodeHeap, 0)
-
-	startNode := &Node{
-		position: agentPos,
-		parent:   nil,
-		g:        0,
-		h:        calculateHeuristic(agentPos, pos),
-		f:        0,
-	}
-
-	heap.Push(&openSet, startNode)
-
-	for len(openSet) > 0 {
-		currentNode := heap.Pop(&openSet).(*Node)
-
-		// If the current node is the target node, reconstruct the path
-		if currentNode.position == pos {
-			path := []types.Position{}
-			current := currentNode
-			for current != nil {
-				path = append(path, current.position)
-				current = current.parent
-			}
-			// Return the position of the first node in the path
-			return path[len(path)-1]
-		}
-
-		// Add the current node to the closed set
-		heap.Push(&closedSet, currentNode)
-
-		// Get the neighboring positions of the current node
-		neighbors := GetNeighbors(currentNode.position, toAvoid)
-
-		for _, neighbor := range neighbors {
-			// Skip if the neighbor is in the closed set
-			if containsNode(&closedSet, neighbor) {
-				continue
-			}
-
-			// Calculate the tentative g value for the neighbor
-			tentativeG := currentNode.g + agentSpeed
-
-			// Check if the neighbor is not in the open set or the tentative g value is lower
-			neighborNode := getNode(&openSet, neighbor)
-			if neighborNode == nil || tentativeG < neighborNode.g {
-				// Create a new node for the neighbor
-				neighborNode = &Node{
-					position: neighbor,
-					parent:   currentNode,
-					g:        tentativeG,
-					h:        calculateHeuristic(neighbor, pos),
-					f:        tentativeG + calculateHeuristic(neighbor, pos),
-				}
-
-				// Add the neighbor node to the open set
-				heap.Push(&openSet, neighborNode)
-			}
-		}
-	}
-
-	// If no path is found, return the agent position
-	return agentPos
-}
-
-func containsNode(nodes *NodeHeap, position types.Position) bool {
-	for _, node := range *nodes {
-		if node.position.Equals(position) {
-			return true
-		}
-	}
-	return false
-}
-
-func getNode(nodes *NodeHeap, position types.Position) *Node {
-	for _, node := range *nodes {
-		if node.position.Equals(position) {
-			return node
-		}
-	}
-	return nil
-}
-
-func abs(n int) int {
-	if n < 0 {
-		return -n
-	}
-	return n
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func PositionsBehindObjects(perceivedObjects []obj.Object, positionsBehindObjects []types.Position) []obj.Object {
@@ -292,10 +136,7 @@ func GetAngle(agentPos types.Position, position types.Position) float64 {
 // define a function that takes two squares in parameters defined by top left and bottom right positions and returns true if they intersect
 func IntersectSquare(topLeft1 types.Position, bottomRight1 types.Position, topLeft2 types.Position, bottomRight2 types.Position) bool {
 	// Check if the two squares intersect
-	if topLeft1.X > bottomRight2.X || topLeft2.X > bottomRight1.X {
-		return false
-	}
-	if topLeft1.Y < bottomRight2.Y || topLeft2.Y < bottomRight1.Y {
+	if topLeft1.X > bottomRight2.X || topLeft2.X > bottomRight1.X || topLeft1.Y > bottomRight2.Y || topLeft2.Y > bottomRight1.Y {
 		return false
 	}
 
@@ -381,14 +222,7 @@ func OppositeDirection(currentPos, targetPos types.Position) types.Position {
 }
 
 func IsOutOfScreen(pos types.Position, W int, H int) bool {
-	if pos.X < 0 || pos.X > W || pos.Y < 0 || pos.Y > H {
-		return true
-	}
-	return false
-}
-
-func IsReachable(targetPos types.Position, agtCenter types.Position, agtReach int) bool {
-	return targetPos.Distance(agtCenter) > float64(agtReach)
+	return pos.X < 0 || pos.X > W || pos.Y < 0 || pos.Y > H
 }
 
 func GetPositionsInHitbox(tl types.Position, br types.Position) (inHitboxPositions []types.Position) {

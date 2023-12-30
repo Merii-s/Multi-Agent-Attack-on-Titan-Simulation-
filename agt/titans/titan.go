@@ -35,6 +35,8 @@ func (t *Titan) SetAttackObject(b bool) { t.attackObject = b }
 
 func (t *Titan) ObjectToAttack() obj.Object { return *t.objectToAttack }
 
+func (t *Titan) ObjectToAttackP() *obj.Object { return t.objectToAttack }
+
 func (t *Titan) SetObjectToAttack(o *obj.Object) { t.objectToAttack = o }
 
-func (t *Titan) AttackObject(o obj.Object) { o.TakeDamage(t.agentAttributes.Strength()) }
+func (t *Titan) AttackObject(o *obj.Object) { o.TakeDamage(t.agentAttributes.Strength()) }

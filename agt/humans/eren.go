@@ -82,12 +82,11 @@ func (eren *Eren) Agent() *env.Agent {
 
 func (eren *Eren) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
+	wgStart.Done()
+	wgStart.Wait()
 	go func() {
 		println("Eren Start")
 		for {
-			wgStart.Done()
-			wgStart.Wait()
-
 			wgPercept.Add(1)
 			eren.Percept(e, wgPercept)
 			wgPercept.Wait()

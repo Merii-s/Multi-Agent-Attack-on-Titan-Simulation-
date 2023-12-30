@@ -81,12 +81,11 @@ func (s *Soldier) Agent() *env.Agent {
 
 func (s *Soldier) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
+	wgStart.Done()
+	wgStart.Wait()
 	go func() {
 		println("Soldier Start")
 		for {
-			wgStart.Done()
-			wgStart.Wait()
-
 			wgPercept.Add(1)
 			s.Percept(e, wgPercept)
 			wgPercept.Wait()

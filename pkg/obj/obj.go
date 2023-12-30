@@ -158,5 +158,8 @@ func (o *Object) Center() types.Position {
 }
 
 func (o *Object) TakeDamage(dmg int) {
-	o.life -= dmg
+	println("Object", o.name, "has", o.life, "life")
+	println("Object", o.name, "take", dmg, "damage")
+	o.SetLife(o.Life() - dmg)
+	println("Object", o.name, "has", o.life, "life")
 }
