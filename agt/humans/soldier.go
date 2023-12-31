@@ -229,8 +229,12 @@ func (sb *SoldierBehavior) Deliberate() {
 
 			sb.s.attributes.agentAttributes.SetNextPos(nextPos)
 		}
+	} else if SpecialTitanIn || BasicTitansNumber >= 2 {
+		//if the soldier is in danger, they run away
+		_, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
+		sb.s.attributes.agentAttributes.SetNextPos(pkg.OppositeDirection(sb.s.attributes.agentAttributes.Pos(), closestAgentPosition))
 	} else {
-		// If there are no interesting agents, the soldier moves randomly
+		// If there are no titans around, the soldier moves randomly
 		var nextPos types.Position
 
 		if rand.Intn(10) < 5 {
