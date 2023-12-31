@@ -4,6 +4,7 @@ import (
 	env "AOT/agt/env"
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
+	pkg "AOT/pkg/utilitaries"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -175,67 +176,101 @@ func (eb *ErenBehavior) Percept(e *env.Environment) {
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := eb.eren.attributes.agentAttributes.GetVision(e)
 
-	// Add the percepted agents to the list of percepted agents
-	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %sren\n", obj.Name())
-		eb.eren.attributes.agentAttributes.AddPerceivedObject(obj)
+	// Add the perceived agents to the list of perceived agents
+	for _, object := range perceivedObjects {
+		eb.eren.attributes.agentAttributes.AddPerceivedObject(object)
 	}
-
-	// Add the percepted agents to the list of percepted agents
+	// Add the perceived agents to the list of perceived agents
 	for _, agt := range perceivedAgents {
-		fmt.Printf("Percepted agent: %sren\n", agt.Id())
 		eb.eren.attributes.agentAttributes.AddPerceivedAgent(agt)
 	}
+	println("Perceived agents: ", len(eb.eren.attributes.agentAttributes.PerceivedAgents()))
+	println("Perceived objects: ", len(eb.eren.attributes.agentAttributes.PerceivedObjects()))
 
 	time.Sleep(100 * time.Millisecond)
 }
 
 func (eb *ErenBehavior) Deliberate() {
-	// Initialize variables for counting titans
-	numTitans := 0
-	var agentToAttack env.AgentI
+	println("Eren Deliberate")
 
-	// Count the number of titans and store the position of the titan to attack
+	//TODO : Find where to put GetAvoidancePositions function
+	// Checks hitbox around to avoid collisions
+	toAvoid := []types.Position{}
+	for _, object := range eb.eren.attributes.agentAttributes.PerceivedObjects() {
+		for _, pos := range pkg.GetPositionsInHitbox(object.TL(), object.Hitbox()[1]) {
+			toAvoid = append(toAvoid, pos)
+		}
+	}
+
 	for _, agt := range eb.eren.attributes.agentAttributes.PerceivedAgents() {
-		//if the agent is a special titan, Eren decides to transform to titan and attacks
-		if agt.Object().GetName() == "BeastTitan" || agt.Object().GetName() == "ColossalTitan" || agt.Object().GetName() == "ArmoredTitan" || agt.Object().GetName() == "FemaleTitan" || agt.Object().GetName() == "JawTitan" {
-			agentToAttack = agt
+		for _, pos := range pkg.GetPositionsInHitbox(agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]) {
+			toAvoid = append(toAvoid, pos)
+			toAvoid = append(toAvoid, types.Position{X: pos.X - eb.eren.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - eb.eren.Agent().ObjectP().Hitbox()[0].Y})
+		}
+	}
+	var interestingAgents []env.AgentI
+	agtPos := eb.eren.attributes.agentAttributes.Pos()
+
+	BasicTitansNumber := 0
+	SpecialTitanIn := false
+	//println("Interesting objects: ", len(interestingObjects))
+
+	for _, agt := range eb.eren.attributes.agentAttributes.PerceivedAgents() {
+		if agt.Agent().GetName() == types.BasicTitan1 ||
+			agt.Agent().GetName() == types.BasicTitan2 {
+			interestingAgents = append(interestingAgents, agt)
+			BasicTitansNumber++
+		}
+		if agt.Agent().GetName() == types.BeastTitan ||
+			agt.Agent().GetName() == types.ColossalTitan ||
+			agt.Agent().GetName() == types.ArmoredTitan ||
+			agt.Agent().GetName() == types.FemaleTitan ||
+			agt.Agent().GetName() == types.JawTitan {
+			interestingAgents = append(interestingAgents, agt)
+			SpecialTitanIn = true
+			// A voir si on veut quand même récupérer les reste des agents
+			//break
+		}
+	}
+	//println("Interesting agents: ", len(interestingAgents))
+
+	eb.eren.attributes.agentAttributes.ResetPerception()
+
+	// Checks first if there are interesting agents to attack and if not, the nearest agent to go to
+	if len(interestingAgents) != 0 && !SpecialTitanIn && BasicTitansNumber < 2 {
+		closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
+
+		if pkg.DetectCollision(closestAgent.Object(), eb.eren.Object()) {
 			eb.eren.attributes.agentAttributes.SetAttack(true)
-			//Eren decides to transform to titan
-			eb.eren.transform = true
-			break
-		}
-		if agt.Object().GetName() == "BasicTitan1" || agt.Object().GetName() == "BasicTitan2" {
-			numTitans++
-			if numTitans == 1 {
-				agentToAttack = agt
-				eb.eren.attributes.agentAttributes.SetAttack(true)
-			}
-		}
-	}
+			eb.eren.attributes.agentAttributes.SetAgentToAttack(closestAgent)
+		} else {
+			eb.eren.attributes.agentAttributes.SetAttack(false)
 
-	// Decide action based on the number of titans
-	if numTitans > 1 {
-		//Eren decides to transform to titan
-		eb.eren.transform = true
-	}
+			neighborAgentPositions := pkg.GetNeighbors(agtPos, eb.eren.attributes.agentAttributes.Speed(), toAvoid)
+			nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
 
-	if eb.eren.attributes.agentAttributes.Attack() {
-		eb.eren.attributes.agentAttributes.SetAgentToAttack(agentToAttack)
-		eb.eren.attributes.agentAttributes.SetNextPos(agentToAttack.Pos())
+			eb.eren.attributes.agentAttributes.SetNextPos(nextPos)
+		}
 	} else {
-		// Move randomly
-		var randPos types.Position
-		randPos.X = eb.eren.attributes.agentAttributes.Pos().X + rand.Intn(10)
-		randPos.Y = eb.eren.attributes.agentAttributes.Pos().Y + rand.Intn(10)
+		// If there are no interesting agents, the soldier moves randomly
+		var nextPos types.Position
 
-		eb.eren.attributes.agentAttributes.SetNextPos(randPos)
+		if rand.Intn(10) < 5 {
+			nextPos = types.Position{X: eb.eren.attributes.agentAttributes.Pos().X + rand.Intn(5), Y: eb.eren.attributes.agentAttributes.Pos().Y + rand.Intn(5)}
+		} else {
+			nextPos = types.Position{X: eb.eren.attributes.agentAttributes.Pos().X - rand.Intn(5), Y: eb.eren.attributes.agentAttributes.Pos().Y - rand.Intn(5)}
+		}
+
+		println("Agent position: ", eb.eren.attributes.agentAttributes.Pos().X, eb.eren.attributes.agentAttributes.Pos().Y)
+		println("Next position: ", nextPos.X, nextPos.Y)
+
+		eb.eren.attributes.agentAttributes.SetNextPos(nextPos)
 	}
 }
 
 func (eb *ErenBehavior) Act(e *env.Environment) {
 	if eb.eren.transform {
-		//TODO: Eren transforms to titan
+		eb.eren.attributes.agentAttributes.SetName("ErenTitan")
 	}
 
 	if eb.eren.attributes.agentAttributes.Attack() {

@@ -103,6 +103,8 @@ func (t *Agent) AttackValue() bool { return t.attack }
 
 func (t *Agent) GetName() types.ObjectName { return t.object.Name() }
 
+func (t *Agent) SetName(name types.ObjectName) { t.object.SetName(name) }
+
 func (t *Agent) ResetPerception() {
 	//println("Reset perception")
 	t.perceivedObjects = []obj.Object{}

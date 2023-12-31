@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 type SoldierI interface {
@@ -36,21 +37,13 @@ func NewSoldier(id types.Id, tl types.Position, life int, reach int, strength in
 }
 
 // Setter and getter methods for Soldier
-func (s *Soldier) SyncChan() chan string {
-	return s.syncChan
-}
+func (s *Soldier) SyncChan() chan string { return s.syncChan }
 
-func (s *Soldier) StopCh() chan struct{} {
-	return s.stopCh
-}
+func (s *Soldier) StopCh() chan struct{} { return s.stopCh }
 
-func (s *Soldier) Behavior() *env.BehaviorI {
-	return &s.behavior
-}
+func (s *Soldier) Behavior() *env.BehaviorI { return &s.behavior }
 
-func (s *Soldier) SetBehavior(b env.BehaviorI) {
-	s.behavior = b
-}
+func (s *Soldier) SetBehavior(b env.BehaviorI) { s.behavior = b }
 
 // Methods for Soldier
 func (s *Soldier) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
@@ -70,9 +63,7 @@ func (s *Soldier) Act(e *env.Environment, wgAct *sync.WaitGroup) {
 	s.behavior.Act(e)
 }
 
-func (s *Soldier) Id() types.Id {
-	return s.attributes.agentAttributes.Id()
-}
+func (s *Soldier) Id() types.Id { return s.attributes.agentAttributes.Id() }
 
 func (s *Soldier) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
@@ -103,7 +94,7 @@ func (s *Soldier) Eat() {
 }
 
 func (s *Soldier) Sleep() {
-	//time.Sleep(?)
+	time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 }
 
 func (*Soldier) Gard() {
@@ -195,18 +186,11 @@ func (sb *SoldierBehavior) Deliberate() {
 			toAvoid = append(toAvoid, types.Position{X: pos.X - sb.s.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - sb.s.Agent().ObjectP().Hitbox()[0].Y})
 		}
 	}
-	var interestingObjects []obj.Object
 	var interestingAgents []env.AgentI
 	agtPos := sb.s.attributes.agentAttributes.Pos()
 
 	BasicTitansNumber := 0
 	SpecialTitanIn := false
-
-	for _, object := range sb.s.attributes.agentAttributes.PerceivedObjects() {
-		if object.Name() == types.Wall || object.Name() == types.Field {
-			interestingObjects = append(interestingObjects, object)
-		}
-	}
 	//println("Interesting objects: ", len(interestingObjects))
 
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
@@ -245,17 +229,16 @@ func (sb *SoldierBehavior) Deliberate() {
 
 			sb.s.attributes.agentAttributes.SetNextPos(nextPos)
 		}
-
-		// If there are no interesting agents, the soldier goes towards the nearest interesting object (wall or field)
 	} else {
-		closestObject, closestObjectPosition := pkg.ClosestObject(interestingObjects, agtPos)
-		println("Closest object: ", closestObject.Name())
-		println("Closest object Position: ", closestObjectPosition.X, closestObjectPosition.Y)
+		// If there are no interesting agents, the soldier moves randomly
+		var nextPos types.Position
 
-		sb.s.attributes.agentAttributes.SetAttack(false)
+		if rand.Intn(10) < 5 {
+			nextPos = types.Position{X: sb.s.attributes.agentAttributes.Pos().X + rand.Intn(5), Y: sb.s.attributes.agentAttributes.Pos().Y + rand.Intn(5)}
+		} else {
+			nextPos = types.Position{X: sb.s.attributes.agentAttributes.Pos().X - rand.Intn(5), Y: sb.s.attributes.agentAttributes.Pos().Y - rand.Intn(5)}
+		}
 
-		neighborAgentPositions := pkg.GetNeighbors(agtPos, sb.s.attributes.agentAttributes.Speed(), toAvoid)
-		nextPos := closestObjectPosition.ClosestPosition(neighborAgentPositions)
 		println("Agent position: ", sb.s.attributes.agentAttributes.Pos().X, sb.s.attributes.agentAttributes.Pos().Y)
 		println("Next position: ", nextPos.X, nextPos.Y)
 

@@ -38,6 +38,10 @@ func (o Object) GetName() types.ObjectName {
 	return o.name
 }
 
+func (o *Object) SetName(n types.ObjectName) {
+	o.name = n
+}
+
 func (o *Object) TL() types.Position {
 	return o.tl
 }
