@@ -211,25 +211,19 @@ func (eb *ErenBehavior) Deliberate() {
 	var interestingAgents []env.AgentI
 	agtPos := eb.eren.attributes.agentAttributes.Pos()
 
-	BasicTitansNumber := 0
-	SpecialTitanIn := false
+	numberTitans := 0
 	//println("Interesting objects: ", len(interestingObjects))
 
 	for _, agt := range eb.eren.attributes.agentAttributes.PerceivedAgents() {
 		if agt.Agent().GetName() == types.BasicTitan1 ||
-			agt.Agent().GetName() == types.BasicTitan2 {
-			interestingAgents = append(interestingAgents, agt)
-			BasicTitansNumber++
-		}
-		if agt.Agent().GetName() == types.BeastTitan ||
+			agt.Agent().GetName() == types.BasicTitan2 ||
+			agt.Agent().GetName() == types.BeastTitan ||
 			agt.Agent().GetName() == types.ColossalTitan ||
 			agt.Agent().GetName() == types.ArmoredTitan ||
 			agt.Agent().GetName() == types.FemaleTitan ||
 			agt.Agent().GetName() == types.JawTitan {
 			interestingAgents = append(interestingAgents, agt)
-			SpecialTitanIn = true
-			// A voir si on veut quand même récupérer les reste des agents
-			//break
+			numberTitans++
 		}
 	}
 	//println("Interesting agents: ", len(interestingAgents))
@@ -237,7 +231,10 @@ func (eb *ErenBehavior) Deliberate() {
 	eb.eren.attributes.agentAttributes.ResetPerception()
 
 	// Checks first if there are interesting agents to attack and if not, the nearest agent to go to
-	if len(interestingAgents) != 0 && !SpecialTitanIn && BasicTitansNumber < 2 {
+	if len(interestingAgents) != 0 {
+		if numberTitans > 1 {
+			eb.eren.transform = true
+		}
 		closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
 
 		if pkg.DetectCollision(closestAgent.Object(), eb.eren.Object()) {
@@ -252,7 +249,7 @@ func (eb *ErenBehavior) Deliberate() {
 			eb.eren.attributes.agentAttributes.SetNextPos(nextPos)
 		}
 	} else {
-		// If there are no interesting agents, the soldier moves randomly
+		// If there are no interesting agents, Eren moves randomly
 		var nextPos types.Position
 
 		if rand.Intn(10) < 5 {
@@ -281,7 +278,7 @@ func (eb *ErenBehavior) Act(e *env.Environment) {
 		eb.eren.attributes.agentAttributes.SetAgentToAttack(nil)
 		if eb.eren.transform {
 			eb.eren.transform = false
-			//TODO: Eren transforms back to human
+			eb.eren.attributes.agentAttributes.SetName("Eren")
 		}
 	} else {
 		// Move towards the specified position
