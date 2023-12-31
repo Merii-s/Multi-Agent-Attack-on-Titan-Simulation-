@@ -137,7 +137,7 @@ func (eren *Eren) Attack(agt env.AgentI) {
 	if rand.Float64() < eren.AttackSuccess(eren.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
 		agt.Agent().SetHp(agt.Agent().Hp() - eren.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %sren : %sren lost  %d HP \n", eren.Id(), agt.Id(), agt.Agent().Hp())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", eren.Id(), agt.Id(), agt.Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens

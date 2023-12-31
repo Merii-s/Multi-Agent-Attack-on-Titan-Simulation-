@@ -4,6 +4,7 @@ import (
 	env "AOT/agt/env"
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
+	pkg "AOT/pkg/utilitaries"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -54,14 +55,17 @@ func (m *Mikasa) SetBehavior(b env.BehaviorI) {
 
 // Methods for Mikasa
 func (m *Mikasa) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
+	defer wgPercept.Done()
 	m.behavior.Percept(e)
 }
 
 func (m *Mikasa) Deliberate(wgDeliberate *sync.WaitGroup) {
+	defer wgDeliberate.Done()
 	m.behavior.Deliberate()
 }
 
 func (m *Mikasa) Act(e *env.Environment, wgAct *sync.WaitGroup) {
+	defer wgAct.Done()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.behavior.Act(e)
@@ -106,7 +110,7 @@ func (m *Mikasa) Eat() {
 }
 
 func (m *Mikasa) Sleep() {
-
+	time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 }
 
 func (m *Mikasa) Guard() {
@@ -170,21 +174,111 @@ func (mb *MikasaBehavior) Percept(e *env.Environment) {
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := mb.m.attributes.agentAttributes.GetVision(e)
 
-	// Add the percepted agents to the list of percepted agents
-	for _, obj := range perceivedObjects {
-		fmt.Printf("Percepted object: %s\n", obj.Name())
-		mb.m.attributes.agentAttributes.AddPerceivedObject(obj)
+	// Add the perceived agents to the list of perceived agents
+	for _, object := range perceivedObjects {
+		mb.m.attributes.agentAttributes.AddPerceivedObject(object)
 	}
-
-	// Add the percepted agents to the list of percepted agents
+	// Add the perceived agents to the list of perceived agents
 	for _, agt := range perceivedAgents {
-		fmt.Printf("Percepted agent: %s\n", agt.Id())
 		mb.m.attributes.agentAttributes.AddPerceivedAgent(agt)
 	}
+	println("Perceived agents: ", len(mb.m.attributes.agentAttributes.PerceivedAgents()))
+	println("Perceived objects: ", len(mb.m.attributes.agentAttributes.PerceivedObjects()))
 
 	time.Sleep(100 * time.Millisecond)
 }
 
-func (mb *MikasaBehavior) Deliberate() {}
+func (mb *MikasaBehavior) Deliberate() {
+	println("Mikasa Deliberate")
 
-func (mb *MikasaBehavior) Act(e *env.Environment) {}
+	//TODO : Find where to put GetAvoidancePositions function
+	// Checks hitbox around to avoid collisions
+	toAvoid := []types.Position{}
+	for _, object := range mb.m.attributes.agentAttributes.PerceivedObjects() {
+		for _, pos := range pkg.GetPositionsInHitbox(object.TL(), object.Hitbox()[1]) {
+			toAvoid = append(toAvoid, pos)
+		}
+	}
+
+	for _, agt := range mb.m.attributes.agentAttributes.PerceivedAgents() {
+		for _, pos := range pkg.GetPositionsInHitbox(agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]) {
+			toAvoid = append(toAvoid, pos)
+			toAvoid = append(toAvoid, types.Position{X: pos.X - mb.m.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - mb.m.Agent().ObjectP().Hitbox()[0].Y})
+		}
+	}
+	var interestingAgents []env.AgentI
+	agtPos := mb.m.attributes.agentAttributes.Pos()
+
+	numberTitans := 0
+	ErenAround := false
+	//println("Interesting objects: ", len(interestingObjects))
+
+	for _, agt := range mb.m.attributes.agentAttributes.PerceivedAgents() {
+		if agt.Agent().GetName() == types.BasicTitan1 ||
+			agt.Agent().GetName() == types.BasicTitan2 ||
+			agt.Agent().GetName() == types.BeastTitan ||
+			agt.Agent().GetName() == types.ColossalTitan ||
+			agt.Agent().GetName() == types.ArmoredTitan ||
+			agt.Agent().GetName() == types.FemaleTitan ||
+			agt.Agent().GetName() == types.JawTitan {
+			interestingAgents = append(interestingAgents, agt)
+			numberTitans++
+		}
+		if agt.Agent().GetName() == types.Eren {
+			// Mikasa always goes to Eren first
+			interestingAgents = append(interestingAgents, agt)
+			ErenAround = true
+			mb.m.attributes.agentAttributes.SetNextPos(agt.Agent().Pos())
+		}
+	}
+	//println("Interesting agents: ", len(interestingAgents))
+
+	mb.m.attributes.agentAttributes.ResetPerception()
+
+	// If Eren is not around, Mikasa checks first if there are interesting agents to attack and if not, the nearest agent to go to
+	if !ErenAround {
+		if len(interestingAgents) != 0 {
+			closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
+
+			if pkg.DetectCollision(closestAgent.Object(), mb.m.Object()) {
+				mb.m.attributes.agentAttributes.SetAttack(true)
+				mb.m.attributes.agentAttributes.SetAgentToAttack(closestAgent)
+			} else {
+				mb.m.attributes.agentAttributes.SetAttack(false)
+
+				neighborAgentPositions := pkg.GetNeighbors(agtPos, mb.m.attributes.agentAttributes.Speed(), toAvoid)
+				nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
+
+				mb.m.attributes.agentAttributes.SetNextPos(nextPos)
+			}
+		} else {
+			// If there are no interesting agents, Mikasa moves randomly
+			var nextPos types.Position
+
+			if rand.Intn(10) < 5 {
+				nextPos = types.Position{X: mb.m.attributes.agentAttributes.Pos().X + rand.Intn(5), Y: mb.m.attributes.agentAttributes.Pos().Y + rand.Intn(5)}
+			} else {
+				nextPos = types.Position{X: mb.m.attributes.agentAttributes.Pos().X - rand.Intn(5), Y: mb.m.attributes.agentAttributes.Pos().Y - rand.Intn(5)}
+			}
+
+			println("Agent position: ", mb.m.attributes.agentAttributes.Pos().X, mb.m.attributes.agentAttributes.Pos().Y)
+			println("Next position: ", nextPos.X, nextPos.Y)
+
+			mb.m.attributes.agentAttributes.SetNextPos(nextPos)
+		}
+	}
+}
+
+func (mb *MikasaBehavior) Act(e *env.Environment) {
+	// Perform the action based on the parameters
+	if mb.m.attributes.agentAttributes.Attack() {
+		mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
+		mb.m.Attack(mb.m.attributes.agentAttributes.AgentToAttack())
+		// Reset the parameters
+		mb.m.attributes.agentAttributes.SetAttack(false)
+		mb.m.attributes.agentAttributes.SetAgentToAttack(nil)
+	} else {
+		// Move towards the specified position
+		mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
+	}
+}
