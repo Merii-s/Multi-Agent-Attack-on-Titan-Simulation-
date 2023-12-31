@@ -112,7 +112,7 @@ func (eren *Eren) Eat() {
 }
 
 func (eren *Eren) Sleep() {
-
+	time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 }
 
 func (*Eren) Guard() {
