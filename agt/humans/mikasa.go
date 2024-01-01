@@ -128,14 +128,14 @@ func (m *Mikasa) AttackSuccess(spdAtk int, spdDef int) float64 {
 	}
 }
 
-func (m *Mikasa) Attack(agt env.AgentI) {
+func (m *Mikasa) Attack(agt *env.AgentI) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < m.AttackSuccess(m.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
+	if rand.Float64() < m.AttackSuccess(m.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.Agent().SetHp(agt.Agent().Hp() - m.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", m.Id(), agt.Id(), agt.Agent().Hp())
+		(*agt).Agent().SetHp((*agt).Agent().Hp() - m.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", m.Id(), (*agt).Id(), (*agt).Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
@@ -273,12 +273,15 @@ func (mb *MikasaBehavior) Act(e *env.Environment) {
 	// Perform the action based on the parameters
 	if mb.m.attributes.agentAttributes.Attack() {
 		mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
-		mb.m.Attack(*mb.m.attributes.agentAttributes.AgentToAttack())
+		mb.m.Attack(mb.m.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		mb.m.attributes.agentAttributes.SetAttack(false)
 		mb.m.attributes.agentAttributes.SetAgentToAttack(nil)
 	} else {
-		// Move towards the specified position
-		mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
+		if env.IsNextPositionValid(mb.m, e) {
+			mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
+		} else {
+			mb.m.Agent().SetNextPos(mb.m.Pos())
+		}
 	}
 }

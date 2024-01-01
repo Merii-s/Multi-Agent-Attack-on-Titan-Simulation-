@@ -134,16 +134,18 @@ func (bt *BasicTitan) AttackSuccess(spdAtk int, spdDef int) float64 {
 func (bt *BasicTitan) Attack(agt *env.AgentI) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
-	// TODO : Verif reachable
-	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
-		// If the attack is successful, the agent loses HP
-		(*agt).Agent().SetHp((*agt).Agent().Hp() - bt.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s has now %d HP \n", bt.Id(), (*agt).Id(), (*agt).Agent().Hp())
-	} else {
-		fmt.Println("Attack unsuccessful.")
-		// If the attack is unsuccessful, nothing happens
+	if pkg.DetectCollision((*agt).Object(), bt.Object()) {
+		// If the percentage is less than the success rate, the attack is successful
+		if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
+			// If the attack is successful, the agent loses HP
+			(*agt).Agent().SetHp((*agt).Agent().Hp() - bt.attributes.agentAttributes.Strength())
+			fmt.Printf("Attack successful from %s : %s has now %d HP \n", bt.Id(), (*agt).Id(), (*agt).Agent().Hp())
+		} else {
+			fmt.Println("Attack unsuccessful.")
+			// If the attack is unsuccessful, nothing happens
+		}
 	}
+
 }
 
 func (bt *BasicTitan) Pos() types.Position {
@@ -361,6 +363,10 @@ func (btb *BasicTitanBehavior) Act(e *env.Environment) {
 	}
 	// If the titan is not attacking anything, it moves towards the next position
 	if !btb.bt.attributes.AttackObjectBool() && !btb.bt.attributes.agentAttributes.Attack() {
-		btb.bt.Move(btb.bt.attributes.agentAttributes.NextPosition())
+		if env.IsNextPositionValid(btb.bt, e) {
+			btb.bt.Move(btb.bt.attributes.agentAttributes.NextPos())
+		} else {
+			btb.bt.Agent().SetNextPos(btb.bt.Pos())
+		}
 	}
 }

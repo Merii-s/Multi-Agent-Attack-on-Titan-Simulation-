@@ -1,6 +1,7 @@
 package env
 
 import (
+	"AOT/pkg/obj"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
 )
@@ -32,4 +33,14 @@ func removeAgents(perceptedAgents []*AgentI, objectsToRemove []*AgentI) []*Agent
 	}
 
 	return perceptedAgents
+}
+
+func IsNextPositionValid(agt AgentI, e *Environment) bool {
+	dummyObject := obj.NewObject(agt.Agent().GetName(), agt.Agent().NextPosition(), agt.Agent().ObjectP().Life())
+	for _, a := range e.Agents() {
+		if utils.DetectCollision(a.Object(), *dummyObject) {
+			return false
+		}
+	}
+	return true
 }

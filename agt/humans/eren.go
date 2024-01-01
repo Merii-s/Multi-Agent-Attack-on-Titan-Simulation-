@@ -267,7 +267,7 @@ func (eb *ErenBehavior) Deliberate() {
 
 func (eb *ErenBehavior) Act(e *env.Environment) {
 	if eb.eren.transform {
-		eb.eren.attributes.agentAttributes.SetName("ErenTitan")
+		eb.eren.attributes.agentAttributes.SetName(types.ErenTitanS)
 	}
 
 	if eb.eren.attributes.agentAttributes.Attack() {
@@ -278,10 +278,13 @@ func (eb *ErenBehavior) Act(e *env.Environment) {
 		eb.eren.attributes.agentAttributes.SetAgentToAttack(nil)
 		if eb.eren.transform {
 			eb.eren.transform = false
-			eb.eren.attributes.agentAttributes.SetName("Eren")
+			eb.eren.attributes.agentAttributes.SetName(types.Eren)
 		}
 	} else {
-		// Move towards the specified position
-		eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
+		if env.IsNextPositionValid(eb.eren, e) {
+			eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
+		} else {
+			eb.eren.Agent().SetNextPos(eb.eren.Pos())
+		}
 	}
 }

@@ -259,7 +259,10 @@ func (sb *SoldierBehavior) Act(e *env.Environment) {
 		sb.s.attributes.agentAttributes.SetAttack(false)
 		sb.s.attributes.agentAttributes.SetAgentToAttack(nil)
 	} else {
-		// Move towards the specified position
-		sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
+		if env.IsNextPositionValid(sb.s, e) {
+			sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
+		} else {
+			sb.s.Agent().SetNextPos(sb.s.Pos())
+		}
 	}
 }

@@ -209,6 +209,9 @@ func (cb *CivilianBehavior) Deliberate() {
 }
 
 func (cb *CivilianBehavior) Act(e *env.Environment) {
-	// Move to the next position
-	cb.c.Move(cb.c.attributes.agentAttributes.NextPos())
+	if env.IsNextPositionValid(cb.c, e) {
+		cb.c.Move(cb.c.attributes.agentAttributes.NextPos())
+	} else {
+		cb.c.Agent().SetNextPos(cb.c.Pos())
+	}
 }
