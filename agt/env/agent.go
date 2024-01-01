@@ -16,7 +16,7 @@ type Agent struct {
 	attack           bool
 	nextPosition     types.Position
 	agentToAttack    *AgentI
-	perceivedObjects []obj.Object
+	perceivedObjects []*obj.Object
 	perceivedAgents  []AgentI
 	cantSeeBehind    []types.ObjectName
 	object           *obj.Object
@@ -32,7 +32,7 @@ func NewAgent(id types.Id, tl types.Position, life int, reach int, strength int,
 		attack:           false,
 		nextPosition:     tl,
 		agentToAttack:    nil,
-		perceivedObjects: []obj.Object{},
+		perceivedObjects: []*obj.Object{},
 		perceivedAgents:  []AgentI{},
 		cantSeeBehind:    []types.ObjectName{},
 		object:           obj.NewObject(name, tl, life),
@@ -81,7 +81,7 @@ func (t *Agent) Attack() bool { return t.attack }
 
 func (t *Agent) AgentToAttack() AgentI { return *t.agentToAttack }
 
-func (t *Agent) PerceivedObjects() []obj.Object { return t.perceivedObjects }
+func (t *Agent) PerceivedObjects() []*obj.Object { return t.perceivedObjects }
 
 func (t *Agent) PerceivedAgents() []AgentI { return t.perceivedAgents }
 
@@ -91,7 +91,7 @@ func (t *Agent) Object() obj.Object { return *t.object }
 
 func (t *Agent) ObjectP() *obj.Object { return t.object }
 
-func (t *Agent) AddPerceivedObject(obj obj.Object) {
+func (t *Agent) AddPerceivedObject(obj *obj.Object) {
 	t.perceivedObjects = append(t.perceivedObjects, obj)
 }
 
@@ -107,14 +107,14 @@ func (t *Agent) SetName(name types.ObjectName) { t.object.SetName(name) }
 
 func (t *Agent) ResetPerception() {
 	//println("Reset perception")
-	t.perceivedObjects = []obj.Object{}
+	t.perceivedObjects = []*obj.Object{}
 	t.perceivedAgents = []AgentI{}
 }
 
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
-func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
-	var perceivedObjects []obj.Object
+func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []AgentI) {
+	var perceivedObjects []*obj.Object
 
 	// Get the top left and bottom right positions of the vision square
 	topLeft := types.Position{X: t.Pos().X - t.Vision(), Y: t.Pos().Y - t.Vision()}
@@ -130,7 +130,7 @@ func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 	CantSeeBehindObjects := []obj.Object{}
 	for i, obj := range perceivedObjects {
 		if utils.Contains(t.CantSeeBehind(), obj.Name()) {
-			CantSeeBehindObjects = append(CantSeeBehindObjects, perceivedObjects[i])
+			CantSeeBehindObjects = append(CantSeeBehindObjects, *perceivedObjects[i])
 		}
 	}
 	// Filter out positions to avoid regarding the agent position
@@ -141,7 +141,7 @@ func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 	positionsBehindObjects := []types.Position{}
 
 	for i, object := range perceivedObjects {
-		if !utils.Contains(CantSeeBehindObjects, perceivedObjects[i]) {
+		if !utils.Contains(CantSeeBehindObjects, *perceivedObjects[i]) {
 			continue
 		} else {
 			// If a objCantSeeBehindObject is in the vision square, the agent can't see behind it

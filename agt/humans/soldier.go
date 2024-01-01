@@ -138,7 +138,7 @@ func (s *Soldier) Object() obj.Object { return s.attributes.agentAttributes.Obje
 
 func (s *Soldier) Agent() *env.Agent { return &s.attributes.agentAttributes }
 
-func (s *Soldier) PerceivedObjects() []obj.Object {
+func (s *Soldier) PerceivedObjects() []*obj.Object {
 	return s.attributes.agentAttributes.PerceivedObjects()
 }
 

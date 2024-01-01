@@ -154,7 +154,7 @@ func (m *Mikasa) Object() obj.Object {
 	return m.attributes.agentAttributes.Object()
 }
 
-func (m *Mikasa) PerceivedObjects() []obj.Object {
+func (m *Mikasa) PerceivedObjects() []*obj.Object {
 	return m.attributes.agentAttributes.PerceivedObjects()
 }
 

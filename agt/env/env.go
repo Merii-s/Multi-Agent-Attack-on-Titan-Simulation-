@@ -26,14 +26,14 @@ func (p *Environment) Agents() []AgentI {
 	return p.Agts
 }
 
-func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types.Position) []obj.Object {
-	objects := make([]obj.Object, 0)
+func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types.Position) []*obj.Object {
+	objects := make([]*obj.Object, 0)
 	for i, obj := range e.Objs {
-		if obj.Name() != types.Grass {
+		if obj.Name() != types.Grass && obj.Life() > 0 {
 			objectTL, objectBR := obj.Hitbox()[0], obj.Hitbox()[1]
 			//println("Object", obj.Name(), "TL", objectTL.X, objectTL.Y, " BR", objectBR.X, objectBR.Y)
 			if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) {
-				objects = append(objects, e.Objs[i])
+				objects = append(objects, &e.Objs[i])
 			}
 		}
 	}

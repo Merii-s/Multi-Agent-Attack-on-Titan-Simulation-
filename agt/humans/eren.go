@@ -156,7 +156,7 @@ func (eren *Eren) Object() obj.Object {
 	return eren.attributes.agentAttributes.Object()
 }
 
-func (eren *Eren) PerceivedObjects() []obj.Object {
+func (eren *Eren) PerceivedObjects() []*obj.Object {
 	return eren.attributes.agentAttributes.PerceivedObjects()
 }
 

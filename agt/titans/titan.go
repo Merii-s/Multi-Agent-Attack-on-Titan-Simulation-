@@ -40,9 +40,7 @@ func (t *Titan) ObjectToAttackP() *obj.Object { return t.objectToAttack }
 func (t *Titan) SetObjectToAttack(o *obj.Object) { t.objectToAttack = o }
 
 func (t *Titan) AttackObject(o *obj.Object) {
-	// fmt.Println("Wall life before attack :", o.Life())
 	o.TakeDamage(t.agentAttributes.Strength())
-	// fmt.Println("Wall life after attack :", o.Life())
 }
 
 // a supprimer

@@ -27,7 +27,7 @@ type AgentI interface {
 
 	Pos() types.Position
 	Vision() int
-	PerceivedObjects() []obj.Object
+	PerceivedObjects() []*obj.Object
 	PerceivedAgents() []AgentI
 	Object() obj.Object
 	Agent() *Agent

@@ -48,12 +48,11 @@ func (g *Game) drawEnvironment(screen *ebiten.Image) {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	time.Sleep(100 * time.Millisecond)
+	g.drawEnvironment(screen)
 	if g.newEnv {
-		time.Sleep(100 * time.Millisecond)
-		g.drawEnvironment(screen)
-		wgSimu.Done()
-		//g.Unlock()
 		g.newEnv = false
+		g.Unlock()
 	}
 }
 
@@ -65,16 +64,16 @@ func (g *Game) ListenToSimu() {
 	var e *env.Environment
 	fmt.Println("UI is listening to simu...")
 	for {
-		e = <-g.c
-		wgSimu.Wait()
-		wgSimu.Add(1)
-		//g.Lock()
-		g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
-		g.elements = append(g.elements, e.Objects()...)
-		for _, agent := range e.Agents() {
-			g.elements = append(g.elements, agent.Object())
+		if !g.newEnv {
+			e = <-g.c
+			g.Lock()
+			g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
+			g.elements = append(g.elements, e.Objects()...)
+			for _, agent := range e.Agents() {
+				g.elements = append(g.elements, agent.Object())
+			}
+			g.newEnv = true
 		}
-		g.newEnv = true
 	}
 }
 
@@ -90,7 +89,7 @@ var wgAct sync.WaitGroup
 var wgSimu sync.WaitGroup
 
 func main() {
-	g := Game{c: make(chan *env.Environment)}
+	g := Game{c: make(chan *env.Environment), newEnv: false}
 	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
 	go env.Simu(e, &wgPercept, &wgDeliberate, &wgAct, g.c)
 	go g.ListenToSimu()
@@ -100,14 +99,4 @@ func main() {
 	if err := ebiten.RunGame(&g); err != nil {
 		log.Fatal(err)
 	}
-	// for i, o := range e.Objects() {
-	// 	if o.Name() == types.Wall {
-	// 		e.Objects()[i].SetLife(150)
-	// 		fmt.Println(e.Objects()[i].Life())
-	// 	}
-	// }
-	// o := obj.NewObject(types.Wall, types.Position{X: 5, Y: 3}, 0)
-	// fmt.Println(o.Life())
-	// o.SetLife(150)
-	// fmt.Println(o.Life())
 }

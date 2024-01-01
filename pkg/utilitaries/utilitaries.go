@@ -85,12 +85,12 @@ func Contains[T any](list []T, target T) bool {
 	return false
 }
 
-func PositionsBehindObjects(perceivedObjects []obj.Object, positionsBehindObjects []types.Position) []obj.Object {
+func PositionsBehindObjects(perceivedObjects []*obj.Object, positionsBehindObjects []types.Position) []*obj.Object {
 	// Filter out positions behind an obstacle if the center of the object is in the positionsBehindObjects list
-	objectsToRemove := []obj.Object{}
-	for _, object := range perceivedObjects {
+	objectsToRemove := []*obj.Object{}
+	for i, object := range perceivedObjects {
 		if Contains(positionsBehindObjects, object.Center()) || object.Name() == types.Grass {
-			objectsToRemove = append(objectsToRemove, object)
+			objectsToRemove = append(objectsToRemove, perceivedObjects[i])
 		}
 	}
 
@@ -100,11 +100,11 @@ func PositionsBehindObjects(perceivedObjects []obj.Object, positionsBehindObject
 	return perceivedObjects
 }
 
-func RemoveObjects(perceivedObjects []obj.Object, objectsToRemove []obj.Object) []obj.Object {
+func RemoveObjects(perceivedObjects []*obj.Object, objectsToRemove []*obj.Object) []*obj.Object {
 	// Remove the objects in the objectsToRemove list from the perceivedObjects list
-	for _, object := range objectsToRemove {
-		for i, perceptedObject := range perceivedObjects {
-			if perceptedObject == object {
+	for i, _ := range objectsToRemove {
+		for j, _ := range perceivedObjects {
+			if *perceivedObjects[j] == *objectsToRemove[i] {
 				perceivedObjects = append(perceivedObjects[:i], perceivedObjects[i+1:]...)
 			}
 		}
@@ -234,14 +234,14 @@ func GetPositionsInHitbox(tl types.Position, br types.Position) (inHitboxPositio
 	return
 }
 
-func ClosestObject(objects []obj.Object, position types.Position) (obj.Object, types.Position) {
+func ClosestObject(objects []*obj.Object, position types.Position) (*obj.Object, types.Position) {
 	// Get the closest position from the list
 	closestObject := objects[0]
 	closestObjectPosition := objects[0].Hitbox()[0]
-	for _, object := range objects {
-		for _, pos := range GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
+	for i, _ := range objects {
+		for _, pos := range GetPositionsInHitbox(objects[i].Hitbox()[0], objects[i].Hitbox()[1]) {
 			if position.Distance(pos) < position.Distance(closestObjectPosition) {
-				closestObject = object
+				closestObject = objects[i]
 				closestObjectPosition = pos
 			}
 		}

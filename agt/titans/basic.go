@@ -159,7 +159,7 @@ func (bt *BasicTitan) Object() obj.Object {
 	return bt.attributes.agentAttributes.Object()
 }
 
-func (bt *BasicTitan) PerceivedObjects() []obj.Object {
+func (bt *BasicTitan) PerceivedObjects() []*obj.Object {
 	return bt.attributes.agentAttributes.PerceivedObjects()
 }
 
@@ -273,7 +273,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 		btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
 
 	} else {
-		var interestingObjects []obj.Object
+		var interestingObjects []*obj.Object
 		var interestingAgents []env.AgentI
 		agtPos := btb.bt.attributes.agentAttributes.Pos()
 
@@ -322,11 +322,11 @@ func (btb *BasicTitanBehavior) Deliberate() {
 			println("Closest object: ", closestObject.Name())
 			println("Closest object Position: ", closestObjectPosition.X, closestObjectPosition.Y)
 
-			if pkg.DetectCollision(closestObject, btb.bt.Object()) {
+			if pkg.DetectCollision(*closestObject, btb.bt.Object()) {
 				//println("Attack object: ", btb.bt.attributes.ObjectToAttack().GetName())
 				btb.bt.attributes.agentAttributes.SetAttack(false)
 				btb.bt.attributes.SetAttackObject(true)
-				btb.bt.attributes.SetObjectToAttack(&closestObject)
+				btb.bt.attributes.SetObjectToAttack(closestObject)
 				println("Attack ", btb.bt.attributes.agentAttributes.Attack())
 				println("Attack Object", btb.bt.attributes.AttackObjectBool())
 				println("Object to attack: ", btb.bt.attributes.ObjectToAttack().GetName())
@@ -357,9 +357,7 @@ func (btb *BasicTitanBehavior) Act(e *env.Environment) {
 	// If the titan is attacking an object, it attacks it
 	if btb.bt.attributes.AttackObjectBool() {
 		println("Attack object")
-		println("Wall life before attack: ", btb.bt.attributes.GetObjectToAttackLife())
 		btb.bt.attributes.AttackObject(btb.bt.attributes.ObjectToAttackP())
-		println("Wall life after attack: ", btb.bt.attributes.GetObjectToAttackLife())
 		btb.bt.attributes.SetAttackObject(false)
 		btb.bt.attributes.SetObjectToAttack(nil)
 	}

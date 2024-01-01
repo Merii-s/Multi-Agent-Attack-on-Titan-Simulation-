@@ -128,7 +128,7 @@ func (c *Civilian) Vision() int { return c.attributes.agentAttributes.Vision() }
 
 func (c *Civilian) Object() obj.Object { return c.attributes.agentAttributes.Object() }
 
-func (c *Civilian) PerceivedObjects() []obj.Object {
+func (c *Civilian) PerceivedObjects() []*obj.Object {
 	return c.attributes.agentAttributes.PerceivedObjects()
 }
 
@@ -147,8 +147,8 @@ func (cb *CivilianBehavior) Percept(e *env.Environment) {
 	perceivedObjects, perceivedAgents := cb.c.attributes.agentAttributes.GetVision(e)
 
 	// Add the perceived agents to the list of perceived agents
-	for _, object := range perceivedObjects {
-		cb.c.attributes.agentAttributes.AddPerceivedObject(object)
+	for i, _ := range perceivedObjects {
+		cb.c.attributes.agentAttributes.AddPerceivedObject(perceivedObjects[i])
 	}
 	// Add the perceived agents to the list of perceived agents
 	for _, agt := range perceivedAgents {
