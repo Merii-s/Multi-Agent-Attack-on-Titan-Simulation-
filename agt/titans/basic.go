@@ -131,16 +131,15 @@ func (bt *BasicTitan) AttackSuccess(spdAtk int, spdDef int) float64 {
 	}
 }
 
-func (bt *BasicTitan) Attack(agt env.AgentI) {
+func (bt *BasicTitan) Attack(agt *env.AgentI) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
-	// TO
 	// TODO : Verif reachable
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
+	if rand.Float64() < bt.AttackSuccess(bt.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.Agent().SetHp(agt.Agent().Hp() - bt.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", bt.Id(), agt.Id(), agt.Agent().Hp())
+		(*agt).Agent().SetHp((*agt).Agent().Hp() - bt.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %s : %s has now %d HP \n", bt.Id(), (*agt).Id(), (*agt).Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
@@ -163,7 +162,7 @@ func (bt *BasicTitan) PerceivedObjects() []*obj.Object {
 	return bt.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (bt *BasicTitan) PerceivedAgents() []env.AgentI {
+func (bt *BasicTitan) PerceivedAgents() []*env.AgentI {
 	return bt.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -250,8 +249,6 @@ func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 func (btb *BasicTitanBehavior) Deliberate() {
 	println("BasicTitan Deliberate")
 
-	//TODO : Find where to put GetAvoidancePositions function
-	// Checks hitbox around to avoid collisions
 	toAvoid := []types.Position{}
 	for _, object := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
 		for _, pos := range pkg.GetPositionsInHitbox(object.TL(), object.Hitbox()[1]) {
@@ -260,11 +257,12 @@ func (btb *BasicTitanBehavior) Deliberate() {
 	}
 
 	for _, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
-		for _, pos := range pkg.GetPositionsInHitbox(agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]) {
+		for _, pos := range pkg.GetPositionsInHitbox((*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]) {
 			toAvoid = append(toAvoid, pos)
 			toAvoid = append(toAvoid, types.Position{X: pos.X - btb.bt.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - btb.bt.Agent().ObjectP().Hitbox()[0].Y})
 		}
 	}
+
 	if pkg.IsOutOfScreen(btb.bt.attributes.agentAttributes.Pos(), params.ScreenWidth, params.ScreenHeight) {
 		println("BasicTitan is out of screen")
 		neighborAgentPositions := pkg.GetNeighbors(btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed(), toAvoid)
@@ -274,7 +272,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 	} else {
 		var interestingObjects []*obj.Object
-		var interestingAgents []env.AgentI
+		var interestingAgents []*env.AgentI
 		agtPos := btb.bt.attributes.agentAttributes.Pos()
 
 		for i, object := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
@@ -285,12 +283,12 @@ func (btb *BasicTitanBehavior) Deliberate() {
 		//println("Interesting objects: ", len(interestingObjects))
 
 		for i, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
-			if agt.Agent().GetName() == types.MaleCivilian ||
-				agt.Agent().GetName() == types.FemaleCivilian ||
-				agt.Agent().GetName() == types.Eren ||
-				agt.Agent().GetName() == types.Mikasa ||
-				agt.Agent().GetName() == types.MaleSoldier ||
-				agt.Agent().GetName() == types.FemaleSoldier {
+			if (*agt).Agent().GetName() == types.MaleCivilian ||
+				(*agt).Agent().GetName() == types.FemaleCivilian ||
+				(*agt).Agent().GetName() == types.Eren ||
+				(*agt).Agent().GetName() == types.Mikasa ||
+				(*agt).Agent().GetName() == types.MaleSoldier ||
+				(*agt).Agent().GetName() == types.FemaleSoldier {
 				interestingAgents = append(interestingAgents, btb.bt.attributes.agentAttributes.PerceivedAgents()[i])
 			}
 		}
@@ -302,7 +300,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 		if len(interestingAgents) != 0 {
 			closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
 
-			if pkg.DetectCollision(closestAgent.Object(), btb.bt.Object()) {
+			if pkg.DetectCollision((*closestAgent).Object(), btb.bt.Object()) {
 				btb.bt.attributes.agentAttributes.SetAttack(true)
 				btb.bt.attributes.SetAttackObject(false)
 				btb.bt.attributes.agentAttributes.SetAgentToAttack(closestAgent)

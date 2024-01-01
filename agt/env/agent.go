@@ -17,7 +17,7 @@ type Agent struct {
 	nextPosition     types.Position
 	agentToAttack    *AgentI
 	perceivedObjects []*obj.Object
-	perceivedAgents  []AgentI
+	perceivedAgents  []*AgentI
 	cantSeeBehind    []types.ObjectName
 	object           *obj.Object
 }
@@ -33,7 +33,7 @@ func NewAgent(id types.Id, tl types.Position, life int, reach int, strength int,
 		nextPosition:     tl,
 		agentToAttack:    nil,
 		perceivedObjects: []*obj.Object{},
-		perceivedAgents:  []AgentI{},
+		perceivedAgents:  []*AgentI{},
 		cantSeeBehind:    []types.ObjectName{},
 		object:           obj.NewObject(name, tl, life),
 	}
@@ -69,7 +69,7 @@ func (t *Agent) SetAttack(b bool) { t.attack = b }
 
 func (t *Agent) SetNextPos(nextPos types.Position) { t.nextPosition = nextPos }
 
-func (t *Agent) SetAgentToAttack(agt AgentI) { t.agentToAttack = &agt }
+func (t *Agent) SetAgentToAttack(agt *AgentI) { t.agentToAttack = agt }
 
 func (t *Agent) SetHp(hp int) { t.object.SetLife(hp) }
 
@@ -79,11 +79,11 @@ func (t *Agent) NextPos() types.Position { return t.nextPosition }
 
 func (t *Agent) Attack() bool { return t.attack }
 
-func (t *Agent) AgentToAttack() AgentI { return *t.agentToAttack }
+func (t *Agent) AgentToAttack() *AgentI { return t.agentToAttack }
 
 func (t *Agent) PerceivedObjects() []*obj.Object { return t.perceivedObjects }
 
-func (t *Agent) PerceivedAgents() []AgentI { return t.perceivedAgents }
+func (t *Agent) PerceivedAgents() []*AgentI { return t.perceivedAgents }
 
 func (t *Agent) CantSeeBehind() []types.ObjectName { return t.cantSeeBehind }
 
@@ -95,7 +95,7 @@ func (t *Agent) AddPerceivedObject(obj *obj.Object) {
 	t.perceivedObjects = append(t.perceivedObjects, obj)
 }
 
-func (t *Agent) AddPerceivedAgent(agt AgentI) { t.perceivedAgents = append(t.perceivedAgents, agt) }
+func (t *Agent) AddPerceivedAgent(agt *AgentI) { t.perceivedAgents = append(t.perceivedAgents, agt) }
 
 func (t *Agent) NextPosition() types.Position { return t.nextPosition }
 
@@ -108,12 +108,12 @@ func (t *Agent) SetName(name types.ObjectName) { t.object.SetName(name) }
 func (t *Agent) ResetPerception() {
 	//println("Reset perception")
 	t.perceivedObjects = []*obj.Object{}
-	t.perceivedAgents = []AgentI{}
+	t.perceivedAgents = []*AgentI{}
 }
 
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
-func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []AgentI) {
+func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 	var perceivedObjects []*obj.Object
 
 	// Get the top left and bottom right positions of the vision square
@@ -165,12 +165,12 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []AgentI) {
 	return perceivedObjects, perceivedAgents
 }
 
-func ClosestAgent(agents []AgentI, position types.Position) (AgentI, types.Position) {
+func ClosestAgent(agents []*AgentI, position types.Position) (*AgentI, types.Position) {
 	// Get the closest position from the list
 	closestAgent := agents[0]
-	closestAgentPosition := agents[0].Agent().ObjectP().Hitbox()[0]
+	closestAgentPosition := (*agents[0]).Agent().ObjectP().Hitbox()[0]
 	for i, agt := range agents {
-		for _, pos := range utils.GetPositionsInHitbox(agt.Agent().ObjectP().Hitbox()[0], agt.Agent().ObjectP().Hitbox()[1]) {
+		for _, pos := range utils.GetPositionsInHitbox((*agt).Agent().ObjectP().Hitbox()[0], (*agt).Agent().ObjectP().Hitbox()[1]) {
 			if position.Distance(pos) < position.Distance(closestAgentPosition) {
 				closestAgent = agents[i]
 				closestAgentPosition = pos

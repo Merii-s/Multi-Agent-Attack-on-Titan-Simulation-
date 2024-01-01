@@ -18,7 +18,7 @@ const (
 	//Agent Lives
 	EREN_LIFE           = 100
 	MIKASA_LIFE         = 100
-	CIVILIAN_LIFE       = 100
+	CIVILIAN_LIFE       = 150
 	SOLDIER_LIFE        = 200
 	BASIC_TITAN_LIFE    = 100
 	COLOSSAL_TITAN_LIFE = 100

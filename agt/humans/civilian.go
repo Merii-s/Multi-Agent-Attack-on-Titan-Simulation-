@@ -107,7 +107,7 @@ func (*Civilian) Sleep() {
 
 func (c *Civilian) AttackSuccess(spdAtk int, spdDef int) float64 { return 0 }
 
-func (c *Civilian) Attack(agt env.AgentI) {
+func (c *Civilian) Attack(agt *env.AgentI) {
 	c.attributes.agentAttributes.SetAgentToAttack(nil)
 	c.attributes.agentAttributes.SetAttack(false)
 }
@@ -132,7 +132,7 @@ func (c *Civilian) PerceivedObjects() []*obj.Object {
 	return c.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (c *Civilian) PerceivedAgents() []env.AgentI {
+func (c *Civilian) PerceivedAgents() []*env.AgentI {
 	return c.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -151,8 +151,8 @@ func (cb *CivilianBehavior) Percept(e *env.Environment) {
 		cb.c.attributes.agentAttributes.AddPerceivedObject(perceivedObjects[i])
 	}
 	// Add the perceived agents to the list of perceived agents
-	for _, agt := range perceivedAgents {
-		cb.c.attributes.agentAttributes.AddPerceivedAgent(agt)
+	for i, _ := range perceivedAgents {
+		cb.c.attributes.agentAttributes.AddPerceivedAgent(perceivedAgents[i])
 	}
 	println("Perceived agents: ", len(cb.c.attributes.agentAttributes.PerceivedAgents()))
 	println("Perceived objects: ", len(cb.c.attributes.agentAttributes.PerceivedObjects()))
@@ -163,20 +163,20 @@ func (cb *CivilianBehavior) Percept(e *env.Environment) {
 func (cb *CivilianBehavior) Deliberate() {
 	println("Civilian Deliberate")
 
-	var interestingAgents []env.AgentI
+	var interestingAgents []*env.AgentI
 	agtPos := cb.c.attributes.agentAttributes.Pos()
 
 	titanFound := false
 	//println("Interesting objects: ", len(interestingObjects))
 
 	for _, agt := range cb.c.attributes.agentAttributes.PerceivedAgents() {
-		if agt.Agent().GetName() == types.BasicTitan1 ||
-			agt.Agent().GetName() == types.BasicTitan2 ||
-			agt.Agent().GetName() == types.BeastTitan ||
-			agt.Agent().GetName() == types.ColossalTitan ||
-			agt.Agent().GetName() == types.ArmoredTitan ||
-			agt.Agent().GetName() == types.FemaleTitan ||
-			agt.Agent().GetName() == types.JawTitan {
+		if (*agt).Agent().GetName() == types.BasicTitan1 ||
+			(*agt).Agent().GetName() == types.BasicTitan2 ||
+			(*agt).Agent().GetName() == types.BeastTitan ||
+			(*agt).Agent().GetName() == types.ColossalTitan ||
+			(*agt).Agent().GetName() == types.ArmoredTitan ||
+			(*agt).Agent().GetName() == types.FemaleTitan ||
+			(*agt).Agent().GetName() == types.JawTitan {
 			titanFound = true
 			interestingAgents = append(interestingAgents, agt)
 		}

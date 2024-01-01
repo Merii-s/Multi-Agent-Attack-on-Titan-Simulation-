@@ -113,15 +113,15 @@ func (*Soldier) AttackSuccess(spdAtk int, spdDef int) float64 {
 	}
 }
 
-func (s *Soldier) Attack(agt env.AgentI) {
+func (s *Soldier) Attack(agt *env.AgentI) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	// TODO : Verif reachable
 	// If the percentage is less than the success rate, the attack is successful
-	if rand.Float64() < s.AttackSuccess(s.attributes.agentAttributes.Speed(), agt.Agent().Speed()) {
+	if rand.Float64() < s.AttackSuccess(s.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
-		agt.Agent().SetHp(agt.Agent().Hp() - s.attributes.agentAttributes.Strength())
-		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), agt.Id(), agt.Agent().Hp())
+		(*agt).Agent().SetHp((*agt).Agent().Hp() - s.attributes.agentAttributes.Strength())
+		fmt.Printf("Attack successful from %s : %s lost  %d HP \n", s.Id(), (*agt).Id(), (*agt).Agent().Hp())
 	} else {
 		fmt.Println("Attack unsuccessful.")
 		// If the attack is unsuccessful, nothing happens
@@ -142,7 +142,7 @@ func (s *Soldier) PerceivedObjects() []*obj.Object {
 	return s.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (s *Soldier) PerceivedAgents() []env.AgentI {
+func (s *Soldier) PerceivedAgents() []*env.AgentI {
 	return s.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -181,12 +181,12 @@ func (sb *SoldierBehavior) Deliberate() {
 	}
 
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
-		for _, pos := range pkg.GetPositionsInHitbox(agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]) {
+		for _, pos := range pkg.GetPositionsInHitbox((*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]) {
 			toAvoid = append(toAvoid, pos)
 			toAvoid = append(toAvoid, types.Position{X: pos.X - sb.s.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - sb.s.Agent().ObjectP().Hitbox()[0].Y})
 		}
 	}
-	var interestingAgents []env.AgentI
+	var interestingAgents []*env.AgentI
 	agtPos := sb.s.attributes.agentAttributes.Pos()
 
 	BasicTitansNumber := 0
@@ -194,16 +194,16 @@ func (sb *SoldierBehavior) Deliberate() {
 	//println("Interesting objects: ", len(interestingObjects))
 
 	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
-		if agt.Agent().GetName() == types.BasicTitan1 ||
-			agt.Agent().GetName() == types.BasicTitan2 {
+		if (*agt).Agent().GetName() == types.BasicTitan1 ||
+			(*agt).Agent().GetName() == types.BasicTitan2 {
 			interestingAgents = append(interestingAgents, agt)
 			BasicTitansNumber++
 		}
-		if agt.Agent().GetName() == types.BeastTitan ||
-			agt.Agent().GetName() == types.ColossalTitan ||
-			agt.Agent().GetName() == types.ArmoredTitan ||
-			agt.Agent().GetName() == types.FemaleTitan ||
-			agt.Agent().GetName() == types.JawTitan {
+		if (*agt).Agent().GetName() == types.BeastTitan ||
+			(*agt).Agent().GetName() == types.ColossalTitan ||
+			(*agt).Agent().GetName() == types.ArmoredTitan ||
+			(*agt).Agent().GetName() == types.FemaleTitan ||
+			(*agt).Agent().GetName() == types.JawTitan {
 			interestingAgents = append(interestingAgents, agt)
 			SpecialTitanIn = true
 			// A voir si on veut quand même récupérer les reste des agents
@@ -218,7 +218,7 @@ func (sb *SoldierBehavior) Deliberate() {
 	if len(interestingAgents) != 0 && !SpecialTitanIn && BasicTitansNumber < 2 {
 		closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
 
-		if pkg.DetectCollision(closestAgent.Object(), sb.s.Object()) {
+		if pkg.DetectCollision((*closestAgent).Object(), sb.s.Object()) {
 			sb.s.attributes.agentAttributes.SetAttack(true)
 			sb.s.attributes.agentAttributes.SetAgentToAttack(closestAgent)
 		} else {

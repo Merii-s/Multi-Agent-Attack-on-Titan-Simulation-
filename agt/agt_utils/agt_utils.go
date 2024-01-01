@@ -105,12 +105,12 @@ func CreateHuman(agt_nb int, humans []env.AgentI, objs []obj.Object, tl_village 
 	//, reach int, strength int, speed int, vision int,
 	if objectType == types.FemaleCivilian || objectType == types.MaleCivilian {
 		human = hagt.NewCivilian(agtId, types.Position{X: x, Y: y}, params.CIVILIAN_LIFE, params.CIVILIAN_REACH, params.CIVILIAN_STRENGTH, params.CIVILIAN_SPEED, params.CIVILIAN_VISION, objectType)
-	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
-		human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, params.SOLDIER_REACH, params.SOLDIER_STRENGTH, params.SOLDIER_SPEED, params.SOLDIER_VISION, objectType)
-	} else if objectType == types.Eren {
-		human = hagt.NewEren(agtId, types.Position{X: x, Y: y}, params.EREN_LIFE, params.EREN_REACH, params.EREN_STRENGTH, params.EREN_SPEED, params.EREN_VISION, objectType)
-	} else if objectType == types.Mikasa {
-		human = hagt.NewMikasa(agtId, types.Position{X: x, Y: y}, params.MIKASA_LIFE, params.MIKASA_REACH, params.MIKASA_STRENGTH, params.MIKASA_SPEED, params.MIKASA_VISION, objectType)
+		//} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
+		//	human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, params.SOLDIER_REACH, params.SOLDIER_STRENGTH, params.SOLDIER_SPEED, params.SOLDIER_VISION, objectType)
+		//} else if objectType == types.Eren {
+		//	human = hagt.NewEren(agtId, types.Position{X: x, Y: y}, params.EREN_LIFE, params.EREN_REACH, params.EREN_STRENGTH, params.EREN_SPEED, params.EREN_VISION, objectType)
+		//} else if objectType == types.Mikasa {
+		//	human = hagt.NewMikasa(agtId, types.Position{X: x, Y: y}, params.MIKASA_LIFE, params.MIKASA_REACH, params.MIKASA_STRENGTH, params.MIKASA_SPEED, params.MIKASA_VISION, objectType)
 	}
 	humans = PlaceHuman(objs, humans, human, tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
 	return humans
@@ -213,7 +213,7 @@ func GetAvoidancePositions(agentAttributes *env.Agent) []types.Position {
 	}
 
 	for _, agt := range agentAttributes.PerceivedAgents() {
-		hitboxStart, hitboxEnd := agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]
+		hitboxStart, hitboxEnd := (*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]
 		for _, pos := range utils.GetPositionsInHitbox(hitboxStart, hitboxEnd) {
 			toAvoid = append(toAvoid, pos)
 		}

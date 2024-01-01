@@ -40,13 +40,13 @@ func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types
 	return objects
 }
 
-func (e *Environment) PerceivedAgents(topLeft types.Position, bottomRight types.Position, agtId types.Id) []AgentI {
-	agents := make([]AgentI, 0)
-	for i, agt := range e.Agents() {
-		object := agt.Object()
+func (e *Environment) PerceivedAgents(topLeft types.Position, bottomRight types.Position, agtId types.Id) []*AgentI {
+	agents := make([]*AgentI, 0)
+	for i := range e.Agts {
+		object := e.Agts[i].Object()
 		objectTL, objectBR := object.Hitbox()[0], object.Hitbox()[1]
-		if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) && agt.Id() != agtId {
-			agents = append(agents, e.Agents()[i])
+		if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) && e.Agts[i].Id() != agtId {
+			agents = append(agents, &e.Agts[i])
 		}
 	}
 	return agents

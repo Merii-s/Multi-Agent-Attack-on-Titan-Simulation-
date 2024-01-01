@@ -23,12 +23,12 @@ type AgentI interface {
 	Eat()
 	Sleep()
 	AttackSuccess(spdAtk int, spdDef int) float64
-	Attack(AgentI)
+	Attack(*AgentI)
 
 	Pos() types.Position
 	Vision() int
 	PerceivedObjects() []*obj.Object
-	PerceivedAgents() []AgentI
+	PerceivedAgents() []*AgentI
 	Object() obj.Object
 	Agent() *Agent
 	SetPos(types.Position)

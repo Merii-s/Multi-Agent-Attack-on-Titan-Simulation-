@@ -5,22 +5,23 @@ import (
 	utils "AOT/pkg/utilitaries"
 )
 
-func removeAgentsBehindPositions(perceptedAgents []AgentI, positionsBehindObjects []types.Position) []AgentI {
+func removeAgentsBehindPositions(perceptedAgents []*AgentI, positionsBehindObjects []types.Position) []*AgentI {
 	// Filter out positions behind an obstacle if the center of the object is in the positionsBehindObjects list
-	objectsToRemove := []AgentI{}
-	for _, object := range perceptedAgents {
-		if utils.Contains(positionsBehindObjects, object.Pos()) {
-			objectsToRemove = append(objectsToRemove, object)
+	agentsToRemove := []*AgentI{}
+
+	for _, agt := range perceptedAgents {
+		if utils.Contains(positionsBehindObjects, (*agt).Pos()) {
+			agentsToRemove = append(agentsToRemove, agt)
 		}
 	}
 
 	// Remove the objects in the objectsToRemove list from the perceivedObjects list
-	perceptedAgents = removeAgents(perceptedAgents, objectsToRemove)
+	perceptedAgents = removeAgents(perceptedAgents, agentsToRemove)
 
 	return perceptedAgents
 }
 
-func removeAgents(perceptedAgents []AgentI, objectsToRemove []AgentI) []AgentI {
+func removeAgents(perceptedAgents []*AgentI, objectsToRemove []*AgentI) []*AgentI {
 	// Remove the objects in the objectsToRemove list from the perceptedObjects list
 	for _, object := range objectsToRemove {
 		for i, perceptedObject := range perceptedAgents {

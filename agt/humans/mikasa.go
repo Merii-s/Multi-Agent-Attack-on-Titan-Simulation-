@@ -158,7 +158,7 @@ func (m *Mikasa) PerceivedObjects() []*obj.Object {
 	return m.attributes.agentAttributes.PerceivedObjects()
 }
 
-func (m *Mikasa) PerceivedAgents() []env.AgentI {
+func (m *Mikasa) PerceivedAgents() []*env.AgentI {
 	return m.attributes.agentAttributes.PerceivedAgents()
 }
 
@@ -201,12 +201,12 @@ func (mb *MikasaBehavior) Deliberate() {
 	}
 
 	for _, agt := range mb.m.attributes.agentAttributes.PerceivedAgents() {
-		for _, pos := range pkg.GetPositionsInHitbox(agt.Agent().ObjectP().TL(), agt.Agent().ObjectP().Hitbox()[1]) {
+		for _, pos := range pkg.GetPositionsInHitbox((*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]) {
 			toAvoid = append(toAvoid, pos)
 			toAvoid = append(toAvoid, types.Position{X: pos.X - mb.m.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - mb.m.Agent().ObjectP().Hitbox()[0].Y})
 		}
 	}
-	var interestingAgents []env.AgentI
+	var interestingAgents []*env.AgentI
 	agtPos := mb.m.attributes.agentAttributes.Pos()
 
 	numberTitans := 0
@@ -214,21 +214,21 @@ func (mb *MikasaBehavior) Deliberate() {
 	//println("Interesting objects: ", len(interestingObjects))
 
 	for _, agt := range mb.m.attributes.agentAttributes.PerceivedAgents() {
-		if agt.Agent().GetName() == types.BasicTitan1 ||
-			agt.Agent().GetName() == types.BasicTitan2 ||
-			agt.Agent().GetName() == types.BeastTitan ||
-			agt.Agent().GetName() == types.ColossalTitan ||
-			agt.Agent().GetName() == types.ArmoredTitan ||
-			agt.Agent().GetName() == types.FemaleTitan ||
-			agt.Agent().GetName() == types.JawTitan {
+		if (*agt).Agent().GetName() == types.BasicTitan1 ||
+			(*agt).Agent().GetName() == types.BasicTitan2 ||
+			(*agt).Agent().GetName() == types.BeastTitan ||
+			(*agt).Agent().GetName() == types.ColossalTitan ||
+			(*agt).Agent().GetName() == types.ArmoredTitan ||
+			(*agt).Agent().GetName() == types.FemaleTitan ||
+			(*agt).Agent().GetName() == types.JawTitan {
 			interestingAgents = append(interestingAgents, agt)
 			numberTitans++
 		}
-		if agt.Agent().GetName() == types.Eren {
+		if (*agt).Agent().GetName() == types.Eren {
 			// Mikasa always goes to Eren first
 			interestingAgents = append(interestingAgents, agt)
 			ErenAround = true
-			mb.m.attributes.agentAttributes.SetNextPos(agt.Agent().Pos())
+			mb.m.attributes.agentAttributes.SetNextPos((*agt).Agent().Pos())
 		}
 	}
 	//println("Interesting agents: ", len(interestingAgents))
@@ -240,7 +240,7 @@ func (mb *MikasaBehavior) Deliberate() {
 		if len(interestingAgents) != 0 {
 			closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
 
-			if pkg.DetectCollision(closestAgent.Object(), mb.m.Object()) {
+			if pkg.DetectCollision((*closestAgent).Object(), mb.m.Object()) {
 				mb.m.attributes.agentAttributes.SetAttack(true)
 				mb.m.attributes.agentAttributes.SetAgentToAttack(closestAgent)
 			} else {
@@ -273,7 +273,7 @@ func (mb *MikasaBehavior) Act(e *env.Environment) {
 	// Perform the action based on the parameters
 	if mb.m.attributes.agentAttributes.Attack() {
 		mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
-		mb.m.Attack(mb.m.attributes.agentAttributes.AgentToAttack())
+		mb.m.Attack(*mb.m.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		mb.m.attributes.agentAttributes.SetAttack(false)
 		mb.m.attributes.agentAttributes.SetAgentToAttack(nil)
