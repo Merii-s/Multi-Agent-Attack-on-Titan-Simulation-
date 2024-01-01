@@ -51,7 +51,7 @@ func (position Position) ClosestPosition(positions []Position) Position {
 	for _, pos := range positions {
 		if position.Distance(pos) < position.Distance(closestPosition) {
 			closestPosition = pos
-			println("Closest position: ", closestPosition.X, closestPosition.Y)
+			//println("Closest position: ", closestPosition.X, closestPosition.Y)
 		}
 	}
 	return closestPosition

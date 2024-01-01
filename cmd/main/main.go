@@ -18,6 +18,7 @@ type Game struct {
 	sync.Mutex
 	c        chan *env.Environment
 	elements []obj.Object
+	newEnv   bool
 }
 
 var (
@@ -47,9 +48,13 @@ func (g *Game) drawEnvironment(screen *ebiten.Image) {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	time.Sleep(100 * time.Millisecond)
-	g.drawEnvironment(screen)
-	g.Unlock()
+	if g.newEnv {
+		time.Sleep(100 * time.Millisecond)
+		g.drawEnvironment(screen)
+		wgSimu.Done()
+		//g.Unlock()
+		g.newEnv = false
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -61,12 +66,15 @@ func (g *Game) ListenToSimu() {
 	fmt.Println("UI is listening to simu...")
 	for {
 		e = <-g.c
-		g.Lock()
+		wgSimu.Wait()
+		wgSimu.Add(1)
+		//g.Lock()
 		g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
 		g.elements = append(g.elements, e.Objects()...)
 		for _, agent := range e.Agents() {
 			g.elements = append(g.elements, agent.Object())
 		}
+		g.newEnv = true
 	}
 }
 
@@ -79,6 +87,7 @@ func NewEnvironement(H int, W int) *env.Environment {
 var wgPercept sync.WaitGroup
 var wgDeliberate sync.WaitGroup
 var wgAct sync.WaitGroup
+var wgSimu sync.WaitGroup
 
 func main() {
 	g := Game{c: make(chan *env.Environment)}
@@ -91,4 +100,14 @@ func main() {
 	if err := ebiten.RunGame(&g); err != nil {
 		log.Fatal(err)
 	}
+	// for i, o := range e.Objects() {
+	// 	if o.Name() == types.Wall {
+	// 		e.Objects()[i].SetLife(150)
+	// 		fmt.Println(e.Objects()[i].Life())
+	// 	}
+	// }
+	// o := obj.NewObject(types.Wall, types.Position{X: 5, Y: 3}, 0)
+	// fmt.Println(o.Life())
+	// o.SetLife(150)
+	// fmt.Println(o.Life())
 }

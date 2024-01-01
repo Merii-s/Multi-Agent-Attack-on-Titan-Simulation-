@@ -114,21 +114,23 @@ func (t *Agent) ResetPerception() {
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
 func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
+	var perceivedObjects []obj.Object
+
 	// Get the top left and bottom right positions of the vision square
 	topLeft := types.Position{X: t.Pos().X - t.Vision(), Y: t.Pos().Y - t.Vision()}
 	bottomRight := types.Position{X: t.Pos().X + t.Vision(), Y: t.Pos().Y + t.Vision()}
 
 	// Get the positions inside the vision square from the environment
-	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
+	perceivedObjects = e.PerceivedObjects(topLeft, bottomRight)
 	println("perceivedObjects:", len(perceivedObjects))
 	perceivedAgents := e.PerceivedAgents(topLeft, bottomRight, t.id)
 	println("perceivedAgents:", len(perceivedAgents))
 
 	// Get the objects not seen by the agent
 	CantSeeBehindObjects := []obj.Object{}
-	for _, obj := range perceivedObjects {
+	for i, obj := range perceivedObjects {
 		if utils.Contains(t.CantSeeBehind(), obj.Name()) {
-			CantSeeBehindObjects = append(CantSeeBehindObjects, obj)
+			CantSeeBehindObjects = append(CantSeeBehindObjects, perceivedObjects[i])
 		}
 	}
 	// Filter out positions to avoid regarding the agent position
@@ -138,8 +140,8 @@ func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 	// Get the positions behind the CantSeeBehindObjects objects
 	positionsBehindObjects := []types.Position{}
 
-	for _, object := range perceivedObjects {
-		if !utils.Contains(CantSeeBehindObjects, object) {
+	for i, object := range perceivedObjects {
+		if !utils.Contains(CantSeeBehindObjects, perceivedObjects[i]) {
 			continue
 		} else {
 			// If a objCantSeeBehindObject is in the vision square, the agent can't see behind it
@@ -150,8 +152,8 @@ func (t *Agent) GetVision(e *Environment) ([]obj.Object, []AgentI) {
 			// Get the perceivedObjects behind the current position to avoid
 			positionsBehindCurrentObject := utils.GetPositionsBehindObject(t.Pos(), angle, topLeft, bottomRight)
 
-			for _, position := range positionsBehindCurrentObject {
-				positionsBehindObjects = append(positionsBehindObjects, position)
+			for i, _ := range positionsBehindCurrentObject {
+				positionsBehindObjects = append(positionsBehindObjects, positionsBehindCurrentObject[i])
 			}
 		}
 	}
@@ -167,10 +169,10 @@ func ClosestAgent(agents []AgentI, position types.Position) (AgentI, types.Posit
 	// Get the closest position from the list
 	closestAgent := agents[0]
 	closestAgentPosition := agents[0].Agent().ObjectP().Hitbox()[0]
-	for _, agt := range agents {
+	for i, agt := range agents {
 		for _, pos := range utils.GetPositionsInHitbox(agt.Agent().ObjectP().Hitbox()[0], agt.Agent().ObjectP().Hitbox()[1]) {
 			if position.Distance(pos) < position.Distance(closestAgentPosition) {
-				closestAgent = agt
+				closestAgent = agents[i]
 				closestAgentPosition = pos
 			}
 		}

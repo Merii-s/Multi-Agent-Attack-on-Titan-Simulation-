@@ -27,29 +27,29 @@ func (p *Environment) Agents() []AgentI {
 }
 
 func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types.Position) []obj.Object {
-	positions := make([]obj.Object, 0)
-	for _, obj := range e.Objs {
+	objects := make([]obj.Object, 0)
+	for i, obj := range e.Objs {
 		if obj.Name() != types.Grass {
 			objectTL, objectBR := obj.Hitbox()[0], obj.Hitbox()[1]
 			//println("Object", obj.Name(), "TL", objectTL.X, objectTL.Y, " BR", objectBR.X, objectBR.Y)
 			if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) {
-				positions = append(positions, obj)
+				objects = append(objects, e.Objs[i])
 			}
 		}
 	}
-	return positions
+	return objects
 }
 
 func (e *Environment) PerceivedAgents(topLeft types.Position, bottomRight types.Position, agtId types.Id) []AgentI {
-	positions := make([]AgentI, 0)
-	for _, agt := range e.Agents() {
+	agents := make([]AgentI, 0)
+	for i, agt := range e.Agents() {
 		object := agt.Object()
 		objectTL, objectBR := object.Hitbox()[0], object.Hitbox()[1]
 		if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) && agt.Id() != agtId {
-			positions = append(positions, agt)
+			agents = append(agents, e.Agents()[i])
 		}
 	}
-	return positions
+	return agents
 }
 
 func (e *Environment) Add(a AgentI) {
@@ -135,34 +135,34 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	object = obj.NewObject(types.Dungeon, types.Position{X: int(0.8*float32(W) - params.CWall - params.WDungeon/2), Y: int(0.2*float32(H) + params.CWall)}, params.DUNGEON_LIFE)
 	objects = append(objects, *object)
 
-	object = obj.NewObject(types.ColossalTitan, types.Position{X: 640, Y: 350}, params.COLOSSAL_TITAN_LIFE)
-	objects = append(objects, *object)
-	nb_objects = nb_objects + 3
+	// object = obj.NewObject(types.ColossalTitan, types.Position{X: 640, Y: 350}, params.COLOSSAL_TITAN_LIFE)
+	// objects = append(objects, *object)
+	// nb_objects = nb_objects + 3
 
-	// Jaw Titan Human
-	object = obj.NewObject(types.JawTitanHuman, types.Position{X: 660, Y: 350}, params.JAW_TITAN_LIFE)
-	objects = append(objects, *object)
-	nb_objects = nb_objects + 1
+	// // Jaw Titan Human
+	// object = obj.NewObject(types.JawTitanHuman, types.Position{X: 660, Y: 350}, params.JAW_TITAN_LIFE)
+	// objects = append(objects, *object)
+	// nb_objects = nb_objects + 1
 
-	// Armored Titan Human
-	object = obj.NewObject(types.ArmoredTitanHuman, types.Position{X: 680, Y: 350}, params.ARMORED_TITAN_LIFE)
-	objects = append(objects, *object)
-	nb_objects = nb_objects + 1
+	// // Armored Titan Human
+	// object = obj.NewObject(types.ArmoredTitanHuman, types.Position{X: 680, Y: 350}, params.ARMORED_TITAN_LIFE)
+	// objects = append(objects, *object)
+	// nb_objects = nb_objects + 1
 
-	// Colossal Titan Human
-	object = obj.NewObject(types.ColossalTitanHuman, types.Position{X: 700, Y: 350}, params.COLOSSAL_TITAN_LIFE)
-	objects = append(objects, *object)
-	nb_objects = nb_objects + 1
+	// // Colossal Titan Human
+	// object = obj.NewObject(types.ColossalTitanHuman, types.Position{X: 700, Y: 350}, params.COLOSSAL_TITAN_LIFE)
+	// objects = append(objects, *object)
+	// nb_objects = nb_objects + 1
 
-	// Female Titan Human
-	object = obj.NewObject(types.FemaleTitanHuman, types.Position{X: 720, Y: 350}, params.FEMALE_TITAN_LIFE)
-	objects = append(objects, *object)
-	nb_objects = nb_objects + 1
+	// // Female Titan Human
+	// object = obj.NewObject(types.FemaleTitanHuman, types.Position{X: 720, Y: 350}, params.FEMALE_TITAN_LIFE)
+	// objects = append(objects, *object)
+	// nb_objects = nb_objects + 1
 
-	// Beast Titan Human
-	object = obj.NewObject(types.BeastTitanHuman, types.Position{X: 740, Y: 350}, params.BEAST_TITAN_LIFE)
-	objects = append(objects, *object)
-	nb_objects = nb_objects + 1
+	// // Beast Titan Human
+	// object = obj.NewObject(types.BeastTitanHuman, types.Position{X: 740, Y: 350}, params.BEAST_TITAN_LIFE)
+	// objects = append(objects, *object)
+	// nb_objects = nb_objects + 1
 
 	return objects
 }
