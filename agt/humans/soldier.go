@@ -41,23 +41,27 @@ func (s *Soldier) SyncChan() chan string { return s.syncChan }
 
 func (s *Soldier) StopCh() chan struct{} { return s.stopCh }
 
+func (s *Soldier) AgtSyncChan() chan int {
+	return s.attributes.agentAttributes.SyncChan()
+}
+
 func (s *Soldier) Behavior() *env.BehaviorI { return &s.behavior }
 
 func (s *Soldier) SetBehavior(b env.BehaviorI) { s.behavior = b }
 
 // Methods for Soldier
-func (s *Soldier) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
-	defer wgPercept.Done()
+func (s *Soldier) Percept(e *env.Environment /*, wgPercept *sync.WaitGroup*/) {
+	//defer wgPercept.Done()
 	s.behavior.Percept(e)
 }
 
-func (s *Soldier) Deliberate(wgDeliberate *sync.WaitGroup) {
-	defer wgDeliberate.Done()
+func (s *Soldier) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
+	//defer wgDeliberate.Done()
 	s.behavior.Deliberate()
 }
 
-func (s *Soldier) Act(e *env.Environment, wgAct *sync.WaitGroup) {
-	defer wgAct.Done()
+func (s *Soldier) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
+	//defer wgAct.Done()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.behavior.Act(e)
@@ -65,24 +69,24 @@ func (s *Soldier) Act(e *env.Environment, wgAct *sync.WaitGroup) {
 
 func (s *Soldier) Id() types.Id { return s.attributes.agentAttributes.Id() }
 
-func (s *Soldier) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
+func (s *Soldier) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
-	wgStart.Done()
-	wgStart.Wait()
+	//wgStart.Done()
+	//wgStart.Wait()
 	go func() {
 		println("Soldier Start")
 		for {
-			wgPercept.Add(1)
-			s.Percept(e, wgPercept)
-			wgPercept.Wait()
+			//wgPercept.Add(1)
+			s.Percept(e /*, wgPercept*/)
+			//wgPercept.Wait()
 
-			wgDeliberate.Add(1)
-			s.Deliberate(wgDeliberate)
-			wgDeliberate.Wait()
+			//wgDeliberate.Add(1)
+			s.Deliberate( /*wgDeliberate*/ )
+			//wgDeliberate.Wait()
 
-			wgAct.Add(1)
-			s.Act(e, wgAct)
-			wgAct.Wait()
+			//wgAct.Add(1)
+			s.Act(e /*, wgAct*/)
+			//wgAct.Wait()
 		}
 	}()
 }

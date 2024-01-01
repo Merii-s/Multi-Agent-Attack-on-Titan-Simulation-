@@ -3,7 +3,6 @@ package env
 import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
-	"sync"
 )
 
 type BehaviorI interface {
@@ -13,10 +12,10 @@ type BehaviorI interface {
 }
 
 type AgentI interface {
-	Percept(*Environment, *sync.WaitGroup)
-	Deliberate(*sync.WaitGroup)
-	Act(*Environment, *sync.WaitGroup)
-	Start(*Environment, *sync.WaitGroup, *sync.WaitGroup, *sync.WaitGroup, *sync.WaitGroup)
+	Percept(*Environment /*, *sync.WaitGroup*/)
+	Deliberate( /**sync.WaitGroup*/ )
+	Act(*Environment /*, *sync.WaitGroup*/)
+	Start(*Environment /*, *sync.WaitGroup, *sync.WaitGroup, *sync.WaitGroup, *sync.WaitGroup*/)
 	Id() types.Id
 
 	Move(pos types.Position)
@@ -24,6 +23,7 @@ type AgentI interface {
 	Sleep()
 	AttackSuccess(spdAtk int, spdDef int) float64
 	Attack(AgentI)
+	AgtSyncChan() chan int
 
 	Pos() types.Position
 	Vision() int

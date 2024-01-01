@@ -36,6 +36,10 @@ func NewMikasa(id types.Id, tl types.Position, life int, reach int, strength int
 	return m
 }
 
+func (m *Mikasa) AgtSyncChan() chan int {
+	return m.attributes.agentAttributes.SyncChan()
+}
+
 // Setter and getter methods for Mikasa
 func (m *Mikasa) SyncChan() chan string {
 	return m.syncChan
@@ -54,18 +58,18 @@ func (m *Mikasa) SetBehavior(b env.BehaviorI) {
 }
 
 // Methods for Mikasa
-func (m *Mikasa) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
-	defer wgPercept.Done()
+func (m *Mikasa) Percept(e *env.Environment /*, wgPercept *sync.WaitGroup*/) {
+	//defer wgPercept.Done()
 	m.behavior.Percept(e)
 }
 
-func (m *Mikasa) Deliberate(wgDeliberate *sync.WaitGroup) {
-	defer wgDeliberate.Done()
+func (m *Mikasa) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
+	//defer wgDeliberate.Done()
 	m.behavior.Deliberate()
 }
 
-func (m *Mikasa) Act(e *env.Environment, wgAct *sync.WaitGroup) {
-	defer wgAct.Done()
+func (m *Mikasa) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
+	//defer wgAct.Done()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.behavior.Act(e)
@@ -79,24 +83,24 @@ func (m *Mikasa) Agent() *env.Agent {
 	return &m.attributes.agentAttributes
 }
 
-func (m *Mikasa) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
+func (m *Mikasa) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
-	wgStart.Done()
-	wgStart.Wait()
+	//wgStart.Done()
+	//wgStart.Wait()
 	go func() {
 		println("Mikasa Start")
 		for {
-			wgPercept.Add(1)
-			m.Percept(e, wgPercept)
-			wgPercept.Wait()
+			//wgPercept.Add(1)
+			m.Percept(e /*, wgPercept*/)
+			//wgPercept.Wait()
 
-			wgDeliberate.Add(1)
-			m.Deliberate(wgDeliberate)
-			wgDeliberate.Wait()
+			//wgDeliberate.Add(1)
+			m.Deliberate( /*wgDeliberate*/ )
+			//wgDeliberate.Wait()
 
-			wgAct.Add(1)
-			m.Act(e, wgAct)
-			wgAct.Wait()
+			//wgAct.Add(1)
+			m.Act(e /*, wgAct*/)
+			//wgAct.Wait()
 		}
 	}()
 }
