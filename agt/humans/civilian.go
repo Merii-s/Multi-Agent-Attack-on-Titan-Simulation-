@@ -5,6 +5,7 @@ import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	pkg "AOT/pkg/utilitaries"
+	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -42,27 +43,33 @@ func (c *Civilian) SyncChan() chan string { return c.syncChan }
 
 func (c *Civilian) StopCh() chan struct{} { return c.stopCh }
 
+func (c *Civilian) AgtSyncChan() chan int {
+	return c.attributes.agentAttributes.SyncChan()
+}
+
 func (c *Civilian) Behavior() *env.BehaviorI { return &c.behavior }
 
 func (c *Civilian) SetBehavior(b env.BehaviorI) { c.behavior = b }
 
 // methods for civilian
-func (c *Civilian) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
-	defer wgPercept.Done()
+func (c *Civilian) Percept(e *env.Environment /*, wgPercept *sync.WaitGroup*/) {
+	//defer wgPercept.Done()
 	c.behavior.Percept(e)
+	fmt.Println("Percept Done  ", c.Id())
 }
 
-func (c *Civilian) Deliberate(wgDeliberate *sync.WaitGroup) {
-	defer wgDeliberate.Done()
+func (c *Civilian) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
+	//defer wgDeliberate.Done()
 	c.behavior.Deliberate()
-
+	fmt.Println("Deliberate Done  ", c.Id())
 }
 
-func (c *Civilian) Act(e *env.Environment, wgAct *sync.WaitGroup) {
-	defer wgAct.Done()
+func (c *Civilian) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
+	//defer wgAct.Done()
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.behavior.Act(e)
+	fmt.Println("Act Done  ", c.Id())
 }
 
 func (c *Civilian) Id() types.Id {
@@ -73,24 +80,40 @@ func (c *Civilian) Agent() *env.Agent {
 	return &c.attributes.agentAttributes
 }
 
-func (c *Civilian) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
+func (c *Civilian) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
-	wgStart.Done()
-	wgStart.Wait()
+	//wgStart.Done()
+	println("Start ", c.Id())
+	//wgStart.Wait()
+	time.Sleep(100 * time.Millisecond)
+	// go func() {
+	// 	for {
+	// 		//wgPercept.Add(1)
+	// 		println("Percept ", c.Id())
+	// 		c.Percept(e /*, wgPercept*/)
+	// 		//wgPercept.Wait()
+
+	// 		//wgDeliberate.Add(1)
+	// 		println("Deliberate ", c.Id())
+	// 		c.Deliberate( /*wgDeliberate*/ )
+	// 		//wgDeliberate.Wait()
+
+	// 		//wgAct.Add(1)
+	// 		println("Act ", c.Id())
+	// 		c.Act(e /*, wgAct*/)
+	// 		//wgAct.Wait()
+	// 	}
+	// }()
 	go func() {
-		println("Civilian Start")
+		var step int
 		for {
-			wgPercept.Add(1)
-			c.Percept(e, wgPercept)
-			wgPercept.Wait()
+			step = <-c.AgtSyncChan()
 
-			wgDeliberate.Add(1)
-			c.Deliberate(wgDeliberate)
-			wgDeliberate.Wait()
+			c.Percept(e)
+			c.Deliberate()
+			c.Act(e)
 
-			wgAct.Add(1)
-			c.Act(e, wgAct)
-			wgAct.Wait()
+			c.AgtSyncChan() <- step
 		}
 	}()
 }
@@ -142,7 +165,7 @@ type CivilianBehavior struct {
 }
 
 func (cb *CivilianBehavior) Percept(e *env.Environment) {
-	println("Civilian Percept")
+	//println("Civilian Percept")
 	// Get the perceived objects and agents
 	perceivedObjects, perceivedAgents := cb.c.attributes.agentAttributes.GetVision(e)
 
@@ -161,7 +184,7 @@ func (cb *CivilianBehavior) Percept(e *env.Environment) {
 }
 
 func (cb *CivilianBehavior) Deliberate() {
-	println("Civilian Deliberate")
+	//println("Civilian Deliberate")
 
 	var interestingAgents []*env.AgentI
 	agtPos := cb.c.attributes.agentAttributes.Pos()

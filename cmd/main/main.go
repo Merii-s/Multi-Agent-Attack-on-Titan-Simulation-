@@ -49,6 +49,7 @@ func (g *Game) drawEnvironment(screen *ebiten.Image) {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	time.Sleep(100 * time.Millisecond)
+	fmt.Println("DRAWING...")
 	g.drawEnvironment(screen)
 	if g.newEnv {
 		g.newEnv = false
@@ -66,6 +67,7 @@ func (g *Game) ListenToSimu() {
 	for {
 		if !g.newEnv {
 			e = <-g.c
+			fmt.Println("RECEIVED NEW ENV...")
 			g.Lock()
 			g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
 			g.elements = append(g.elements, e.Objects()...)
@@ -86,13 +88,15 @@ func NewEnvironement(H int, W int) *env.Environment {
 var wgPercept sync.WaitGroup
 var wgDeliberate sync.WaitGroup
 var wgAct sync.WaitGroup
-var wgSimu sync.WaitGroup
 
 func main() {
 	g := Game{c: make(chan *env.Environment), newEnv: false}
 	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
-	go env.Simu(e, &wgPercept, &wgDeliberate, &wgAct, g.c)
+	// go env.Simu(e, &wgPercept, &wgDeliberate, &wgAct, g.c)
+	//
+	simu := env.NewSimulation(params.NB_AGENTS, params.MaxStep, params.MaxDuration, e, g.c)
 	go g.ListenToSimu()
+	go simu.Run()
 	ebiten.SetWindowSize(params.ScreenWidth, params.ScreenHeight)
 	ebiten.SetWindowTitle("AOT Simulation")
 

@@ -192,12 +192,21 @@ func MoveColossal(e *Environment, c chan *Environment, wg *sync.WaitGroup) {
 
 func Simu(e *Environment, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup, c chan *Environment) {
 	wgStart := new(sync.WaitGroup)
-	for _, agt := range e.Agts {
-		go func(agt AgentI) {
-			wgStart.Add(1)
-			agt.Start(e, wgStart, wgPercept, wgDeliberate, wgAct)
-		}(agt)
+	for i, _ := range e.Agts {
+		wgStart.Add(1)
+		go func(i int) {
+			e.Agts[i].Start(e /*, wgStart, wgPercept, wgDeliberate, wgAct*/)
+		}(i)
 	}
+	// go func(e *Environment){
+	// 	for {
+
+	// 		go Perception(...)
+
+	// 		go Deliberation()
+	// 		go Action()
+	// 	}
+	// }
 	go func() {
 		for {
 			time.Sleep(100 * time.Millisecond)

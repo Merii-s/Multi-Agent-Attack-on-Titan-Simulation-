@@ -47,6 +47,10 @@ func (eren *Eren) StopCh() chan struct{} {
 	return eren.stopCh
 }
 
+func (eren *Eren) AgtSyncChan() chan int {
+	return eren.attributes.agentAttributes.SyncChan()
+}
+
 func (eren *Eren) Behavior() *env.BehaviorI {
 	return &eren.behavior
 }
@@ -56,18 +60,18 @@ func (eren *Eren) SetBehavior(b env.BehaviorI) {
 }
 
 // Methods for Eren
-func (eren *Eren) Percept(e *env.Environment, wgPercept *sync.WaitGroup) {
-	defer wgPercept.Done()
+func (eren *Eren) Percept(e *env.Environment /*, wgPercept *sync.WaitGroup*/) {
+	//defer wgPercept.Done()
 	eren.behavior.Percept(e)
 }
 
-func (eren *Eren) Deliberate(wgDeliberate *sync.WaitGroup) {
-	defer wgDeliberate.Done()
+func (eren *Eren) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
+	//defer wgDeliberate.Done()
 	eren.behavior.Deliberate()
 }
 
-func (eren *Eren) Act(e *env.Environment, wgAct *sync.WaitGroup) {
-	defer wgAct.Done()
+func (eren *Eren) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
+	//defer wgAct.Done()
 	eren.mu.Lock()
 	defer eren.mu.Unlock()
 	eren.behavior.Act(e)
@@ -81,24 +85,24 @@ func (eren *Eren) Agent() *env.Agent {
 	return &eren.attributes.agentAttributes
 }
 
-func (eren *Eren) Start(e *env.Environment, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup) {
+func (eren *Eren) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
 	// launch the agent goroutine Percept-Deliberate-Act cycle
-	wgStart.Done()
-	wgStart.Wait()
+	//wgStart.Done()
+	//wgStart.Wait()
 	go func() {
 		println("Eren Start")
 		for {
-			wgPercept.Add(1)
-			eren.Percept(e, wgPercept)
-			wgPercept.Wait()
+			//wgPercept.Add(1)
+			eren.Percept(e /*, wgPercept*/)
+			//wgPercept.Wait()
 
-			wgDeliberate.Add(1)
-			eren.Deliberate(wgDeliberate)
-			wgDeliberate.Wait()
+			//wgDeliberate.Add(1)
+			eren.Deliberate( /*wgDeliberate*/ )
+			//wgDeliberate.Wait()
 
-			wgAct.Add(1)
-			eren.Act(e, wgAct)
-			wgAct.Wait()
+			//wgAct.Add(1)
+			eren.Act(e /*, wgAct*/)
+			//wgAct.Wait()
 		}
 	}()
 }

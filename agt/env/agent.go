@@ -14,6 +14,7 @@ type Agent struct {
 	maxHP            int
 	vision           int
 	attack           bool
+	syncChan         chan int
 	nextPosition     types.Position
 	agentToAttack    *AgentI
 	perceivedObjects []*obj.Object
@@ -30,6 +31,7 @@ func NewAgent(id types.Id, tl types.Position, life int, reach int, strength int,
 		speed:            speed,
 		vision:           vision,
 		attack:           false,
+		syncChan:         make(chan int),
 		nextPosition:     tl,
 		agentToAttack:    nil,
 		perceivedObjects: []*obj.Object{},
@@ -38,6 +40,8 @@ func NewAgent(id types.Id, tl types.Position, life int, reach int, strength int,
 		object:           obj.NewObject(name, tl, life),
 	}
 }
+
+func (t *Agent) SyncChan() chan int { return t.syncChan }
 
 func (t *Agent) Id() types.Id {
 	return t.id
