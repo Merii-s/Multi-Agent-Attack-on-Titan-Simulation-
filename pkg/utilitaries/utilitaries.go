@@ -236,20 +236,20 @@ func OppositeDirection(currentPos, targetPos types.Position) types.Position {
 	// Check if the position is valid
 	xToGo := 2*currentPos.X - targetPos.X
 	yToGo := 2*currentPos.Y - targetPos.Y
-	if xToGo < 0 || yToGo < 0 {
-		return currentPos
-	}
-	// TODO: Add more checks if needed
-
 	return types.Position{X: xToGo, Y: yToGo}
 }
 
-func IsOutOfScreen(pos types.Position) bool {
-	return pos.X < 0 || pos.X > params.ScreenWidth || pos.Y < 0 || pos.Y > params.ScreenHeight
+func IsOutOfScreen(obj obj.Object) bool {
+	tl, br := obj.Hitbox()[0], obj.Hitbox()[1]
+	return tl.X < 0 || br.X > params.ScreenWidth || tl.Y < 0 || br.Y > params.ScreenHeight
 }
 
 func IsOutOfWalls(pos types.Position) bool {
 	return pos.X < params.WallTLX || pos.X > params.WallBRX || pos.Y < params.WallTLY || pos.Y > params.WallBRY
+}
+
+func IsWithinWalls(pos types.Position) bool {
+	return pos.X > params.WallTLX+params.CWall && pos.X < params.WallBRX-params.CWall && pos.Y > params.WallTLY+params.CWall && pos.Y < params.WallBRY
 }
 
 func GetPositionsInHitbox(tl types.Position, br types.Position) (inHitboxPositions []types.Position) {

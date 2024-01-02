@@ -368,7 +368,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 				btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
 				println("Agent position: ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)
-				println("Next position: ", nextPos.X, nextPos.Y)
+				println("Next position : ", nextPos.X, nextPos.Y)
 			}
 
 			// If there are no interesting agents, the titan goes towards the nearest interesting object (wall or field)

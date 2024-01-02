@@ -152,6 +152,7 @@ func CreateTitans(H int, W int) []env.AgentI {
 
 	for i := 0; i < params.NB_TITANS; i++ {
 		x, y := utils.GetRandomCoords(tl_screen, br_screen)
+		y -= params.HBasicTitanM
 
 		if dir == 0 {
 			y = y - H - 100

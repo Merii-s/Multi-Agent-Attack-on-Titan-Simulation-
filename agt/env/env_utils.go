@@ -38,7 +38,13 @@ func removeAgents(perceptedAgents []*AgentI, objectsToRemove []*AgentI) []*Agent
 
 func IsNextPositionValid(agt AgentI, e *Environment) bool {
 	dummyObject := obj.NewObject(agt.Agent().GetName(), agt.Agent().NextPosition(), agt.Agent().ObjectP().Life())
-	if !utils.IsOutOfScreen(agt.Pos()) && utils.IsOutOfScreen(dummyObject.TL()) {
+	if !utils.IsOutOfScreen(agt.Object()) && utils.IsOutOfScreen(*dummyObject) {
+		return false
+
+	} else if utils.IsWithinWalls(agt.Pos()) && utils.IsOutOfScreen(*dummyObject) {
+		return false
+
+	} else if utils.IsWithinWalls(agt.Pos()) && !utils.IsWithinWalls(dummyObject.TL()) {
 		return false
 	}
 	for i := range e.Agents() {
