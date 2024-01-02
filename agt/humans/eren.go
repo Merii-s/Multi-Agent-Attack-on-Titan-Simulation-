@@ -33,6 +33,7 @@ func NewEren(id types.Id, tl types.Position, life int, reach int, strength int, 
 		mu:         sync.Mutex{},
 		transform:  false,
 	}
+	eren.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall, types.Field, types.Dungeon, types.BigHouse, types.SmallHouse})
 	behavior := &ErenBehavior{eren: eren}
 	eren.SetBehavior(behavior)
 	return eren
@@ -272,6 +273,7 @@ func (eb *ErenBehavior) Deliberate() {
 func (eb *ErenBehavior) Act(e *env.Environment) {
 	if eb.eren.transform {
 		eb.eren.attributes.agentAttributes.SetName(types.ErenTitanS)
+		eb.eren.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall})
 	}
 
 	if eb.eren.attributes.agentAttributes.Attack() {

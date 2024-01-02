@@ -2,6 +2,7 @@ package pkg
 
 import (
 	obj "AOT/pkg/obj"
+	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 	"fmt"
 	"math"
@@ -30,6 +31,7 @@ func GetImagePath(imgName string) string {
 }
 
 func CreateAgentID(agentNb int, agentType types.ObjectName) types.Id {
+	fmt.Print("Creating agent ID", fmt.Sprint(agentNb), "_", string(agentType), "\n")
 	return types.Id(fmt.Sprint("AGTID", fmt.Sprint(agentNb), "_", string(agentType)))
 }
 
@@ -41,14 +43,18 @@ func DetectCollision(obj1, obj2 obj.Object) bool {
 
 	// Check for collision on the X-axis
 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
+
+		fmt.Println("No collision on X-axis between ", obj1.Name(), "and", obj2.Name())
 		return false // No collision on X-axis
 	}
 
 	// Check for collision on the Y-axis
 	if obj1BottomRight.Y < obj2TopLeft.Y || obj1TopLeft.Y > obj2BottomRight.Y {
+		fmt.Println("No collision on Y-axis between ", obj1.Name(), "and", obj2.Name())
 		return false // No collision on Y-axis
 	}
 
+	fmt.Println("Collision detected between ", obj1.Name(), "and", obj2.Name())
 	return true // Collided on both axes
 }
 
@@ -100,17 +106,37 @@ func PositionsBehindObjects(perceivedObjects []*obj.Object, positionsBehindObjec
 	return perceivedObjects
 }
 
+//func RemoveObjects(perceivedObjects []*obj.Object, objectsToRemove []*obj.Object) []*obj.Object {
+//	// Remove the objects in the objectsToRemove list from the perceivedObjects list
+//	for i, _ := range objectsToRemove {
+//		for j, _ := range perceivedObjects {
+//			if *perceivedObjects[j] == *objectsToRemove[i] {
+//				perceivedObjects = append(perceivedObjects[:j], perceivedObjects[j+1:]...)
+//			}
+//		}
+//	}
+//
+//	return perceivedObjects
+//}
+
 func RemoveObjects(perceivedObjects []*obj.Object, objectsToRemove []*obj.Object) []*obj.Object {
-	// Remove the objects in the objectsToRemove list from the perceivedObjects list
-	for i, _ := range objectsToRemove {
-		for j, _ := range perceivedObjects {
-			if *perceivedObjects[j] == *objectsToRemove[i] {
-				perceivedObjects = append(perceivedObjects[:i], perceivedObjects[i+1:]...)
-			}
+	// Create a map to store the objects to remove
+	removeMap := make(map[*obj.Object]bool)
+	for _, o := range objectsToRemove {
+		removeMap[o] = true
+	}
+
+	// Create a new slice to store the remaining objects
+	var remainingObjects []*obj.Object
+
+	// Iterate over the perceivedObjects and append to the remainingObjects if not in objectsToRemove
+	for _, o := range perceivedObjects {
+		if !removeMap[o] {
+			remainingObjects = append(remainingObjects, o)
 		}
 	}
 
-	return perceivedObjects
+	return remainingObjects
 }
 
 // define a function to get the angle between two positions
@@ -221,8 +247,12 @@ func OppositeDirection(currentPos, targetPos types.Position) types.Position {
 	return types.Position{X: xToGo, Y: yToGo}
 }
 
-func IsOutOfScreen(pos types.Position, W int, H int) bool {
-	return pos.X < 0 || pos.X > W || pos.Y < 0 || pos.Y > H
+func IsOutOfScreen(pos types.Position) bool {
+	return pos.X < 0 || pos.X > params.ScreenWidth || pos.Y < 0 || pos.Y > params.ScreenHeight
+}
+
+func IsOutOfWalls(pos types.Position) bool {
+	return pos.X < params.WallTLX || pos.X > params.WallBRX || pos.Y < params.WallTLY || pos.Y > params.WallBRY
 }
 
 func GetPositionsInHitbox(tl types.Position, br types.Position) (inHitboxPositions []types.Position) {

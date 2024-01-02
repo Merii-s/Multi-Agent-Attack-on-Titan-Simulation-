@@ -31,6 +31,7 @@ func NewMikasa(id types.Id, tl types.Position, life int, reach int, strength int
 		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
 	}
+	m.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall, types.Field, types.Dungeon, types.BigHouse, types.SmallHouse})
 	behavior := &MikasaBehavior{m: m}
 	m.SetBehavior(behavior)
 	return m

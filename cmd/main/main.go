@@ -92,7 +92,7 @@ var wgAct sync.WaitGroup
 func main() {
 	g := Game{c: make(chan *env.Environment), newEnv: false}
 	e := NewEnvironement(params.ScreenHeight, params.ScreenWidth)
-	// go env.Simu(e, &wgPercept, &wgDeliberate, &wgAct, g.c)
+	go env.Simu(e, &wgPercept, &wgDeliberate, &wgAct, g.c)
 	//
 	simu := env.NewSimulation(params.NB_AGENTS, params.MaxStep, params.MaxDuration, e, g.c)
 	go g.ListenToSimu()
@@ -103,4 +103,11 @@ func main() {
 	if err := ebiten.RunGame(&g); err != nil {
 		log.Fatal(err)
 	}
+
+	//for _, o := range e.Objects() {
+	//	if o.Name() == types.Wall {
+	//		fmt.Println(o)
+	//	}
+	//}
+
 }

@@ -31,6 +31,7 @@ func NewSoldier(id types.Id, tl types.Position, life int, reach int, strength in
 		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
 	}
+	s.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall, types.Field, types.Dungeon, types.BigHouse, types.SmallHouse})
 	behavior := &SoldierBehavior{s: s}
 	s.SetBehavior(behavior)
 	return s

@@ -91,6 +91,12 @@ func (t *Agent) PerceivedAgents() []*AgentI { return t.perceivedAgents }
 
 func (t *Agent) CantSeeBehind() []types.ObjectName { return t.cantSeeBehind }
 
+func (t *Agent) SetCantSeeBehind(cantSeeBehindObjects []types.ObjectName) {
+	for _, objects := range cantSeeBehindObjects {
+		t.cantSeeBehind = append(t.cantSeeBehind, objects)
+	}
+}
+
 func (t *Agent) Object() obj.Object { return *t.object }
 
 func (t *Agent) ObjectP() *obj.Object { return t.object }

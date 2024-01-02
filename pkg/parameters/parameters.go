@@ -8,7 +8,7 @@ const (
 	MaxDuration = 10000000000000000
 
 	//Agent numbers
-	NB_BASIC_TITANS   = 3
+	NB_BASIC_TITANS   = 1
 	NB_SPECIAL_TITANS = 0
 	NB_TITANS         = NB_BASIC_TITANS + NB_SPECIAL_TITANS
 
@@ -21,7 +21,7 @@ const (
 	//Agent Lives
 	EREN_LIFE           = 100
 	MIKASA_LIFE         = 100
-	CIVILIAN_LIFE       = 150
+	CIVILIAN_LIFE       = 100
 	SOLDIER_LIFE        = 200
 	BASIC_TITAN_LIFE    = 100
 	COLOSSAL_TITAN_LIFE = 100
@@ -44,7 +44,7 @@ const (
 	MIKASA_SPEED         = 3
 	CIVILIAN_SPEED       = 1
 	SOLDIER_SPEED        = 2
-	BASIC_TITAN_SPEED    = 30
+	BASIC_TITAN_SPEED    = 5
 	COLOSSAL_TITAN_SPEED = 1
 	ARMORED_TITAN_SPEED  = 1
 	BEAST_TITAN_SPEED    = 1
@@ -77,7 +77,7 @@ const (
 	MIKASA_VISION         = 10
 	CIVILIAN_VISION       = 10
 	SOLDIER_VISION        = 10
-	BASIC_TITAN_VISION    = 100
+	BASIC_TITAN_VISION    = 20
 	BEAST_TITAN_VISION    = 10
 	COLOSSAL_TITAN_VISION = 10
 	ARMORED_TITAN_VISION  = 10
@@ -95,6 +95,10 @@ const (
 	//Screen Dimensions
 	ScreenHeight = 700
 	ScreenWidth  = 1000
+	WallTLX      = 0.2 * ScreenWidth
+	WallTLY      = 0.2 * ScreenHeight
+	WallBRX      = WallTLX + 0.6*ScreenWidth + CWall
+	WallBRY      = ScreenHeight
 
 	//Sprite Dimensions
 	CWall = 20

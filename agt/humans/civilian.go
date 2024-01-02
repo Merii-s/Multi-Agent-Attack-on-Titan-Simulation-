@@ -33,6 +33,7 @@ func NewCivilian(id types.Id, tl types.Position, life int, reach int, strength i
 		syncChan:   make(chan string),
 		mu:         sync.Mutex{},
 	}
+	c.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall, types.Field, types.Dungeon, types.BigHouse, types.SmallHouse})
 	behavior := &CivilianBehavior{c: c}
 	c.SetBehavior(behavior)
 	return c

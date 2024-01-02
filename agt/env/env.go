@@ -215,18 +215,28 @@ func Simu(e *Environment, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGrou
 	}()
 }
 
-func GetWallPositions(e *Environment) []types.Position {
-	wallPositions := []types.Position{}
-
+func GetWalls(e *Environment) []*obj.Object {
+	walls := []*obj.Object{}
 	for _, object := range e.Objects() {
 		if object.Name() == types.Wall {
-			for _, pos := range utils.GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
-				wallPositions = append(wallPositions, pos)
+			walls = append(walls, &object)
+
+		}
+	}
+	return walls
+}
+
+func ClosestWall(walls []*obj.Object, agtPos types.Position) *obj.Object {
+	// Get the closest position from the list
+	closestWall := walls[0]
+	for i, wall := range walls {
+		for _, pos := range utils.GetPositionsInHitbox(wall.Hitbox()[0], wall.Hitbox()[1]) {
+			if agtPos.Distance(pos) < agtPos.Distance(closestWall.TL()) {
+				closestWall = walls[i]
 			}
 		}
 	}
-
-	return wallPositions
+	return closestWall
 }
 
 // function that gets the Agent with the specified selected id
