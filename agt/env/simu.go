@@ -52,7 +52,7 @@ func (simu *Simulation) Run() {
 				step++
 				c, _ := simu.syncChans.Load((*simu.agents[i]).Id())
 				c.(chan int) <- step               // /!\ utilisation d'un "Type Assertion"
-				time.Sleep(100 * time.Millisecond) // "cool down"
+				time.Sleep(500 * time.Millisecond) // "cool down"
 				<-c.(chan int)
 			}
 		}(i)

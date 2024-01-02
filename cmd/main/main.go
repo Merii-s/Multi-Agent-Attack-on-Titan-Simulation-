@@ -70,7 +70,10 @@ func (g *Game) ListenToSimu() {
 			fmt.Println("RECEIVED NEW ENV...")
 			g.Lock()
 			g.elements = make([]obj.Object, len(e.Objects())+len(e.Agents()))
-			g.elements = append(g.elements, e.Objects()...)
+			for i, o := range e.Objects() {
+				g.elements[i] = *o
+			}
+			//g.elements = append(g.elements, e.Objects()...)
 			for _, agent := range e.Agents() {
 				g.elements = append(g.elements, agent.Object())
 			}
@@ -104,10 +107,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//for _, o := range e.Objects() {
-	//	if o.Name() == types.Wall {
-	//		fmt.Println(o)
+	//bt := e.Agents()[0]
+	//fmt.Println(bt.Agent())
+	//
+	//walls := env.GetWallPositions(e)
+	//closestPosition := types.Position{X: -2 * params.ScreenWidth, Y: -2 * params.ScreenHeight}
+	//closestWall := &obj.Object{}
+	//
+	//for wall, posTab := range walls {
+	//	agtCenter := bt.Agent().ObjectP().Center()
+	//	closestInCurrentWall := agtCenter.ClosestPosition(posTab)
+	//	if agtCenter.Distance(closestInCurrentWall) < agtCenter.Distance(closestPosition) {
+	//		closestPosition = closestInCurrentWall
+	//		closestWall = wall
 	//	}
 	//}
+	//fmt.Println("Closest wall:", closestWall, "at", closestPosition)
 
 }

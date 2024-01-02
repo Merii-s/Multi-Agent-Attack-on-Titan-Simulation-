@@ -44,17 +44,14 @@ func DetectCollision(obj1, obj2 obj.Object) bool {
 	// Check for collision on the X-axis
 	if obj1BottomRight.X < obj2TopLeft.X || obj1TopLeft.X > obj2BottomRight.X {
 
-		fmt.Println("No collision on X-axis between ", obj1.Name(), "and", obj2.Name())
 		return false // No collision on X-axis
 	}
 
 	// Check for collision on the Y-axis
 	if obj1BottomRight.Y < obj2TopLeft.Y || obj1TopLeft.Y > obj2BottomRight.Y {
-		fmt.Println("No collision on Y-axis between ", obj1.Name(), "and", obj2.Name())
 		return false // No collision on Y-axis
 	}
 
-	fmt.Println("Collision detected between ", obj1.Name(), "and", obj2.Name())
 	return true // Collided on both axes
 }
 

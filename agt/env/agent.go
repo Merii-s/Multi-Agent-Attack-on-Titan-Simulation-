@@ -4,6 +4,7 @@ import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
+	"fmt"
 )
 
 type Agent struct {
@@ -124,14 +125,16 @@ func (t *Agent) ResetPerception() {
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
 func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
-	var perceivedObjects []*obj.Object
 
 	// Get the top left and bottom right positions of the vision square
-	topLeft := types.Position{X: t.Pos().X - t.Vision(), Y: t.Pos().Y - t.Vision()}
-	bottomRight := types.Position{X: t.Pos().X + t.Vision(), Y: t.Pos().Y + t.Vision()}
+	agtCenter := t.ObjectP().Center()
+	agtVision := t.Vision()
+	topLeft := types.Position{X: agtCenter.X - agtVision, Y: agtCenter.Y - agtVision}
+	bottomRight := types.Position{X: agtCenter.X + agtVision, Y: agtCenter.Y + agtVision}
+	fmt.Println("topLeft:", topLeft, "bottomRight:", bottomRight)
 
 	// Get the positions inside the vision square from the environment
-	perceivedObjects = e.PerceivedObjects(topLeft, bottomRight)
+	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
 	println("perceivedObjects:", len(perceivedObjects))
 	perceivedAgents := e.PerceivedAgents(topLeft, bottomRight, t.id)
 	println("perceivedAgents:", len(perceivedAgents))

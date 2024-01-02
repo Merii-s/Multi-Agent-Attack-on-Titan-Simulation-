@@ -10,7 +10,7 @@ import (
 	utils "AOT/pkg/utilitaries"
 )
 
-func PlaceHuman(objs []obj.Object, humans []env.AgentI, human env.AgentI, tl_village types.Position, br_village types.Position) []env.AgentI {
+func PlaceHuman(objs []*obj.Object, humans []env.AgentI, human env.AgentI, tl_village types.Position, br_village types.Position) []env.AgentI {
 	end := false
 
 	for !end {
@@ -18,7 +18,7 @@ func PlaceHuman(objs []obj.Object, humans []env.AgentI, human env.AgentI, tl_vil
 		nb_grass := 0
 		for _, object := range objs {
 			if object.Name() != types.Grass {
-				if utils.DetectCollision(human.Object(), object) {
+				if utils.DetectCollision(human.Object(), *object) {
 					x, y := utils.GetRandomCoords(tl_village, br_village)
 					human.SetPos(types.Position{X: x, Y: y})
 					break
@@ -81,7 +81,7 @@ func PlaceTitan(titan env.AgentI, titans []env.AgentI, W int, H int, dir int) []
 	return titans
 }
 
-func CreateHuman(agt_nb int, humans []env.AgentI, objs []obj.Object, tl_village types.Position, br_village types.Position, objectType types.ObjectName, life int) []env.AgentI {
+func CreateHuman(agt_nb int, humans []env.AgentI, objs []*obj.Object, tl_village types.Position, br_village types.Position, objectType types.ObjectName, life int) []env.AgentI {
 	var human env.AgentI
 	var w, h int
 
@@ -116,7 +116,7 @@ func CreateHuman(agt_nb int, humans []env.AgentI, objs []obj.Object, tl_village 
 	return humans
 }
 
-func CreateHumans(objs []obj.Object, tl_village types.Position, br_village types.Position) []env.AgentI {
+func CreateHumans(objs []*obj.Object, tl_village types.Position, br_village types.Position) []env.AgentI {
 	humans := make([]env.AgentI, 0)
 
 	for i := 0; i < params.NB_HUMANS; i++ {
@@ -193,7 +193,7 @@ func CreateTitans(H int, W int) []env.AgentI {
 	return titans
 }
 
-func CreateAgents(H int, W int, objects []obj.Object) []env.AgentI {
+func CreateAgents(H int, W int, objects []*obj.Object) []env.AgentI {
 	humans := CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
 	titans := CreateTitans(H, W)
 	all_agents := make([]env.AgentI, 0)

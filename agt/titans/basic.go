@@ -3,6 +3,7 @@ package titans
 import (
 	env "AOT/agt/env"
 	obj "AOT/pkg/obj"
+	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 	pkg "AOT/pkg/utilitaries"
 	"fmt"
@@ -23,6 +24,7 @@ type BasicTitan struct {
 	behavior          env.BehaviorI
 	firstWallInitDone bool
 	wallToGo          *obj.Object
+	wallToGoPos       types.Position
 }
 
 func NewBasicTitan(id types.Id, tl types.Position, life int, reach int, strength int, speed int, vision int, obj types.ObjectName, regen int) *BasicTitan {
@@ -64,6 +66,10 @@ func (bt *BasicTitan) SetBehavior(b env.BehaviorI) { bt.behavior = b }
 func (bt *BasicTitan) SetWallToGo(wall *obj.Object) { bt.wallToGo = wall }
 
 func (bt *BasicTitan) WallToGo() *obj.Object { return bt.wallToGo }
+
+func (bt *BasicTitan) WallToGoPos() types.Position { return bt.wallToGoPos }
+
+func (bt *BasicTitan) SetWallToGoPos(pos types.Position) { bt.wallToGoPos = pos }
 
 // Methods for BasicTitan
 func (bt *BasicTitan) Percept(e *env.Environment /*, wgPercept *sync.WaitGroup*/) {
@@ -123,6 +129,7 @@ func (bt *BasicTitan) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPe
 			bt.Deliberate()
 			bt.Act(e)
 
+			time.Sleep(100 * time.Millisecond)
 			bt.AgtSyncChan() <- step
 		}
 	}()
@@ -251,10 +258,23 @@ func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 		//println("BasicTitan is out of walls")
 		// Checks hitbox around to avoid collisions
 		btb.bt.firstWallInitDone = true
-		walls := env.GetWalls(e)
-		closestWall := env.ClosestWall(walls, btb.bt.attributes.agentAttributes.Pos())
-		//println("BasicTitan Position: ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)`
 
+		walls := env.GetWallPositions(e)
+
+		closestPosition := types.Position{X: -2 * params.ScreenWidth, Y: -2 * params.ScreenHeight}
+		closestWall := &obj.Object{}
+
+		for wall, posTab := range walls {
+			agtCenter := btb.bt.Agent().ObjectP().Center()
+			closestInCurrentWall := agtCenter.ClosestPosition(posTab)
+			if agtCenter.Distance(closestInCurrentWall) < agtCenter.Distance(closestPosition) {
+				closestPosition = closestInCurrentWall
+				closestWall = wall
+			}
+		}
+
+		btb.bt.SetWallToGoPos(closestPosition)
+		fmt.Println("Wall to go position: ", btb.bt.WallToGoPos().X, btb.bt.WallToGoPos().Y)
 		btb.bt.SetWallToGo(closestWall)
 		fmt.Println("Wall to go: ", btb.bt.WallToGo().TL())
 	}
@@ -297,100 +317,87 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 	if pkg.IsOutOfWalls(btb.bt.attributes.agentAttributes.Pos()) && !pkg.DetectCollision(*btb.bt.wallToGo, btb.bt.Object()) {
 		neighborAgentPositions := pkg.GetNeighbors(btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed(), toAvoid)
-		nextPos := btb.bt.wallToGo.TL().ClosestPosition(neighborAgentPositions)
+		nextPos := btb.bt.wallToGo.Center().ClosestPosition(neighborAgentPositions)
 		println("BasicTitan", btb.bt.Id(), "Next position: ", nextPos.X, nextPos.Y)
 		btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
-	} else if pkg.DetectCollision(*btb.bt.wallToGo, btb.bt.Object()) {
-		btb.bt.attributes.agentAttributes.SetAttack(false)
-		btb.bt.attributes.SetAttackObject(true)
-		btb.bt.attributes.SetObjectToAttack(btb.bt.wallToGo)
-	}
+	} else {
+		var interestingObjects []*obj.Object
+		var interestingAgents []*env.AgentI
+		agtPos := btb.bt.attributes.agentAttributes.Pos()
 
-	//if pkg.IsOutOfWalls(btb.bt.attributes.agentAttributes.Pos()) && len(btb.bt.PerceivedObjects()) == 0 {
-	//	println("BasicTitan", btb.bt.Id(), "is out of walls")
-	//	neighborAgentPositions := pkg.GetNeighbors(btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed(), toAvoid)
-	//	nextPos := btb.bt.wallToGo.ClosestPosition(neighborAgentPositions)
-	//	println("BasicTitan", btb.bt.Id(), "Next position: ", nextPos.X, nextPos.Y)
-	//	btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
-	//
-	//} else {
-	//	var interestingObjects []*obj.Object
-	//	var interestingAgents []*env.AgentI
-	//	agtPos := btb.bt.attributes.agentAttributes.Pos()
-	//
-	//	for i, object := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
-	//		fmt.Println("Perceived object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
-	//		if object.Name() == types.Wall || object.Name() == types.Field || object.Name() == types.Dungeon {
-	//			fmt.Println("Interesting object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
-	//			interestingObjects = append(interestingObjects, btb.bt.attributes.agentAttributes.PerceivedObjects()[i])
-	//		}
-	//	}
-	//	//println("Interesting objects: ", len(interestingObjects))
-	//
-	//	for i, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
-	//		if (*agt).Agent().GetName() == types.MaleCivilian ||
-	//			(*agt).Agent().GetName() == types.FemaleCivilian ||
-	//			(*agt).Agent().GetName() == types.Eren ||
-	//			(*agt).Agent().GetName() == types.Mikasa ||
-	//			(*agt).Agent().GetName() == types.MaleSoldier ||
-	//			(*agt).Agent().GetName() == types.FemaleSoldier {
-	//			interestingAgents = append(interestingAgents, btb.bt.attributes.agentAttributes.PerceivedAgents()[i])
-	//		}
-	//	}
-	//	//println("Interesting agents: ", len(interestingAgents))
-	//
-	//	btb.bt.attributes.agentAttributes.ResetPerception()
-	//
-	//	// Checks first if there are interesting agents to attack and if not, the nearest agent to go to
-	//	if len(interestingAgents) != 0 {
-	//		closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
-	//
-	//		fmt.Println("Closest agent: ", (*closestAgent).Agent().GetName(), " at ", closestAgentPosition.X)
-	//
-	//		if pkg.DetectCollision((*closestAgent).Object(), btb.bt.Object()) {
-	//			btb.bt.attributes.agentAttributes.SetAttack(true)
-	//			btb.bt.attributes.SetAttackObject(false)
-	//			btb.bt.attributes.agentAttributes.SetAgentToAttack(closestAgent)
-	//			println("BasicTitan", btb.bt.Id(), " : Attacks agent: ", (*btb.bt.attributes.agentAttributes.AgentToAttack()).Object().GetName())
-	//		} else {
-	//			btb.bt.attributes.agentAttributes.SetAttack(false)
-	//			btb.bt.attributes.SetAttackObject(false)
-	//
-	//			neighborAgentPositions := pkg.GetNeighbors(agtPos, btb.bt.attributes.agentAttributes.Speed(), toAvoid)
-	//			nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
-	//
-	//			btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
-	//			println("Agent position: ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)
-	//			println("Next position: ", nextPos.X, nextPos.Y)
-	//		}
-	//
-	//		// If there are no interesting agents, the titan goes towards the nearest interesting object (wall or field)
-	//	} else if len(interestingObjects) != 0 {
-	//		closestObject, closestObjectPosition := pkg.ClosestObject(interestingObjects, agtPos)
-	//		println("Closest object: ", closestObject.Name())
-	//		println("Closest object Position: ", closestObjectPosition.X, closestObjectPosition.Y)
-	//
-	//		if pkg.DetectCollision(*closestObject, btb.bt.Object()) {
-	//			btb.bt.attributes.agentAttributes.SetAttack(false)
-	//			btb.bt.attributes.SetAttackObject(true)
-	//			btb.bt.attributes.SetObjectToAttack(closestObject)
-	//			println("BasicTitan", btb.bt.Id(), " : Attacks object: ", btb.bt.attributes.ObjectToAttack().GetName())
-	//			//println("Attack ", btb.bt.attributes.agentAttributes.Attack())
-	//			//println("Attack Object", btb.bt.attributes.AttackObjectBool())
-	//			//println("Object to attack: ", btb.bt.attributes.ObjectToAttack().GetName())
-	//		} else {
-	//			btb.bt.attributes.agentAttributes.SetAttack(false)
-	//			btb.bt.attributes.SetAttackObject(false)
-	//
-	//			neighborAgentPositions := pkg.GetNeighbors(agtPos, btb.bt.attributes.agentAttributes.Speed(), toAvoid)
-	//			nextPos := closestObjectPosition.ClosestPosition(neighborAgentPositions)
-	//			println("Agent position: ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)
-	//			println("Next position: ", nextPos.X, nextPos.Y)
-	//
-	//			btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
-	//		}
-	//	}
-	//}
+		for i, object := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
+			fmt.Println("Perceived object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
+			if object.Name() == types.Wall || object.Name() == types.Field || object.Name() == types.Dungeon {
+				fmt.Println("Interesting object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
+				interestingObjects = append(interestingObjects, btb.bt.attributes.agentAttributes.PerceivedObjects()[i])
+			}
+		}
+		//println("Interesting objects: ", len(interestingObjects))
+
+		for i, agt := range btb.bt.attributes.agentAttributes.PerceivedAgents() {
+			if (*agt).Agent().GetName() == types.MaleCivilian ||
+				(*agt).Agent().GetName() == types.FemaleCivilian ||
+				(*agt).Agent().GetName() == types.Eren ||
+				(*agt).Agent().GetName() == types.Mikasa ||
+				(*agt).Agent().GetName() == types.MaleSoldier ||
+				(*agt).Agent().GetName() == types.FemaleSoldier {
+				interestingAgents = append(interestingAgents, btb.bt.attributes.agentAttributes.PerceivedAgents()[i])
+			}
+		}
+		//println("Interesting agents: ", len(interestingAgents))
+
+		btb.bt.attributes.agentAttributes.ResetPerception()
+
+		// Checks first if there are interesting agents to attack and if not, the nearest agent to go to
+		if len(interestingAgents) != 0 {
+			closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
+
+			fmt.Println("Closest agent: ", (*closestAgent).Agent().GetName(), " at ", closestAgentPosition.X)
+
+			if pkg.DetectCollision((*closestAgent).Object(), btb.bt.Object()) {
+				btb.bt.attributes.agentAttributes.SetAttack(true)
+				btb.bt.attributes.SetAttackObject(false)
+				btb.bt.attributes.agentAttributes.SetAgentToAttack(closestAgent)
+				println("BasicTitan", btb.bt.Id(), " : Attacks agent: ", (*btb.bt.attributes.agentAttributes.AgentToAttack()).Object().GetName())
+			} else {
+				btb.bt.attributes.agentAttributes.SetAttack(false)
+				btb.bt.attributes.SetAttackObject(false)
+
+				neighborAgentPositions := pkg.GetNeighbors(agtPos, btb.bt.attributes.agentAttributes.Speed(), toAvoid)
+				nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
+
+				btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
+				println("Agent position: ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)
+				println("Next position: ", nextPos.X, nextPos.Y)
+			}
+
+			// If there are no interesting agents, the titan goes towards the nearest interesting object (wall or field)
+		} else if len(interestingObjects) != 0 {
+			closestObject, closestObjectPosition := pkg.ClosestObject(interestingObjects, agtPos)
+			println("Closest object: ", closestObject.Name())
+			println("Closest object Position: ", closestObjectPosition.X, closestObjectPosition.Y)
+
+			if pkg.DetectCollision(*closestObject, btb.bt.Object()) {
+				btb.bt.attributes.agentAttributes.SetAttack(false)
+				btb.bt.attributes.SetAttackObject(true)
+				btb.bt.attributes.SetObjectToAttack(closestObject)
+				println("BasicTitan", btb.bt.Id(), " : Attacks object: ", btb.bt.attributes.ObjectToAttack().GetName())
+				//println("Attack ", btb.bt.attributes.agentAttributes.Attack())
+				//println("Attack Object", btb.bt.attributes.AttackObjectBool())
+				//println("Object to attack: ", btb.bt.attributes.ObjectToAttack().GetName())
+			} else {
+				btb.bt.attributes.agentAttributes.SetAttack(false)
+				btb.bt.attributes.SetAttackObject(false)
+
+				neighborAgentPositions := pkg.GetNeighbors(agtPos, btb.bt.attributes.agentAttributes.Speed(), toAvoid)
+				nextPos := closestObjectPosition.ClosestPosition(neighborAgentPositions)
+				println("Agent position: ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)
+				println("Next position: ", nextPos.X, nextPos.Y)
+
+				btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
+			}
+		}
+	}
 }
 
 func (btb *BasicTitanBehavior) Act(e *env.Environment) {

@@ -5,6 +5,7 @@ import (
 	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -12,12 +13,12 @@ import (
 type Environment struct {
 	sync.RWMutex
 	Agts []AgentI
-	Objs []obj.Object
+	Objs []*obj.Object
 	// Day/Night cycle
 	day bool
 }
 
-func (p *Environment) Objects() []obj.Object {
+func (p *Environment) Objects() []*obj.Object {
 	return p.Objs
 }
 
@@ -28,12 +29,12 @@ func (p *Environment) Agents() []AgentI {
 
 func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types.Position) []*obj.Object {
 	objects := make([]*obj.Object, 0)
-	for i, obj := range e.Objs {
-		if obj.Name() != types.Grass && obj.Life() > 0 {
-			objectTL, objectBR := obj.Hitbox()[0], obj.Hitbox()[1]
+	for i := range e.Objs {
+		if e.Objs[i].Name() != types.Grass && e.Objs[i].Life() > 0 {
+			objectTL, objectBR := e.Objs[i].Hitbox()[0], e.Objs[i].Hitbox()[1]
 			//println("Object", obj.Name(), "TL", objectTL.X, objectTL.Y, " BR", objectBR.X, objectBR.Y)
 			if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) {
-				objects = append(objects, &e.Objs[i])
+				objects = append(objects, e.Objs[i])
 			}
 		}
 	}
@@ -56,8 +57,8 @@ func (e *Environment) Add(a AgentI) {
 	e.Agts = append(e.Agts, a)
 }
 
-func CreateStaticObjects(H int, W int) []obj.Object {
-	objects := make([]obj.Object, 0)
+func CreateStaticObjects(H int, W int) []*obj.Object {
+	objects := make([]*obj.Object, 0)
 	var object *obj.Object
 	nb_objects := 0
 
@@ -67,7 +68,7 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	for i := 0; i < nH; i++ {
 		for j := 0; j < nW; j++ {
 			object = obj.NewObject(types.Grass, types.Position{X: j * params.CGrass, Y: i * params.CGrass}, params.GRASS_LIFE)
-			objects = append(objects, *object)
+			objects = append(objects, object)
 			nb_objects = nb_objects + 1
 		}
 	}
@@ -83,15 +84,15 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	//Mur du Nord, Horizontal
 	for i := 0; i < nW+1; i++ {
 		object = obj.NewObject(types.Wall, types.Position{X: wall_Tl_X + i*params.CWall, Y: wall_Tl_Y}, params.WALL_LIFE)
-		objects = append(objects, *object)
+		objects = append(objects, object)
 		nb_objects = nb_objects + 1
 	}
 	//Murs cotes, Verticaux
 	for i := 1; i < nH; i++ {
 		object = obj.NewObject(types.Wall, types.Position{X: wall_Tl_X, Y: wall_Tl_Y + i*params.CWall}, params.WALL_LIFE)
-		objects = append(objects, *object)
+		objects = append(objects, object)
 		object = obj.NewObject(types.Wall, types.Position{X: wall_Tl_X + wWall, Y: wall_Tl_Y + i*params.CWall}, params.WALL_LIFE)
-		objects = append(objects, *object)
+		objects = append(objects, object)
 		nb_objects = nb_objects + 2
 	}
 
@@ -108,7 +109,7 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 		}
 		object = obj.NewObject(types.Field, types.Position{X: x, Y: y}, params.FIELD_LIFE)
 		object.SetReserve(params.FIELD_RESERVE)
-		objects = append(objects, *object)
+		objects = append(objects, object)
 		nb_objects = nb_objects + 1
 	}
 
@@ -117,7 +118,7 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	for _, coords := range coefsCoords {
 
 		object = obj.NewObject(types.SmallHouse, types.Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, params.SMALL_HOUSE_LIFE)
-		objects = append(objects, *object)
+		objects = append(objects, object)
 		nb_objects = nb_objects + 1
 	}
 
@@ -125,15 +126,15 @@ func CreateStaticObjects(H int, W int) []obj.Object {
 	coefsCoords = [][]float32{{0.29, 0.7}, {0.5, 0.55}, {0.60, 0.7}}
 	for _, coords := range coefsCoords {
 		object = obj.NewObject(types.BigHouse, types.Position{X: int(coords[0] * float32(W)), Y: int(coords[1] * float32(H))}, params.BIG_HOUSE_LIFE)
-		objects = append(objects, *object)
+		objects = append(objects, object)
 		nb_objects = nb_objects + 1
 	}
 
 	//Donjons
 	object = obj.NewObject(types.Dungeon, types.Position{X: int(0.2*float32(W) + params.CWall), Y: int(0.2*float32(H) + params.CWall)}, params.DUNGEON_LIFE)
-	objects = append(objects, *object)
+	objects = append(objects, object)
 	object = obj.NewObject(types.Dungeon, types.Position{X: int(0.8*float32(W) - params.CWall - params.WDungeon/2), Y: int(0.2*float32(H) + params.CWall)}, params.DUNGEON_LIFE)
-	objects = append(objects, *object)
+	objects = append(objects, object)
 
 	// object = obj.NewObject(types.ColossalTitan, types.Position{X: 640, Y: 350}, params.COLOSSAL_TITAN_LIFE)
 	// objects = append(objects, *object)
@@ -219,9 +220,29 @@ func GetWalls(e *Environment) []*obj.Object {
 	walls := []*obj.Object{}
 	for _, object := range e.Objects() {
 		if object.Name() == types.Wall {
-			walls = append(walls, &object)
+			walls = append(walls, object)
 
 		}
+	}
+	return walls
+}
+
+func GetWallPositions(e *Environment) map[*obj.Object][]types.Position {
+	walls := make(map[*obj.Object][]types.Position)
+
+	for _, object := range e.Objects() {
+		if object.Name() == types.Wall {
+			wallPositions := []types.Position{}
+			for _, pos := range utils.GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
+				wallPositions = append(wallPositions, pos)
+			}
+			fmt.Println(object)
+			walls[object] = wallPositions
+		}
+	}
+	fmt.Println("finished")
+	for wall, _ := range walls {
+		fmt.Println(wall)
 	}
 	return walls
 }
