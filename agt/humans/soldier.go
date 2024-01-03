@@ -176,21 +176,6 @@ func (sb *SoldierBehavior) Percept(e *env.Environment) {
 func (sb *SoldierBehavior) Deliberate() {
 	println("Soldier Deliberate")
 
-	//TODO : Find where to put GetAvoidancePositions function
-	// Checks hitbox around to avoid collisions
-	toAvoid := []types.Position{}
-	for _, object := range sb.s.attributes.agentAttributes.PerceivedObjects() {
-		for _, pos := range pkg.GetPositionsInHitbox(object.TL(), object.Hitbox()[1]) {
-			toAvoid = append(toAvoid, pos)
-		}
-	}
-
-	for _, agt := range sb.s.attributes.agentAttributes.PerceivedAgents() {
-		for _, pos := range pkg.GetPositionsInHitbox((*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]) {
-			toAvoid = append(toAvoid, pos)
-			toAvoid = append(toAvoid, types.Position{X: pos.X - sb.s.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - sb.s.Agent().ObjectP().Hitbox()[0].Y})
-		}
-	}
 	var interestingAgents []*env.AgentI
 	agtPos := sb.s.attributes.agentAttributes.Pos()
 
@@ -229,7 +214,7 @@ func (sb *SoldierBehavior) Deliberate() {
 		} else {
 			sb.s.attributes.agentAttributes.SetAttack(false)
 
-			neighborAgentPositions := pkg.GetNeighbors(agtPos, sb.s.attributes.agentAttributes.Speed(), toAvoid)
+			neighborAgentPositions := pkg.GetNeighbors(agtPos, sb.s.attributes.agentAttributes.Speed())
 			nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
 
 			sb.s.attributes.agentAttributes.SetNextPos(nextPos)

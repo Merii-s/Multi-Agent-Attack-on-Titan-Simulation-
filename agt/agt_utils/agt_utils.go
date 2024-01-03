@@ -152,7 +152,7 @@ func CreateTitans(H int, W int) []env.AgentI {
 
 	for i := 0; i < params.NB_TITANS; i++ {
 		x, y := utils.GetRandomCoords(tl_screen, br_screen)
-		y -= params.HBasicTitanM
+		y -= 2 * params.HBasicTitanM
 
 		if dir == 0 {
 			y = y - H - 100
@@ -201,24 +201,4 @@ func CreateAgents(H int, W int, objects []*obj.Object) []env.AgentI {
 	all_agents = append(all_agents, humans...)
 	all_agents = append(all_agents, titans...)
 	return all_agents
-}
-
-func GetAvoidancePositions(agentAttributes *env.Agent) []types.Position {
-	toAvoid := []types.Position{}
-
-	for _, object := range agentAttributes.PerceivedObjects() {
-		hitboxStart, hitboxEnd := object.TL(), object.Hitbox()[1]
-		for _, pos := range utils.GetPositionsInHitbox(hitboxStart, hitboxEnd) {
-			toAvoid = append(toAvoid, pos)
-		}
-	}
-
-	for _, agt := range agentAttributes.PerceivedAgents() {
-		hitboxStart, hitboxEnd := (*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]
-		for _, pos := range utils.GetPositionsInHitbox(hitboxStart, hitboxEnd) {
-			toAvoid = append(toAvoid, pos)
-		}
-	}
-
-	return toAvoid
 }

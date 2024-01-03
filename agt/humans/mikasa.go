@@ -196,21 +196,6 @@ func (mb *MikasaBehavior) Percept(e *env.Environment) {
 func (mb *MikasaBehavior) Deliberate() {
 	println("Mikasa Deliberate")
 
-	//TODO : Find where to put GetAvoidancePositions function
-	// Checks hitbox around to avoid collisions
-	toAvoid := []types.Position{}
-	for _, object := range mb.m.attributes.agentAttributes.PerceivedObjects() {
-		for _, pos := range pkg.GetPositionsInHitbox(object.TL(), object.Hitbox()[1]) {
-			toAvoid = append(toAvoid, pos)
-		}
-	}
-
-	for _, agt := range mb.m.attributes.agentAttributes.PerceivedAgents() {
-		for _, pos := range pkg.GetPositionsInHitbox((*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]) {
-			toAvoid = append(toAvoid, pos)
-			toAvoid = append(toAvoid, types.Position{X: pos.X - mb.m.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - mb.m.Agent().ObjectP().Hitbox()[0].Y})
-		}
-	}
 	var interestingAgents []*env.AgentI
 	agtPos := mb.m.attributes.agentAttributes.Pos()
 
@@ -251,7 +236,7 @@ func (mb *MikasaBehavior) Deliberate() {
 			} else {
 				mb.m.attributes.agentAttributes.SetAttack(false)
 
-				neighborAgentPositions := pkg.GetNeighbors(agtPos, mb.m.attributes.agentAttributes.Speed(), toAvoid)
+				neighborAgentPositions := pkg.GetNeighbors(agtPos, mb.m.attributes.agentAttributes.Speed())
 				nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
 
 				mb.m.attributes.agentAttributes.SetNextPos(nextPos)

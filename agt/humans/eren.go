@@ -198,21 +198,6 @@ func (eb *ErenBehavior) Percept(e *env.Environment) {
 func (eb *ErenBehavior) Deliberate() {
 	println("Eren Deliberate")
 
-	//TODO : Find where to put GetAvoidancePositions function
-	// Checks hitbox around to avoid collisions
-	toAvoid := []types.Position{}
-	for _, object := range eb.eren.attributes.agentAttributes.PerceivedObjects() {
-		for _, pos := range pkg.GetPositionsInHitbox(object.TL(), object.Hitbox()[1]) {
-			toAvoid = append(toAvoid, pos)
-		}
-	}
-
-	for _, agt := range eb.eren.attributes.agentAttributes.PerceivedAgents() {
-		for _, pos := range pkg.GetPositionsInHitbox((*agt).Agent().ObjectP().TL(), (*agt).Agent().ObjectP().Hitbox()[1]) {
-			toAvoid = append(toAvoid, pos)
-			toAvoid = append(toAvoid, types.Position{X: pos.X - eb.eren.Agent().ObjectP().Hitbox()[0].X, Y: pos.Y - eb.eren.Agent().ObjectP().Hitbox()[0].Y})
-		}
-	}
 	var interestingAgents []*env.AgentI
 	agtPos := eb.eren.attributes.agentAttributes.Pos()
 
@@ -248,7 +233,7 @@ func (eb *ErenBehavior) Deliberate() {
 		} else {
 			eb.eren.attributes.agentAttributes.SetAttack(false)
 
-			neighborAgentPositions := pkg.GetNeighbors(agtPos, eb.eren.attributes.agentAttributes.Speed(), toAvoid)
+			neighborAgentPositions := pkg.GetNeighbors(agtPos, eb.eren.attributes.agentAttributes.Speed())
 			nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
 
 			eb.eren.attributes.agentAttributes.SetNextPos(nextPos)

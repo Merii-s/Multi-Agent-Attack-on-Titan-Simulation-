@@ -131,13 +131,12 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 	agtVision := t.Vision()
 	topLeft := types.Position{X: agtCenter.X - agtVision, Y: agtCenter.Y - agtVision}
 	bottomRight := types.Position{X: agtCenter.X + agtVision, Y: agtCenter.Y + agtVision}
-	fmt.Println("topLeft:", topLeft, "bottomRight:", bottomRight)
 
 	// Get the positions inside the vision square from the environment
 	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
-	println("perceivedObjects:", len(perceivedObjects))
+	fmt.Println("n vision before : env perceivedObjects:", len(perceivedObjects))
 	perceivedAgents := e.PerceivedAgents(topLeft, bottomRight, t.id)
-	println("perceivedAgents:", len(perceivedAgents))
+	fmt.Println(t.Id(), "In vision before : env perceivedAgents:", len(perceivedAgents))
 
 	// Get the objects not seen by the agent
 	CantSeeBehindObjects := []obj.Object{}
@@ -160,16 +159,20 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 			// If a objCantSeeBehindObject is in the vision square, the agent can't see behind it
 			// Get the angle between the agent and the position to avoid
 			objectCenter := object.Center()
-			angle := utils.GetAngle(t.Pos(), objectCenter)
+			angle := utils.GetAngle(t.ObjectP().Center(), objectCenter)
 
 			// Get the perceivedObjects behind the current position to avoid
-			positionsBehindCurrentObject := utils.GetPositionsBehindObject(t.Pos(), angle, topLeft, bottomRight)
+			positionsBehindCurrentObject := utils.GetPositionsBehindObject(t.Object(), angle, topLeft, bottomRight)
 
 			for i, _ := range positionsBehindCurrentObject {
 				positionsBehindObjects = append(positionsBehindObjects, positionsBehindCurrentObject[i])
 			}
 		}
 	}
+	//fmt.Println(t.Id(), " Position ", t.Pos())
+	//fmt.Println(t.Id(), " Can't see behind:", CantSeeBehindObjects)
+	//fmt.Println(t.Id(), " Can't see this number of positions:", len(positionsBehindObjects))
+	//fmt.Println(t.Id(), " at these positions:", positionsBehindObjects)
 
 	// Checks if the perceivedObjects are in a positionsBehindObjects position and remove them if they are
 	perceivedObjects = utils.PositionsBehindObjects(perceivedObjects, positionsBehindObjects)

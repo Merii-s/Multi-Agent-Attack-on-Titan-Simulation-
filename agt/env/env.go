@@ -5,7 +5,6 @@ import (
 	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -236,14 +235,10 @@ func GetWallPositions(e *Environment) map[*obj.Object][]types.Position {
 			for _, pos := range utils.GetPositionsInHitbox(object.Hitbox()[0], object.Hitbox()[1]) {
 				wallPositions = append(wallPositions, pos)
 			}
-			fmt.Println(object)
 			walls[object] = wallPositions
 		}
 	}
-	fmt.Println("finished")
-	for wall, _ := range walls {
-		fmt.Println(wall)
-	}
+
 	return walls
 }
 
