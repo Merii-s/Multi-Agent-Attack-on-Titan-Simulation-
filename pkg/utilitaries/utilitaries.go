@@ -92,7 +92,7 @@ func RemoveNoSeeableObjects(perceivedObjects []*obj.Object, noSeeableSquaresBehi
 				if IntersectSquare(noSeeableBox[0], noSeeableBox[1], object.Hitbox()[0], object.Hitbox()[1]) &&
 					objNoSeeBehind != object &&
 					object.GetName() != types.Wall {
-					fmt.Println("Can't see :", object.Name(), "at", object.TL(), "because of", noSeeableBox)
+					//fmt.Println("Can't see :", object.Name(), "at", object.TL(), "because of", noSeeableBox)
 					objectsToRemove = append(objectsToRemove, perceivedObjects[i])
 				}
 			}
@@ -175,14 +175,14 @@ func GetNotSeeableBoxBehindObject(object obj.Object, angle float64, topLeftVisio
 	// if the position to avoid is in the straight right of the agent position
 	// the agent can't see the positions behind it from 315 to 45 degrees following the perspective logic
 	if angle > 358 && angle < 2 {
-		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.TL().Y}
+		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.TL().Y + 1}
 		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: object.Hitbox()[1].Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the bottom right quarter of the vision square
 		// the agent can't see the positions in the bottom right quarter of the vision square
 	} else if angle >= 2 && angle < 88 {
-		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.Hitbox()[1].Y + 1}
+		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.Hitbox()[1].Y}
 		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: bottomRightVision.Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
@@ -283,4 +283,13 @@ func ClosestObject(objects []*obj.Object, position types.Position) (*obj.Object,
 		}
 	}
 	return closestObject, closestObjectPosition
+}
+
+func RemovePosition(positions []types.Position, positionToRemove types.Position) []types.Position {
+	for i := len(positions) - 1; i >= 0; i-- {
+		if positions[i] == positionToRemove {
+			positions = append(positions[:i], positions[i+1:]...)
+		}
+	}
+	return positions
 }

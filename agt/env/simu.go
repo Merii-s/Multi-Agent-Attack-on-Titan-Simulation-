@@ -44,7 +44,6 @@ func (simu *Simulation) Run() {
 	simu.start = time.Now()
 
 	// Lancement de l'orchestration de tous les agents
-	// simu.step += 1 // plus de sens
 	for i := range simu.agents {
 		go func(i int) {
 			step := 0
@@ -60,7 +59,7 @@ func (simu *Simulation) Run() {
 
 	go func() {
 		for {
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 			simu.uiChan <- simu.env
 		}
 	}()

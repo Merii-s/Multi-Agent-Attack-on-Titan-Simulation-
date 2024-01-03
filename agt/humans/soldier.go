@@ -82,10 +82,10 @@ func (s *Soldier) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercep
 				s.Deliberate()
 				s.Act(e)
 
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(30 * time.Millisecond)
 				s.AgtSyncChan() <- step
 			} else {
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(30 * time.Millisecond)
 				s.AgtSyncChan() <- step
 			}
 		}
@@ -258,7 +258,7 @@ func (sb *SoldierBehavior) Act(e *env.Environment) {
 		if env.IsNextPositionValid(sb.s, e) {
 			sb.s.Move(sb.s.attributes.agentAttributes.NextPos())
 		} else {
-			sb.s.Agent().SetNextPos(env.FirstValidPosition(sb.s, e))
+			sb.s.Agent().SetNextPos(env.FirstValidPositionToCityCenter(sb.s, e))
 		}
 	}
 }

@@ -85,23 +85,23 @@ func (m *Mikasa) Agent() *env.Agent {
 }
 
 func (m *Mikasa) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
-	// launch the agent goroutine Percept-Deliberate-Act cycle
-	//wgStart.Done()
-	//wgStart.Wait()
+	println("Start ", m.Id())
+	time.Sleep(100 * time.Millisecond)
 	go func() {
-		println("Mikasa Start")
+		var step int
 		for {
-			//wgPercept.Add(1)
-			m.Percept(e /*, wgPercept*/)
-			//wgPercept.Wait()
+			step = <-m.AgtSyncChan()
+			if m.Agent().ObjectP().Life() > 0 {
+				m.Percept(e)
+				m.Deliberate()
+				m.Act(e)
 
-			//wgDeliberate.Add(1)
-			m.Deliberate( /*wgDeliberate*/ )
-			//wgDeliberate.Wait()
-
-			//wgAct.Add(1)
-			m.Act(e /*, wgAct*/)
-			//wgAct.Wait()
+				time.Sleep(30 * time.Millisecond)
+				m.AgtSyncChan() <- step
+			} else {
+				time.Sleep(30 * time.Millisecond)
+				m.AgtSyncChan() <- step
+			}
 		}
 	}()
 }
@@ -134,8 +134,6 @@ func (m *Mikasa) AttackSuccess(spdAtk int, spdDef int) float64 {
 }
 
 func (m *Mikasa) Attack(agt *env.AgentI) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
 	if rand.Float64() < m.AttackSuccess(m.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
@@ -271,7 +269,7 @@ func (mb *MikasaBehavior) Act(e *env.Environment) {
 		if env.IsNextPositionValid(mb.m, e) {
 			mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
 		} else {
-			mb.m.Agent().SetNextPos(env.FirstValidPosition(mb.m, e))
+			mb.m.Agent().SetNextPos(env.FirstValidPositionToCityCenter(mb.m, e))
 		}
 	}
 }

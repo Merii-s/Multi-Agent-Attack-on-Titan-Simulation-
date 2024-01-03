@@ -3,6 +3,7 @@ package humans
 import (
 	env "AOT/agt/env"
 	obj "AOT/pkg/obj"
+	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 	pkg "AOT/pkg/utilitaries"
 	"fmt"
@@ -87,23 +88,24 @@ func (eren *Eren) Agent() *env.Agent {
 }
 
 func (eren *Eren) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
-	// launch the agent goroutine Percept-Deliberate-Act cycle
-	//wgStart.Done()
-	//wgStart.Wait()
+	println("Start ", eren.Id())
+	time.Sleep(100 * time.Millisecond)
 	go func() {
-		println("Eren Start")
+		var step int
 		for {
-			//wgPercept.Add(1)
-			eren.Percept(e /*, wgPercept*/)
-			//wgPercept.Wait()
+			step = <-eren.AgtSyncChan()
+			if eren.Agent().ObjectP().Life() > 0 {
 
-			//wgDeliberate.Add(1)
-			eren.Deliberate( /*wgDeliberate*/ )
-			//wgDeliberate.Wait()
+				eren.Percept(e)
+				eren.Deliberate()
+				eren.Act(e)
 
-			//wgAct.Add(1)
-			eren.Act(e /*, wgAct*/)
-			//wgAct.Wait()
+				time.Sleep(30 * time.Millisecond)
+				eren.AgtSyncChan() <- step
+			} else {
+				time.Sleep(30 * time.Millisecond)
+				eren.AgtSyncChan() <- step
+			}
 		}
 	}()
 }
@@ -136,8 +138,6 @@ func (*Eren) AttackSuccess(spdAtk int, spdDef int) float64 {
 }
 
 func (eren *Eren) Attack(agt *env.AgentI) {
-	eren.mu.Lock()
-	defer eren.mu.Unlock()
 	// If the percentage is less than the success rate, the attack is successful
 	if rand.Float64() < eren.AttackSuccess(eren.attributes.agentAttributes.Speed(), (*agt).Agent().Speed()) {
 		// If the attack is successful, the agent loses HP
@@ -189,8 +189,8 @@ func (eb *ErenBehavior) Percept(e *env.Environment) {
 	for _, agt := range perceivedAgents {
 		eb.eren.attributes.agentAttributes.AddPerceivedAgent(agt)
 	}
-	println("Perceived agents: ", len(eb.eren.attributes.agentAttributes.PerceivedAgents()))
-	println("Perceived objects: ", len(eb.eren.attributes.agentAttributes.PerceivedObjects()))
+	println(eb.eren.Id(), " Perceived agents: ", len(eb.eren.attributes.agentAttributes.PerceivedAgents()))
+	println(eb.eren.Id(), " Perceived objects: ", len(eb.eren.attributes.agentAttributes.PerceivedObjects()))
 
 	time.Sleep(100 * time.Millisecond)
 }
@@ -213,23 +213,26 @@ func (eb *ErenBehavior) Deliberate() {
 			(*agt).Agent().GetName() == types.FemaleTitan ||
 			(*agt).Agent().GetName() == types.JawTitan {
 			interestingAgents = append(interestingAgents, agt)
-			numberTitans++
+			fmt.Println(eb.eren.Id(), " Eren will transform into Eren Titan")
+			eb.eren.transform = true
+			fmt.Println(eb.eren.Id(), " Eren transform: ", eb.eren.transform)
 		}
 	}
-	//println("Interesting agents: ", len(interestingAgents))
+	println(eb.eren.Id(), " Interesting agents: ", len(interestingAgents))
 
+	fmt.Println(eb.eren.Id(), " Number of titans: ", numberTitans)
 	eb.eren.attributes.agentAttributes.ResetPerception()
 
 	// Checks first if there are interesting agents to attack and if not, the nearest agent to go to
 	if len(interestingAgents) != 0 {
-		if numberTitans > 1 {
-			eb.eren.transform = true
-		}
 		closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
+
+		fmt.Println(eb.eren.Id(), " Eren is interested by ", (*closestAgent).Id())
 
 		if pkg.DetectCollision((*closestAgent).Object(), eb.eren.Object()) {
 			eb.eren.attributes.agentAttributes.SetAttack(true)
 			eb.eren.attributes.agentAttributes.SetAgentToAttack(closestAgent)
+			fmt.Println(eb.eren.Id(), " Eren will attack ", (*closestAgent).Id())
 		} else {
 			eb.eren.attributes.agentAttributes.SetAttack(false)
 
@@ -248,34 +251,42 @@ func (eb *ErenBehavior) Deliberate() {
 			nextPos = types.Position{X: eb.eren.attributes.agentAttributes.Pos().X - rand.Intn(5), Y: eb.eren.attributes.agentAttributes.Pos().Y - rand.Intn(5)}
 		}
 
-		println("Agent position: ", eb.eren.attributes.agentAttributes.Pos().X, eb.eren.attributes.agentAttributes.Pos().Y)
-		println("Next position: ", nextPos.X, nextPos.Y)
+		println(eb.eren.Id(), "Agent position: ", eb.eren.attributes.agentAttributes.Pos().X, eb.eren.attributes.agentAttributes.Pos().Y)
+		println(eb.eren.Id(), " Next position: ", nextPos.X, nextPos.Y)
 
 		eb.eren.attributes.agentAttributes.SetNextPos(nextPos)
 	}
 }
 
 func (eb *ErenBehavior) Act(e *env.Environment) {
+	println("Eren Act")
 	if eb.eren.transform {
 		eb.eren.attributes.agentAttributes.SetName(types.ErenTitanS)
+		eb.eren.attributes.agentAttributes.SetSpeed(params.EREN_TITAN_SPEED)
+		eb.eren.attributes.agentAttributes.SetStrength(params.EREN_TITAN_STRENGTH)
+		eb.eren.attributes.agentAttributes.SetVision(params.EREN_TITAN_VISION)
 		eb.eren.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall})
+		fmt.Println("Eren transforms into Eren Titan")
+		eb.eren.transform = false
 	}
-
 	if eb.eren.attributes.agentAttributes.Attack() {
+		eb.eren.attributes.agentAttributes.SetName(types.ErenTitanS)
+		eb.eren.attributes.agentAttributes.SetSpeed(params.EREN_TITAN_SPEED)
+		eb.eren.attributes.agentAttributes.SetStrength(params.EREN_TITAN_STRENGTH)
+		eb.eren.attributes.agentAttributes.SetVision(params.EREN_TITAN_VISION)
+		eb.eren.attributes.agentAttributes.SetCantSeeBehind([]types.ObjectName{types.Wall})
+		fmt.Println("Eren transforms into Eren Titan")
+		fmt.Println("Eren attacks a titan")
 		eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
 		eb.eren.Attack(eb.eren.attributes.agentAttributes.AgentToAttack())
 		// Reset the parameters
 		eb.eren.attributes.agentAttributes.SetAttack(false)
 		eb.eren.attributes.agentAttributes.SetAgentToAttack(nil)
-		if eb.eren.transform {
-			eb.eren.transform = false
-			eb.eren.attributes.agentAttributes.SetName(types.Eren)
-		}
 	} else {
 		if env.IsNextPositionValid(eb.eren, e) {
 			eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
 		} else {
-			eb.eren.Agent().SetNextPos(env.FirstValidPosition(eb.eren, e))
+			eb.eren.Agent().SetNextPos(env.FirstValidPositionToCityCenter(eb.eren, e))
 		}
 	}
 }

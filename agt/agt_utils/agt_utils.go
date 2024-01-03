@@ -107,10 +107,10 @@ func CreateHuman(agt_nb int, humans []env.AgentI, objs []*obj.Object, tl_village
 		human = hagt.NewCivilian(agtId, types.Position{X: x, Y: y}, params.CIVILIAN_LIFE, params.CIVILIAN_REACH, params.CIVILIAN_STRENGTH, params.CIVILIAN_SPEED, params.CIVILIAN_VISION, objectType)
 	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
 		human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, params.SOLDIER_REACH, params.SOLDIER_STRENGTH, params.SOLDIER_SPEED, params.SOLDIER_VISION, objectType)
-		//} else if objectType == types.Eren {
-		//	human = hagt.NewEren(agtId, types.Position{X: x, Y: y}, params.EREN_LIFE, params.EREN_REACH, params.EREN_STRENGTH, params.EREN_SPEED, params.EREN_VISION, objectType)
-		//} else if objectType == types.Mikasa {
-		//	human = hagt.NewMikasa(agtId, types.Position{X: x, Y: y}, params.MIKASA_LIFE, params.MIKASA_REACH, params.MIKASA_STRENGTH, params.MIKASA_SPEED, params.MIKASA_VISION, objectType)
+	} else if objectType == types.Eren {
+		human = hagt.NewEren(agtId, types.Position{X: x, Y: y}, params.EREN_LIFE, params.EREN_REACH, params.EREN_STRENGTH, params.EREN_SPEED, params.EREN_VISION, objectType)
+	} else if objectType == types.Mikasa {
+		human = hagt.NewMikasa(agtId, types.Position{X: x, Y: y}, params.MIKASA_LIFE, params.MIKASA_REACH, params.MIKASA_STRENGTH, params.MIKASA_SPEED, params.MIKASA_VISION, objectType)
 	}
 	humans = PlaceHuman(objs, humans, human, tl_village, types.Position{X: br_village.X - w, Y: br_village.Y - h})
 	return humans
@@ -132,10 +132,10 @@ func CreateHumans(objs []*obj.Object, tl_village types.Position, br_village type
 			} else {
 				humans = CreateHuman(i, humans, objs, tl_village, br_village, types.FemaleSoldier, params.SOLDIER_LIFE)
 			}
-			//} else if i < params.NB_CIVILIANS+params.NB_SOLDIERS+1 {
-			//	humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
-			//} else {
-			//	humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
+		} else if i < params.NB_CIVILIANS+params.NB_SOLDIERS+1 {
+			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Eren, params.EREN_LIFE)
+		} else {
+			humans = CreateHuman(i, humans, objs, tl_village, br_village, types.Mikasa, params.MIKASA_LIFE)
 		}
 	}
 	return humans

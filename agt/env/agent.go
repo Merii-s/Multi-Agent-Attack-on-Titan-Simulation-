@@ -4,7 +4,6 @@ import (
 	obj "AOT/pkg/obj"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
-	"fmt"
 )
 
 type Agent struct {
@@ -122,6 +121,12 @@ func (t *Agent) ResetPerception() {
 	t.perceivedAgents = []*AgentI{}
 }
 
+func (t *Agent) SetSpeed(speed int) { t.speed = speed }
+
+func (t *Agent) SetStrength(strength int) { t.strength = strength }
+
+func (t *Agent) SetVision(vision int) { t.vision = vision }
+
 // returns a list of objects that the agent can see
 // the vision is a square centered on the agent position
 func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
@@ -136,7 +141,7 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
 	//fmt.Println("In vision before : env perceivedObjects:", perceivedObjects)
 	perceivedAgents := e.PerceivedAgents(topLeft, bottomRight, t.id)
-	fmt.Println(t.Id(), "In vision before : env perceivedAgents:", len(perceivedAgents))
+	//fmt.Println(t.Id(), "In vision before : env perceivedAgents:", len(perceivedAgents))
 
 	// Get the objects not seen by the agent
 	CantSeeBehindObjects := []obj.Object{}
@@ -163,7 +168,7 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 
 			// Get the perceivedObjects behind the current position to avoid
 			noSeeableSquaresBehindObjects[object] = utils.GetNotSeeableBoxBehindObject(t.Object(), angle, topLeft, bottomRight)
-			fmt.Println(t.Id(), " Can't see in :", noSeeableSquaresBehindObjects[object], "because of ", object.Name(), "at", objectCenter, "with angle", angle)
+			//fmt.Println(t.Id(), " Can't see in :", noSeeableSquaresBehindObjects[object], "because of ", object.Name(), "at", objectCenter, "with angle", angle)
 
 		}
 	}

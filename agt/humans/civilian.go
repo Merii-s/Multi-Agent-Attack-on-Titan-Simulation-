@@ -67,8 +67,8 @@ func (c *Civilian) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
 
 func (c *Civilian) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
 	//defer wgAct.Done()
-	//c.mu.Lock()
-	//defer c.mu.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.behavior.Act(e)
 	fmt.Println("Act Done  ", c.Id())
 }
@@ -93,10 +93,10 @@ func (c *Civilian) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPerce
 				c.Deliberate()
 				c.Act(e)
 
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(30 * time.Millisecond)
 				c.AgtSyncChan() <- step
 			} else {
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(30 * time.Millisecond)
 				c.AgtSyncChan() <- step
 			}
 		}
@@ -220,6 +220,6 @@ func (cb *CivilianBehavior) Act(e *env.Environment) {
 	if env.IsNextPositionValid(cb.c, e) {
 		cb.c.Move(cb.c.attributes.agentAttributes.NextPos())
 	} else {
-		cb.c.Agent().SetNextPos(env.FirstValidPosition(cb.c, e))
+		cb.c.Agent().SetNextPos(env.FirstValidPositionToCityCenter(cb.c, e))
 	}
 }

@@ -2,11 +2,10 @@ package env
 
 import (
 	"AOT/pkg/obj"
+	params "AOT/pkg/parameters"
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
 	"fmt"
-	"math/rand"
-	"time"
 )
 
 func RemoveNoSeeableAgents(perceivedAgents []*AgentI, noSeeableSquaresBehindObjects map[*obj.Object][]types.Position) []*AgentI {
@@ -19,7 +18,7 @@ func RemoveNoSeeableAgents(perceivedAgents []*AgentI, noSeeableSquaresBehindObje
 		for _, noSeeableBox := range noSeeableSquaresBehindObjects {
 			if len(noSeeableBox) > 0 {
 				if utils.IntersectSquare(noSeeableBox[0], noSeeableBox[1], (*agt).Agent().ObjectP().Hitbox()[0], (*agt).Agent().ObjectP().Hitbox()[1]) {
-					fmt.Println("Can't see :", (*agt).Agent().ObjectP().Name(), "at", (*agt).Agent().ObjectP().TL(), "because of", noSeeableBox)
+					//fmt.Println("Can't see :", (*agt).Agent().ObjectP().Name(), "at", (*agt).Agent().ObjectP().TL(), "because of", noSeeableBox)
 					agentsToRemove = append(agentsToRemove, perceivedAgents[i])
 				}
 			}
@@ -64,6 +63,7 @@ func IsNextPositionValid(agt AgentI, e *Environment) bool {
 	// Verify collisions with other agents of same type (human or titan)
 	for i := range e.Agents() {
 		if agt.Id() != e.Agents()[i].Id() &&
+			e.Agents()[i].Agent().ObjectP().Life() > 0 &&
 			utils.DetectCollision(e.Agents()[i].Object(), *dummyObject) {
 			// Titan case
 			if (agt.Object().GetName() == types.BasicTitan1 || agt.Object().GetName() == types.BasicTitan2) &&
@@ -94,18 +94,17 @@ func IsNextPositionValid(agt AgentI, e *Environment) bool {
 	return true
 }
 
-func FirstValidPosition(agt AgentI, e *Environment) types.Position {
+func FirstValidPositionToCityCenter(agt AgentI, e *Environment) types.Position {
 	neighbours := utils.GetNeighbors(agt.Pos(), agt.Agent().Speed())
-	source := rand.NewSource(time.Now().UnixNano())
-	random := rand.New(source)
-	neighbour := neighbours[random.Intn(len(neighbours))]
-	for i := 0; i < 10; i++ {
+	cityCenter := types.Position{X: (params.WallTLX + params.WallBRX) / 2, Y: (params.WallTLY + params.WallBRY) / 2}
+	if len(neighbours) > 0 {
+		neighbour := cityCenter.ClosestPosition(neighbours)
 		agt.Agent().SetNextPos(neighbour)
 		if IsNextPositionValid(agt, e) {
 			fmt.Println(agt.Id(), " New valid position", neighbour)
 			return neighbour
 		}
-		neighbour = neighbours[random.Intn(len(neighbours))]
+		neighbours = utils.RemovePosition(neighbours, neighbour)
 	}
 	return agt.Pos()
 }
