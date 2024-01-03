@@ -174,14 +174,14 @@ func GetNotSeeableBoxBehindObject(object obj.Object, angle float64, topLeftVisio
 
 	// if the position to avoid is in the straight right of the agent position
 	// the agent can't see the positions behind it from 315 to 45 degrees following the perspective logic
-	if angle > 345 && angle < 15 {
+	if angle > 358 && angle < 2 {
 		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.TL().Y}
 		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: object.Hitbox()[1].Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the bottom right quarter of the vision square
 		// the agent can't see the positions in the bottom right quarter of the vision square
-	} else if angle >= 15 && angle < 75 {
+	} else if angle >= 2 && angle < 88 {
 		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.Hitbox()[1].Y + 1}
 		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: bottomRightVision.Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
@@ -189,42 +189,42 @@ func GetNotSeeableBoxBehindObject(object obj.Object, angle float64, topLeftVisio
 		// if the position to avoid is in the straight bottom of the agent position
 		// the agent can't see the positions behind it from 45 to 135 degrees following the perspective logic
 
-	} else if angle > 75 && angle < 105 {
+	} else if angle > 88 && angle < 92 {
 		notSeeableBoxTL := types.Position{X: object.Hitbox()[0].X + 1, Y: object.Hitbox()[1].Y + 1}
 		notSeeableBoxBR := types.Position{X: object.Hitbox()[1].X, Y: bottomRightVision.Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the bottom left of the agent position
 		// the agent can't see the positions behind it from 90 to 180 degrees following the perspective logic
-	} else if angle >= 105 && angle <= 165 {
+	} else if angle >= 92 && angle <= 178 {
 		notSeeableBoxTL := types.Position{X: topLeftVision.X, Y: object.Hitbox()[1].Y + 1}
 		notSeeableBoxBR := types.Position{X: object.TL().X - 1, Y: bottomRightVision.Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the straight left of the agent position
 		// the agent can't see the positions behind it from 135 to 225 degrees following the perspective logic
-	} else if angle > 165 && angle < 195 {
+	} else if angle > 178 && angle < 182 {
 		notSeeableBoxTL := types.Position{X: topLeftVision.X, Y: object.TL().Y}
 		notSeeableBoxBR := types.Position{X: object.TL().X - 1, Y: object.Hitbox()[1].Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the top left of the agent position
 		// the agent can't see the positions behind it from 180 to 270 degrees following the perspective logic
-	} else if angle >= 195 && angle <= 255 {
+	} else if angle >= 182 && angle <= 268 {
 		notSeeableBoxTL := types.Position{X: topLeftVision.X, Y: topLeftVision.Y}
 		notSeeableBoxBR := types.Position{X: object.TL().X - 1, Y: object.TL().Y - 1}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the straight top of the agent position
 		// the agent can't see the positions behind it from 225 to 315 degrees following the perspective logic
-	} else if angle > 255 && angle < 285 {
+	} else if angle > 268 && angle < 272 {
 		notSeeableBoxTL := types.Position{X: object.TL().X, Y: topLeftVision.Y}
 		notSeeableBoxBR := types.Position{X: object.Hitbox()[1].X - 1, Y: object.TL().Y - 1}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the top right of the agent position
 		// the agent can't see the positions behind it from 270 to 360 degrees and from 0 to 90 degrees following the perspective logic
-	} else if angle >= 285 && angle <= 345 {
+	} else if angle >= 272 && angle <= 358 {
 		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 21, Y: topLeftVision.Y}
 		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: object.TL().Y + 1}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)

@@ -18,9 +18,9 @@ func PlaceHuman(objs []*obj.Object, humans []env.AgentI, human env.AgentI, tl_vi
 		nb_grass := 0
 		for _, object := range objs {
 			if object.Name() != types.Grass {
-				if utils.DetectCollision(human.Object(), *object) {
+				if utils.DetectCollision((human).Object(), *object) {
 					x, y := utils.GetRandomCoords(tl_village, br_village)
-					human.SetPos(types.Position{X: x, Y: y})
+					(human).SetPos(types.Position{X: x, Y: y})
 					break
 				} else {
 					counter++
@@ -31,9 +31,9 @@ func PlaceHuman(objs []*obj.Object, humans []env.AgentI, human env.AgentI, tl_vi
 		}
 
 		for _, hu := range humans {
-			if utils.DetectCollision(human.Object(), hu.Object()) {
+			if utils.DetectCollision((human).Object(), (hu).Object()) {
 				x, y := utils.GetRandomCoords(tl_village, br_village)
-				human.SetPos(types.Position{X: x, Y: y})
+				(human).SetPos(types.Position{X: x, Y: y})
 				break
 			} else {
 				counter++
@@ -105,8 +105,8 @@ func CreateHuman(agt_nb int, humans []env.AgentI, objs []*obj.Object, tl_village
 	//, reach int, strength int, speed int, vision int,
 	if objectType == types.FemaleCivilian || objectType == types.MaleCivilian {
 		human = hagt.NewCivilian(agtId, types.Position{X: x, Y: y}, params.CIVILIAN_LIFE, params.CIVILIAN_REACH, params.CIVILIAN_STRENGTH, params.CIVILIAN_SPEED, params.CIVILIAN_VISION, objectType)
-		//} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
-		//	human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, params.SOLDIER_REACH, params.SOLDIER_STRENGTH, params.SOLDIER_SPEED, params.SOLDIER_VISION, objectType)
+	} else if objectType == types.FemaleSoldier || objectType == types.MaleSoldier {
+		human = hagt.NewSoldier(agtId, types.Position{X: x, Y: y}, params.SOLDIER_LIFE, params.SOLDIER_REACH, params.SOLDIER_STRENGTH, params.SOLDIER_SPEED, params.SOLDIER_VISION, objectType)
 		//} else if objectType == types.Eren {
 		//	human = hagt.NewEren(agtId, types.Position{X: x, Y: y}, params.EREN_LIFE, params.EREN_REACH, params.EREN_STRENGTH, params.EREN_SPEED, params.EREN_VISION, objectType)
 		//} else if objectType == types.Mikasa {
@@ -198,7 +198,12 @@ func CreateAgents(H int, W int, objects []*obj.Object) []env.AgentI {
 	humans := CreateHumans(objects, types.Position{X: int(0.2*float32(W)) + params.CWall, Y: int(0.2*float32(H)) + params.CWall}, types.Position{X: int(0.8 * float32(W)), Y: H})
 	titans := CreateTitans(H, W)
 	all_agents := make([]env.AgentI, 0)
-	all_agents = append(all_agents, humans...)
-	all_agents = append(all_agents, titans...)
+	for i := range humans {
+		all_agents = append(all_agents, humans[i])
+	}
+	for i := range titans {
+		all_agents = append(all_agents, titans[i])
+	}
+
 	return all_agents
 }

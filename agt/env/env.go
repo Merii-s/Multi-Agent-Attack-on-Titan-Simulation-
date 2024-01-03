@@ -42,9 +42,9 @@ func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types
 func (e *Environment) PerceivedAgents(topLeft types.Position, bottomRight types.Position, agtId types.Id) []*AgentI {
 	agents := make([]*AgentI, 0)
 	for i := range e.Agts {
-		object := e.Agts[i].Object()
+		object := (e.Agts[i]).Object()
 		objectTL, objectBR := object.Hitbox()[0], object.Hitbox()[1]
-		if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) && e.Agts[i].Id() != agtId {
+		if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) && (e.Agts[i]).Id() != agtId && object.Life() > 0 {
 			agents = append(agents, &e.Agts[i])
 		}
 	}
@@ -194,7 +194,7 @@ func Simu(e *Environment, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGrou
 	for i, _ := range e.Agts {
 		wgStart.Add(1)
 		go func(i int) {
-			e.Agts[i].Start(e /*, wgStart, wgPercept, wgDeliberate, wgAct*/)
+			(e.Agts[i]).Start(e /*, wgStart, wgPercept, wgDeliberate, wgAct*/)
 		}(i)
 	}
 	// go func(e *Environment){

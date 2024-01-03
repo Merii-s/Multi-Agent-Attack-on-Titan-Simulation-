@@ -82,39 +82,23 @@ func (c *Civilian) Agent() *env.Agent {
 }
 
 func (c *Civilian) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
-	// launch the agent goroutine Percept-Deliberate-Act cycle
-	//wgStart.Done()
 	println("Start ", c.Id())
-	//wgStart.Wait()
 	time.Sleep(100 * time.Millisecond)
-	// go func() {
-	// 	for {
-	// 		//wgPercept.Add(1)
-	// 		println("Percept ", c.Id())
-	// 		c.Percept(e /*, wgPercept*/)
-	// 		//wgPercept.Wait()
-
-	// 		//wgDeliberate.Add(1)
-	// 		println("Deliberate ", c.Id())
-	// 		c.Deliberate( /*wgDeliberate*/ )
-	// 		//wgDeliberate.Wait()
-
-	// 		//wgAct.Add(1)
-	// 		println("Act ", c.Id())
-	// 		c.Act(e /*, wgAct*/)
-	// 		//wgAct.Wait()
-	// 	}
-	// }()
 	go func() {
 		var step int
 		for {
 			step = <-c.AgtSyncChan()
+			if c.Agent().ObjectP().Life() > 0 {
+				c.Percept(e)
+				c.Deliberate()
+				c.Act(e)
 
-			c.Percept(e)
-			c.Deliberate()
-			c.Act(e)
-
-			c.AgtSyncChan() <- step
+				time.Sleep(10 * time.Millisecond)
+				c.AgtSyncChan() <- step
+			} else {
+				time.Sleep(10 * time.Millisecond)
+				c.AgtSyncChan() <- step
+			}
 		}
 	}()
 }
@@ -236,6 +220,6 @@ func (cb *CivilianBehavior) Act(e *env.Environment) {
 	if env.IsNextPositionValid(cb.c, e) {
 		cb.c.Move(cb.c.attributes.agentAttributes.NextPos())
 	} else {
-		cb.c.Agent().SetNextPos(cb.c.Pos())
+		cb.c.Agent().SetNextPos(env.FirstValidPosition(cb.c, e))
 	}
 }

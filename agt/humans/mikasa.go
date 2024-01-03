@@ -271,7 +271,7 @@ func (mb *MikasaBehavior) Act(e *env.Environment) {
 		if env.IsNextPositionValid(mb.m, e) {
 			mb.m.Move(mb.m.attributes.agentAttributes.NextPos())
 		} else {
-			mb.m.Agent().SetNextPos(mb.m.Pos())
+			mb.m.Agent().SetNextPos(env.FirstValidPosition(mb.m, e))
 		}
 	}
 }

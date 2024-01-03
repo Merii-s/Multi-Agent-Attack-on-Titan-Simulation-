@@ -275,7 +275,7 @@ func (eb *ErenBehavior) Act(e *env.Environment) {
 		if env.IsNextPositionValid(eb.eren, e) {
 			eb.eren.Move(eb.eren.attributes.agentAttributes.NextPos())
 		} else {
-			eb.eren.Agent().SetNextPos(eb.eren.Pos())
+			eb.eren.Agent().SetNextPos(env.FirstValidPosition(eb.eren, e))
 		}
 	}
 }

@@ -5,6 +5,8 @@ import (
 	types "AOT/pkg/types"
 	utils "AOT/pkg/utilitaries"
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 func RemoveNoSeeableAgents(perceivedAgents []*AgentI, noSeeableSquaresBehindObjects map[*obj.Object][]types.Position) []*AgentI {
@@ -17,6 +19,7 @@ func RemoveNoSeeableAgents(perceivedAgents []*AgentI, noSeeableSquaresBehindObje
 		for _, noSeeableBox := range noSeeableSquaresBehindObjects {
 			if len(noSeeableBox) > 0 {
 				if utils.IntersectSquare(noSeeableBox[0], noSeeableBox[1], (*agt).Agent().ObjectP().Hitbox()[0], (*agt).Agent().ObjectP().Hitbox()[1]) {
+					fmt.Println("Can't see :", (*agt).Agent().ObjectP().Name(), "at", (*agt).Agent().ObjectP().TL(), "because of", noSeeableBox)
 					agentsToRemove = append(agentsToRemove, perceivedAgents[i])
 				}
 			}
@@ -45,15 +48,19 @@ func removeAgents(perceptedAgents []*AgentI, objectsToRemove []*AgentI) []*Agent
 func IsNextPositionValid(agt AgentI, e *Environment) bool {
 	dummyObject := obj.NewObject(agt.Agent().GetName(), agt.Agent().NextPosition(), agt.Agent().ObjectP().Life())
 	if !utils.IsOutOfScreen(agt.Object()) && utils.IsOutOfScreen(*dummyObject) {
+		fmt.Println(agt.Id(), " can't go out of screen")
 		return false
 
 	} else if utils.IsWithinWalls(agt.Pos()) && utils.IsOutOfScreen(*dummyObject) {
+		fmt.Println(agt.Id(), " can't go out of screen when is in walls")
 		return false
 
-	} else if utils.IsWithinWalls(agt.Pos()) && !utils.IsWithinWalls(dummyObject.TL()) {
-		return false
+	} else if agt.Object().GetName() != types.BasicTitan1 || agt.Object().GetName() != types.BasicTitan2 {
+		if utils.IsWithinWalls(agt.Pos()) && !utils.IsWithinWalls(dummyObject.TL()) {
+			fmt.Println(agt.Id(), " can't go out of walls when is in")
+			return false
+		}
 	}
-
 	// Verify collisions with other agents of same type (human or titan)
 	for i := range e.Agents() {
 		if agt.Id() != e.Agents()[i].Id() &&
@@ -85,4 +92,20 @@ func IsNextPositionValid(agt AgentI, e *Environment) bool {
 	}
 
 	return true
+}
+
+func FirstValidPosition(agt AgentI, e *Environment) types.Position {
+	neighbours := utils.GetNeighbors(agt.Pos(), agt.Agent().Speed())
+	source := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(source)
+	neighbour := neighbours[random.Intn(len(neighbours))]
+	for i := 0; i < 10; i++ {
+		agt.Agent().SetNextPos(neighbour)
+		if IsNextPositionValid(agt, e) {
+			fmt.Println(agt.Id(), " New valid position", neighbour)
+			return neighbour
+		}
+		neighbour = neighbours[random.Intn(len(neighbours))]
+	}
+	return agt.Pos()
 }

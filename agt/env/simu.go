@@ -26,7 +26,7 @@ func NewSimulation(NB_AGENTS int, maxStep int, maxDuration time.Duration, e *Env
 	simu.env = e
 
 	for i := range e.Agts {
-		simu.syncChans.Store(e.Agts[i].Id(), e.Agts[i].AgtSyncChan())
+		simu.syncChans.Store(e.Agents()[i].Id(), e.Agents()[i].AgtSyncChan())
 		simu.agents = append(simu.agents, &e.Agts[i])
 	}
 
