@@ -72,7 +72,6 @@ func GetNeighbors(position types.Position, speed int) []types.Position {
 
 // contains checks if the given list contains the specified object.
 func Contains[T any](list []T, target T) bool {
-	fmt.Println(target)
 	for _, item := range list {
 		if reflect.DeepEqual(item, target) {
 			return true
@@ -81,12 +80,22 @@ func Contains[T any](list []T, target T) bool {
 	return false
 }
 
-func PositionsBehindObjects(perceivedObjects []*obj.Object, positionsBehindObjects []types.Position) []*obj.Object {
+func RemoveNoSeeableObjects(perceivedObjects []*obj.Object, noSeeableSquaresBehindObjects map[*obj.Object][]types.Position) []*obj.Object {
 	// Filter out positions behind an obstacle if the center of the object is in the positionsBehindObjects list
-	objectsToRemove := []*obj.Object{}
+	if len(noSeeableSquaresBehindObjects) == 0 {
+		return perceivedObjects
+	}
+	var objectsToRemove []*obj.Object
 	for i, object := range perceivedObjects {
-		if Contains(positionsBehindObjects, object.Center()) || object.Name() == types.Grass {
-			objectsToRemove = append(objectsToRemove, perceivedObjects[i])
+		for objNoSeeBehind, noSeeableBox := range noSeeableSquaresBehindObjects {
+			if len(noSeeableBox) > 0 {
+				if IntersectSquare(noSeeableBox[0], noSeeableBox[1], object.Hitbox()[0], object.Hitbox()[1]) &&
+					objNoSeeBehind != object &&
+					object.GetName() != types.Wall {
+					fmt.Println("Can't see :", object.Name(), "at", object.TL(), "because of", noSeeableBox)
+					objectsToRemove = append(objectsToRemove, perceivedObjects[i])
+				}
+			}
 		}
 	}
 
@@ -159,82 +168,69 @@ func IntersectSquare(topLeft1 types.Position, bottomRight1 types.Position, topLe
 	return true
 }
 
-func GetPositionsBehindObject(object obj.Object, angle float64, topLeftVision types.Position, bottomRightVision types.Position) []types.Position {
-	//notSeeableBox := []types.Position{}
-	positionsBehindObjects := []types.Position{}
+func GetNotSeeableBoxBehindObject(object obj.Object, angle float64, topLeftVision types.Position, bottomRightVision types.Position) []types.Position {
+	notSeeableBox := []types.Position{}
 	// the angle order follows the counter-clockwise order
 
 	// if the position to avoid is in the straight right of the agent position
 	// the agent can't see the positions behind it from 315 to 45 degrees following the perspective logic
 	if angle > 345 && angle < 15 {
-		for i := 0; i < bottomRightVision.X; i++ {
-			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: object.Center().X + 1 + i, Y: object.Center().Y + 1})
-		}
-		//notSeeableBoxTL  := types.Position{X : position.X, Y : position.Y }
-		//notSeeableBoxBR  := types.Position{X : position.X + bottomRightVision.X, Y : position.Y }
-		//notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
+		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.TL().Y}
+		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: object.Hitbox()[1].Y}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the bottom right quarter of the vision square
 		// the agent can't see the positions in the bottom right quarter of the vision square
 	} else if angle >= 15 && angle < 75 {
-		for x := object.Center().X + 1; x <= bottomRightVision.X; x++ {
-			for y := object.Center().Y + 1; y <= bottomRightVision.Y; y++ {
-				positionsBehindObjects = append(positionsBehindObjects, types.Position{X: x, Y: y})
-			}
-			//notSeeableBoxTL  := types.Position{X : position.X, Y : position.Y }
-			//notSeeableBoxBR  := types.Position{X : position.X + bottomRightVision.X, Y : position.Y }
-			//notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
-		}
+		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.Hitbox()[1].Y + 1}
+		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: bottomRightVision.Y}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
+
 		// if the position to avoid is in the straight bottom of the agent position
 		// the agent can't see the positions behind it from 45 to 135 degrees following the perspective logic
+
 	} else if angle > 75 && angle < 105 {
-		for i := 0; i < bottomRightVision.Y; i++ {
-			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: object.Center().X - 1, Y: object.Center().Y + i + 1})
-		}
+		notSeeableBoxTL := types.Position{X: object.Hitbox()[0].X + 1, Y: object.Hitbox()[1].Y + 1}
+		notSeeableBoxBR := types.Position{X: object.Hitbox()[1].X, Y: bottomRightVision.Y}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the bottom left of the agent position
 		// the agent can't see the positions behind it from 90 to 180 degrees following the perspective logic
 	} else if angle >= 105 && angle <= 165 {
-		for x := topLeftVision.X; x <= object.Center().X-1; x++ {
-			for y := object.Center().Y + 1; y <= bottomRightVision.Y; y++ {
-				positionsBehindObjects = append(positionsBehindObjects, types.Position{X: x, Y: y})
-			}
-		}
+		notSeeableBoxTL := types.Position{X: topLeftVision.X, Y: object.Hitbox()[1].Y + 1}
+		notSeeableBoxBR := types.Position{X: object.TL().X - 1, Y: bottomRightVision.Y}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the straight left of the agent position
 		// the agent can't see the positions behind it from 135 to 225 degrees following the perspective logic
 	} else if angle > 165 && angle < 195 {
-		for i := 0; i < topLeftVision.X; i++ {
-			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: object.Center().X - 1 - i, Y: object.Center().Y - 1})
-		}
+		notSeeableBoxTL := types.Position{X: topLeftVision.X, Y: object.TL().Y}
+		notSeeableBoxBR := types.Position{X: object.TL().X - 1, Y: object.Hitbox()[1].Y}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the top left of the agent position
 		// the agent can't see the positions behind it from 180 to 270 degrees following the perspective logic
 	} else if angle >= 195 && angle <= 255 {
-		for x := topLeftVision.X; x <= object.Center().X-1; x++ {
-			for y := topLeftVision.Y; y <= object.Center().Y-1; y++ {
-				positionsBehindObjects = append(positionsBehindObjects, types.Position{X: x, Y: y})
-			}
-		}
+		notSeeableBoxTL := types.Position{X: topLeftVision.X, Y: topLeftVision.Y}
+		notSeeableBoxBR := types.Position{X: object.TL().X - 1, Y: object.TL().Y - 1}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the straight top of the agent position
 		// the agent can't see the positions behind it from 225 to 315 degrees following the perspective logic
 	} else if angle > 255 && angle < 285 {
-		for i := 0; i < topLeftVision.Y; i++ {
-			positionsBehindObjects = append(positionsBehindObjects, types.Position{X: object.Center().X - 1, Y: object.Center().Y - 1 - i})
-		}
+		notSeeableBoxTL := types.Position{X: object.TL().X, Y: topLeftVision.Y}
+		notSeeableBoxBR := types.Position{X: object.Hitbox()[1].X - 1, Y: object.TL().Y - 1}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 		// if the position to avoid is in the top right of the agent position
 		// the agent can't see the positions behind it from 270 to 360 degrees and from 0 to 90 degrees following the perspective logic
-	} else if angle >= 285 && angle <= 345 || angle >= 0 && angle <= 90 {
-		for x := object.Center().X + 1; x <= bottomRightVision.X; x++ {
-			for y := topLeftVision.Y; y <= object.Center().Y-1; y++ {
-				positionsBehindObjects = append(positionsBehindObjects, types.Position{X: x, Y: y})
-			}
-		}
+	} else if angle >= 285 && angle <= 345 {
+		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 21, Y: topLeftVision.Y}
+		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: object.TL().Y + 1}
+		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)
 
 	}
-	return positionsBehindObjects
+	return notSeeableBox
 }
 
 // Calculate the opposite direction of a position

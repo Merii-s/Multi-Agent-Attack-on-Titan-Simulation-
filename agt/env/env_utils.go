@@ -7,25 +7,26 @@ import (
 	"fmt"
 )
 
-func removeAgentsBehindPositions(perceptedAgents []*AgentI, positionsBehindObjects []types.Position) []*AgentI {
+func RemoveNoSeeableAgents(perceivedAgents []*AgentI, noSeeableSquaresBehindObjects map[*obj.Object][]types.Position) []*AgentI {
 	// Filter out positions behind an obstacle if the center of the object is in the positionsBehindObjects list
+	if len(noSeeableSquaresBehindObjects) == 0 {
+		return perceivedAgents
+	}
 	agentsToRemove := []*AgentI{}
+	for i, agt := range perceivedAgents {
+		for _, noSeeableBox := range noSeeableSquaresBehindObjects {
+			if len(noSeeableBox) > 0 {
+				if utils.IntersectSquare(noSeeableBox[0], noSeeableBox[1], (*agt).Agent().ObjectP().Hitbox()[0], (*agt).Agent().ObjectP().Hitbox()[1]) {
+					agentsToRemove = append(agentsToRemove, perceivedAgents[i])
+				}
+			}
 
-	for _, agt := range perceptedAgents {
-		if utils.Contains(positionsBehindObjects, (*agt).Agent().ObjectP().Center()) {
-			fmt.Println("Can't see Agent : ", (*agt).Id(), "at", (*agt).Agent().Pos(), "because of an object")
-			agentsToRemove = append(agentsToRemove, agt)
 		}
 	}
-
-	// Remove the objects in the objectsToRemove list from the perceivedObjects list
-	//fmt.Println("Agents to remove : ", len(agentsToRemove))
-	//fmt.Println("Agents perceived before : ", len(perceptedAgents))
-	//fmt.Println("Agents to remove : ", agentsToRemove)
-	perceptedAgents = removeAgents(perceptedAgents, agentsToRemove)
+	perceivedAgents = removeAgents(perceivedAgents, agentsToRemove)
 	//fmt.Println("Agents perceived after removed : ", len(perceptedAgents))
 
-	return perceptedAgents
+	return perceivedAgents
 }
 
 func removeAgents(perceptedAgents []*AgentI, objectsToRemove []*AgentI) []*AgentI {

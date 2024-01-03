@@ -294,7 +294,7 @@ func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 		btb.bt.attributes.agentAttributes.AddPerceivedAgent(perceivedAgents[i])
 	}
 	fmt.Println(btb.bt.Id(), " : Perceived agents: ", len(btb.bt.attributes.agentAttributes.PerceivedAgents()))
-	//println("Perceived objects: ", len(btb.bt.attributes.agentAttributes.PerceivedObjects()))
+	fmt.Println(btb.bt.Id(), " : Perceived objects: ", len(btb.bt.attributes.agentAttributes.PerceivedObjects()))
 
 }
 
@@ -315,7 +315,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 		for i, object := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
 			if object.Name() == types.Wall || object.Name() == types.Field || object.Name() == types.Dungeon {
-				fmt.Println(btb.bt.Id(), " : Interesting object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
+				//fmt.Println(btb.bt.Id(), " : Interesting object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
 				interestingObjects = append(interestingObjects, btb.bt.attributes.agentAttributes.PerceivedObjects()[i])
 			}
 		}

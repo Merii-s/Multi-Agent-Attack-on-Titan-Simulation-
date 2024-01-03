@@ -31,7 +31,6 @@ func (e *Environment) PerceivedObjects(topLeft types.Position, bottomRight types
 	for i := range e.Objs {
 		if e.Objs[i].Name() != types.Grass && e.Objs[i].Life() > 0 {
 			objectTL, objectBR := e.Objs[i].Hitbox()[0], e.Objs[i].Hitbox()[1]
-			//println("Object", obj.Name(), "TL", objectTL.X, objectTL.Y, " BR", objectBR.X, objectBR.Y)
 			if utils.IntersectSquare(objectTL, objectBR, topLeft, bottomRight) {
 				objects = append(objects, e.Objs[i])
 			}

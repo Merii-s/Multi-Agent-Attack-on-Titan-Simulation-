@@ -67,8 +67,8 @@ func (c *Civilian) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
 
 func (c *Civilian) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
 	//defer wgAct.Done()
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	//c.mu.Lock()
+	//defer c.mu.Unlock()
 	c.behavior.Act(e)
 	fmt.Println("Act Done  ", c.Id())
 }
