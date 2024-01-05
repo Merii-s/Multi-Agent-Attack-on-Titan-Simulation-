@@ -253,13 +253,3 @@ func ClosestWall(walls []*obj.Object, agtPos types.Position) *obj.Object {
 	}
 	return closestWall
 }
-
-// function that gets the Agent with the specified selected id
-// func (e *pkg.Environment) GetAgent(id pkg.Id) pkg.Agent {
-// 	// For example, if you have a map of agents in the environment:
-// 	agent, exists := e.agents[id]
-// 	if !exists {
-// 		fmt.Println("Agent not found in the environment")
-// 	}
-// 	return agent
-// }

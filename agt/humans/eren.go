@@ -201,9 +201,6 @@ func (eb *ErenBehavior) Deliberate() {
 	var interestingAgents []*env.AgentI
 	agtPos := eb.eren.attributes.agentAttributes.Pos()
 
-	numberTitans := 0
-	//println("Interesting objects: ", len(interestingObjects))
-
 	for _, agt := range eb.eren.attributes.agentAttributes.PerceivedAgents() {
 		if (*agt).Agent().GetName() == types.BasicTitan1 ||
 			(*agt).Agent().GetName() == types.BasicTitan2 ||
@@ -220,7 +217,6 @@ func (eb *ErenBehavior) Deliberate() {
 	}
 	println(eb.eren.Id(), " Interesting agents: ", len(interestingAgents))
 
-	fmt.Println(eb.eren.Id(), " Number of titans: ", numberTitans)
 	eb.eren.attributes.agentAttributes.ResetPerception()
 
 	// Checks first if there are interesting agents to attack and if not, the nearest agent to go to

@@ -92,7 +92,6 @@ func RemoveNoSeeableObjects(perceivedObjects []*obj.Object, noSeeableSquaresBehi
 				if IntersectSquare(noSeeableBox[0], noSeeableBox[1], object.Hitbox()[0], object.Hitbox()[1]) &&
 					objNoSeeBehind != object &&
 					object.GetName() != types.Wall {
-					//fmt.Println("Can't see :", object.Name(), "at", object.TL(), "because of", noSeeableBox)
 					objectsToRemove = append(objectsToRemove, perceivedObjects[i])
 				}
 			}
@@ -181,7 +180,7 @@ func GetNotSeeableBoxBehindObject(object obj.Object, angle float64, topLeftVisio
 
 		// if the position to avoid is in the bottom right quarter of the vision square
 		// the agent can't see the positions in the bottom right quarter of the vision square
-	} else if angle >= 2 && angle < 88 {
+	} else if angle >= 2 && angle <= 88 {
 		notSeeableBoxTL := types.Position{X: object.Hitbox()[1].X + 1, Y: object.Hitbox()[1].Y}
 		notSeeableBoxBR := types.Position{X: bottomRightVision.X, Y: bottomRightVision.Y}
 		notSeeableBox = append(notSeeableBox, notSeeableBoxTL, notSeeableBoxBR)

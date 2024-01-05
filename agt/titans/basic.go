@@ -85,11 +85,9 @@ func (bt *BasicTitan) Deliberate( /*wgDeliberate *sync.WaitGroup*/ ) {
 }
 
 func (bt *BasicTitan) Act(e *env.Environment /*, wgAct *sync.WaitGroup*/) {
-	//defer wgAct.Done()
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 	bt.behavior.Act(e)
-	//fmt.Println("Act Done  ", bt.Id())
 }
 
 func (bt *BasicTitan) Start(e *env.Environment /*, wgStart *sync.WaitGroup, wgPercept *sync.WaitGroup, wgDeliberate *sync.WaitGroup, wgAct *sync.WaitGroup*/) {
@@ -267,12 +265,12 @@ func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 
 	// Add the perceived agents to the list of perceived agents
 	for i := range perceivedObjects {
-		//fmt.Println("Basic titan", btb.bt.Id(), " perceives", perceivedObjects[i].Name())
+
 		btb.bt.attributes.agentAttributes.AddPerceivedObject(perceivedObjects[i])
 	}
 	// Add the perceived agents to the list of perceived agents
 	for i := range perceivedAgents {
-		//fmt.Println("Basic titan", btb.bt.Id(), " perceives", (*perceivedAgents[i]).Agent().GetName())
+
 		btb.bt.attributes.agentAttributes.AddPerceivedAgent(perceivedAgents[i])
 	}
 	fmt.Println(btb.bt.Id(), " : Perceived agents: ", len(btb.bt.attributes.agentAttributes.PerceivedAgents()))
@@ -283,9 +281,7 @@ func (btb *BasicTitanBehavior) Percept(e *env.Environment) {
 func (btb *BasicTitanBehavior) Deliberate() {
 
 	if pkg.IsOutOfWalls(btb.bt.attributes.agentAttributes.Object()) && !pkg.DetectCollision(*btb.bt.wallToGo, btb.bt.Object()) {
-		//fmt.Println(btb.bt.Id(), " : Is out of walls and no collision with wall to go")
-		//fmt.Println(btb.bt.Id(), " : Position: ", btb.bt.Pos())
-		//fmt.Println(btb.bt.Id(), " : Wall to go position: ", btb.bt.wallToGoPos)
+		fmt.Println(btb.bt.Id(), " : Is out of walls and no collision with wall to go")
 		neighborAgentPositions := pkg.GetNeighbors(btb.bt.attributes.agentAttributes.Pos(), btb.bt.attributes.agentAttributes.Speed())
 		nextPos := btb.bt.wallToGoPos.ClosestPosition(neighborAgentPositions)
 		println("BasicTitan", btb.bt.Id(), "Next position: ", nextPos.X, nextPos.Y)
@@ -297,7 +293,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 
 		for i, object := range btb.bt.attributes.agentAttributes.PerceivedObjects() {
 			if object.Name() == types.Wall || object.Name() == types.Dungeon || object.Name() == types.SmallHouse || object.Name() == types.BigHouse {
-				//fmt.Println(btb.bt.Id(), " : Interesting object: ", btb.bt.attributes.agentAttributes.PerceivedObjects()[i].Name())
+
 				interestingObjects = append(interestingObjects, btb.bt.attributes.agentAttributes.PerceivedObjects()[i])
 			}
 		}
@@ -321,8 +317,6 @@ func (btb *BasicTitanBehavior) Deliberate() {
 		if len(interestingAgents) != 0 {
 			closestAgent, closestAgentPosition := env.ClosestAgent(interestingAgents, agtPos)
 
-			//fmt.Println(btb.bt.Id(), " : Closest agent: ", (*closestAgent).Agent().GetName(), " at ", closestAgentPosition)
-
 			if pkg.DetectCollision((*closestAgent).Object(), btb.bt.Object()) {
 				btb.bt.attributes.agentAttributes.SetAttack(true)
 				btb.bt.attributes.SetAttackObject(false)
@@ -336,9 +330,7 @@ func (btb *BasicTitanBehavior) Deliberate() {
 				nextPos := closestAgentPosition.ClosestPosition(neighborAgentPositions)
 
 				btb.bt.attributes.agentAttributes.SetNextPos(nextPos)
-				//fmt.Println("Agent not reachable, ", btb.bt.Id(), " position : ", btb.bt.attributes.agentAttributes.Pos().X, btb.bt.attributes.agentAttributes.Pos().Y)
-				//fmt.Println(btb.bt.Id(), "Agent position", closestAgentPosition)
-				//fmt.Println(btb.bt.Id(), "Next position : ", nextPos.X, nextPos.Y)
+
 			}
 
 			// If there are no interesting agents, the titan goes towards the nearest interesting object (wall or field)
@@ -393,10 +385,8 @@ func (btb *BasicTitanBehavior) Act(e *env.Environment) {
 		if btb.bt.Pos() == btb.bt.attributes.agentAttributes.NextPos() {
 			btb.bt.Agent().SetNextPos(env.FirstValidPositionToCityCenter(btb.bt, e))
 			btb.bt.Move(btb.bt.attributes.agentAttributes.NextPos())
-			fmt.Println("Basic Titan", btb.bt.Id(), " : Next position is not valid")
 		} else if env.IsNextPositionValid(btb.bt, e) {
 			btb.bt.Move(btb.bt.attributes.agentAttributes.NextPos())
-			fmt.Println("Basic Titan", btb.bt.Id(), " : Can move to next position", btb.bt.attributes.agentAttributes.NextPos())
 		} else {
 			btb.bt.Agent().SetNextPos(env.FirstValidPositionToCityCenter(btb.bt, e))
 			btb.bt.Move(btb.bt.attributes.agentAttributes.NextPos())

@@ -106,21 +106,4 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//bt := e.Agents()[0]
-	//fmt.Println(bt.Agent())
-	//
-	//walls := env.GetWallPositions(e)
-	//closestPosition := types.Position{X: -2 * params.ScreenWidth, Y: -2 * params.ScreenHeight}
-	//closestWall := &obj.Object{}
-	//
-	//for wall, posTab := range walls {
-	//	agtCenter := bt.Agent().ObjectP().Center()
-	//	closestInCurrentWall := agtCenter.ClosestPosition(posTab)
-	//	if agtCenter.Distance(closestInCurrentWall) < agtCenter.Distance(closestPosition) {
-	//		closestPosition = closestInCurrentWall
-	//		closestWall = wall
-	//	}
-	//}
-	//fmt.Println("Closest wall:", closestWall, "at", closestPosition)
-
 }

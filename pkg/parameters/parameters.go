@@ -19,8 +19,8 @@ const (
 	NB_AGENTS = NB_TITANS + NB_HUMANS
 
 	//Agent Lives
-	EREN_LIFE           = 200
-	MIKASA_LIFE         = 200
+	EREN_LIFE           = 300
+	MIKASA_LIFE         = 300
 	CIVILIAN_LIFE       = 300
 	SOLDIER_LIFE        = 200
 	BASIC_TITAN_LIFE    = 100

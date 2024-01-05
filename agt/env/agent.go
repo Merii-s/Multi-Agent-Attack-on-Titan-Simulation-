@@ -139,9 +139,7 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 
 	// Get the positions inside the vision square from the environment
 	perceivedObjects := e.PerceivedObjects(topLeft, bottomRight)
-	//fmt.Println("In vision before : env perceivedObjects:", perceivedObjects)
 	perceivedAgents := e.PerceivedAgents(topLeft, bottomRight, t.id)
-	//fmt.Println(t.Id(), "In vision before : env perceivedAgents:", len(perceivedAgents))
 
 	// Get the objects not seen by the agent
 	CantSeeBehindObjects := []obj.Object{}
@@ -168,14 +166,9 @@ func (t *Agent) GetVision(e *Environment) ([]*obj.Object, []*AgentI) {
 
 			// Get the perceivedObjects behind the current position to avoid
 			noSeeableSquaresBehindObjects[object] = utils.GetNotSeeableBoxBehindObject(t.Object(), angle, topLeft, bottomRight)
-			//fmt.Println(t.Id(), " Can't see in :", noSeeableSquaresBehindObjects[object], "because of ", object.Name(), "at", objectCenter, "with angle", angle)
 
 		}
 	}
-	//fmt.Println(t.Id(), " Position ", t.Pos())
-	//fmt.Println(t.Id(), " Can't see behind:", CantSeeBehindObjects)
-	//fmt.Println(t.Id(), " Can't see this number of positions:", len(positionsBehindObjects))
-	//fmt.Println(t.Id(), " at these positions:", positionsBehindObjects)
 
 	// Checks if the perceivedObjects are in a positionsBehindObjects position and remove them if they are
 	perceivedObjects = utils.RemoveNoSeeableObjects(perceivedObjects, noSeeableSquaresBehindObjects)
