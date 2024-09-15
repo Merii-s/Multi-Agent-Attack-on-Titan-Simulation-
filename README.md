@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project, conducted over one mounth in an academic context for the Multi-Agent Simulation course at Université de Technologie de Compiègne implements a multi-agent simulation inspired by the popular anime **Attack on Titan**. The simulation explores dynamic interactions between agents, focusing on environment perception and real-time decision-making. It aims to create a realistic and engaging experience that mirrors the strategic elements found in the anime.
+This project, conducted over one mounth in an academic context for the Multi-Agent Simulation course at Université de Technologie de Compiègne implements a multi-agent simulation inspired by the popular anime **Attack on Titan**.
+
+The simulation explores dynamic interactions between agents, focusing on environment perception and real-time decision-making. It aims to create a realistic and engaging experience that mirrors the strategic elements found in the anime.
 
 ## Key Features
 
